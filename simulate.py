@@ -43,7 +43,17 @@ def run_elo_simulation(
     # one proxy per exchange
     # one pacemaker agent per proxy
     p = settings.ports
-    session_dur = get_simulation_parameters()['session_duration']
+    params = get_simulation_parameters()
+    print(params)
+    session_dur = params['session_duration']
+    if params['focal_market_format'].upper() == 'CDA':
+        focal_exchange_port = p['focal_exchange_port_cda']
+    else:
+        focal_exchange_port = p['focal_exchange_port_fba']
+    if params['external_market_format'].upper() == 'CDA':
+        external_exchange_port = p['external_exchange_port_cda']
+    else:
+        external_exchange_port = p['external_exchange_port_fba']
     # (cmd, process_name)
     focal_proxy = """ run_proxy.py --ouch_port {0} --json_port {1}
                       --session_code {2} --exchange_host {3} --exchange_port {4} 
@@ -52,7 +62,7 @@ def run_elo_simulation(
                 p['focal_proxy_json_port'],
                 session_code, 
                 settings.focal_exchange_host,
-                p['focal_exchange_port'], 
+                focal_exchange_port, 
                 session_dur), 'focal_proxy'
     external_proxy = """run_proxy.py --ouch_port {0} --json_port {1}
                         --session_code {2} --exchange_host {3} --exchange_port {4} 
@@ -61,7 +71,7 @@ def run_elo_simulation(
                 p['external_proxy_json_port'], 
                 session_code, 
                 settings.external_exchange_host,
-                p['external_exchange_port'], 
+                external_exchange_port, 
                 session_dur), 'external_proxy'
 
     rabbit_agent_focal = """run_agent.py --session_duration {0} --exchange_ouch_port {1}

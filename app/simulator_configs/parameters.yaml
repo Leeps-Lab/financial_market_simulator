@@ -10,6 +10,9 @@ exogenous_order_price_noise_std: 12000
 bid_ask_offset: 10000
 time_in_force: 7
 
+focal_market_format: FBA
+external_market_format: FBA
+
 lambdaJ: 0.5
 lambdaI: [0.1, 0.1]  # first element: focal market, second element: external market
 
