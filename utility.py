@@ -104,8 +104,12 @@ def transform_incoming_message(source, message, external_market_state=None):
             external_market_state['e_best_bid'] = message['best_bid']
             external_market_state['e_best_offer'] = message['best_offer']
             message['e_signed_volume'] = external_market_state['e_signed_volume']
-            # if message['e_signed_volume'] is None:
-            #     message['e_signed_volume'] = 0
+        if message['type'] == 'post_batch':
+            message['e_best_bid'] = message['best_bid']
+            message['e_best_offer'] = message['best_offer']
+            external_market_state['e_best_bid'] = message['best_bid']
+            external_market_state['e_best_offer'] = message['best_offer']
+            message['e_signed_volume'] = external_market_state['e_signed_volume']
         if message['type'] == 'signed_volume':
             message['e_signed_volume'] = message['signed_volume']
             message['e_best_bid'] = external_market_state['e_best_bid']

@@ -16,7 +16,7 @@ class ProxyOuchServerProtocol(OUCH):
         'S': 10,
         'C': 19,
         'O': 49,
-        'U': 47
+        'U': 47,
     }
     message_cls = ouch_messages.OuchClientMessages
 
@@ -78,6 +78,7 @@ class ProxyOuchClient(OUCH):
         'U': 80,
         'A': 66,
         'Q': 41,
+        'Z': 49,
     }
     message_cls = ouch_messages.OuchServerMessages
 
@@ -98,7 +99,7 @@ class ProxyOuchClient(OUCH):
             msg = ResetMessage.create(
                 'reset_exchange', exchange_host='', 
                 exchange_port=0, delay=0, 
-                event_code='S', timestamp=0)
+                event_code='S', timestamp=0, subsession_id=0)
             self.sendMessage(msg.translate(), 0)
             self.factory.reset_message_sent = True
 
