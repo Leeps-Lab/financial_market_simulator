@@ -24,6 +24,8 @@ default_simulation_parameters = {
     'speed_unit_cost': 10000,  # per second
     'focal_market_format': 'CDA',
     'external_market_format': 'CDA',
+    'focal_market_fba_interval': 3,
+    'external_market_fba_interval': 3,
 }
 
 logs_dir = './app/logs/'
@@ -38,10 +40,6 @@ focal_exchange_host = os.getenv('FOCAL_EXCHANGE_HOST', 'localhost')
 external_exchange_host = os.getenv('EXTERNAL_EXCHANGE_HOST', 'localhost')
 
 ports = {
-    'focal_exchange_port_cda': 9001,
-    'external_exchange_port_cda': 9002,
-    'focal_exchange_port_fba': 9003,
-    'external_exchange_port_fba': 9004,
     'focal_proxy_ouch_port': 9201,
     'focal_proxy_json_port': 9202,
     'external_proxy_ouch_port': 9301,

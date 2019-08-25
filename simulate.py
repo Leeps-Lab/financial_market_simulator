@@ -11,6 +11,9 @@ import numpy as np
 from db.db import session_results_ready
 from db.db_commands import export_session
 import logging
+from contextlib import closing
+import socket
+from time import sleep
 
 log = logging.getLogger(__name__)
 
@@ -22,6 +25,33 @@ p.add('--session_code', default=random_chars(8), type=str)
 p.add('--note', type=str)
 options, args = p.parse_known_args()
 
+# gets a list of `num_ports` of available ports between 9000 and 10000
+def get_available_ports(num_ports):
+    ports = []
+    # return codes for connect_ex that indicate that a port is available
+    for port in range(9000, 10000):
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+            res = sock.connect_ex(('localhost', port))
+            if res != 0:
+                ports.append(port)
+                if len(ports) == num_ports:
+                    return ports
+    raise RuntimeError('no available ports')
+
+def start_exchange(port, exchange_format, fba_interval):
+    cmd = [
+        sys.executable,
+        'exchange_server/run_exchange_server.py',
+        '--host', '0.0.0.0',
+        '--port', str(port),
+        '--debug',
+        '--mechanism', exchange_format.lower(),
+    ]
+    if exchange_format.lower() == 'fba':
+        cmd.extend([
+            '--interval', str(fba_interval),
+        ])
+    return subprocess.Popen(cmd)
 
 def run_elo_simulation(
         session_code, random_seed=np.random.randint(0, 99)):
@@ -42,18 +72,27 @@ def run_elo_simulation(
     # commands to run each process
     # one proxy per exchange
     # one pacemaker agent per proxy
-    p = settings.ports
+
+    # start exchanges
     params = get_simulation_parameters()
-    print(params)
+    focal_exchange_port, external_exchange_port = get_available_ports(2)
+    focal_exchange_proc = start_exchange(
+        focal_exchange_port,
+        params['focal_market_format'],
+        params['focal_market_fba_interval']
+    )
+    external_exchange_proc = start_exchange(
+        external_exchange_port,
+        params['external_market_format'],
+        params['external_market_fba_interval']
+    )
+    # sleep for a second after making the exchanges to ensure they don't buffer messages
+    # when the experiment starts. not sure this is necessary, but just being safe
+    sleep(1)
+
+    p = settings.ports
     session_dur = params['session_duration']
-    if params['focal_market_format'].upper() == 'CDA':
-        focal_exchange_port = p['focal_exchange_port_cda']
-    else:
-        focal_exchange_port = p['focal_exchange_port_fba']
-    if params['external_market_format'].upper() == 'CDA':
-        external_exchange_port = p['external_exchange_port_cda']
-    else:
-        external_exchange_port = p['external_exchange_port_fba']
+
     # (cmd, process_name)
     focal_proxy = """ run_proxy.py --ouch_port {0} --json_port {1}
                       --session_code {2} --exchange_host {3} --exchange_port {4} 
@@ -114,6 +153,9 @@ def run_elo_simulation(
         cmd = sys.executable + ' ' + cmd
         processes[process_tag] = subprocess.Popen(shlex.split(cmd))
     exit_codes = [p.wait() for p in processes.values()]
+    # once all other subprocesses have finished, kill exchanges
+    focal_exchange_proc.terminate()
+    external_exchange_proc.terminate()
     if sum(exit_codes) == 0 and session_results_ready(session_code):
         export_session(session_code)
         export_session_report(session_code, options.note)
