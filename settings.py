@@ -26,6 +26,7 @@ default_simulation_parameters = {
     'external_market_format': 'CDA',
     'focal_market_fba_interval': 3,
     'external_market_fba_interval': 3,
+    'random_seed': None,
 }
 
 logs_dir = './app/logs/'

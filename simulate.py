@@ -14,6 +14,7 @@ import logging
 from contextlib import closing
 import socket
 from time import sleep
+import atexit
 
 log = logging.getLogger(__name__)
 
@@ -50,10 +51,12 @@ def start_exchange(port, exchange_format, fba_interval):
         ])
     if options.debug:
         cmd.append('--debug')
-    return subprocess.Popen(cmd)
+    proc = subprocess.Popen(cmd)
+    # make sure this process is eventually killed
+    atexit.register(proc.terminate)
+    return proc
 
-def run_elo_simulation(
-        session_code, random_seed=np.random.randint(0, 99)):
+def run_elo_simulation(session_code):
     """
     given a session code
     runs a a simulation of ELO type
@@ -91,6 +94,10 @@ def run_elo_simulation(
 
     p = settings.ports
     session_dur = params['session_duration']
+    if params['random_seed']:
+        random_seed = int(params['random_seed'])
+    else:
+        random_seed = np.random.randint(0, 99)
 
     # (cmd, process_name)
     focal_proxy = """ run_proxy.py --ouch_port {0} --json_port {1}
@@ -158,7 +165,8 @@ def run_elo_simulation(
     if sum(exit_codes) == 0 and session_results_ready(session_code):
         export_session(session_code)
         export_session_report(session_code, options.note)
-        log.info('session %s complete!' % session_code)
+
+    log.info('session %s complete!' % session_code)
 
 
 if __name__ == '__main__':

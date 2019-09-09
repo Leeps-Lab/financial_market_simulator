@@ -78,5 +78,7 @@ if __name__ == '__main__':
         format = "[%(asctime)s.%(msecs)03d] %(levelname)s \
             [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
         datefmt = '%H:%M:%S')
+    if options.random_seed:
+        log.debug('%s agent started using random seed %d', options.agent_type, options.random_seed)
     main(account_id)
     
