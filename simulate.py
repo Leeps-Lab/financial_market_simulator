@@ -17,8 +17,6 @@ from time import sleep
 
 log = logging.getLogger(__name__)
 
-
-# assume matching engines are listening
 p = configargparse.getArgParser()
 p.add('--debug', action='store_true')
 p.add('--session_code', default=random_chars(8), type=str)
@@ -42,15 +40,16 @@ def start_exchange(port, exchange_format, fba_interval):
     cmd = [
         sys.executable,
         'exchange_server/run_exchange_server.py',
-        '--host', '0.0.0.0',
+        '--host', 'localhost',
         '--port', str(port),
-        '--debug',
         '--mechanism', exchange_format.lower(),
     ]
     if exchange_format.lower() == 'fba':
         cmd.extend([
             '--interval', str(fba_interval),
         ])
+    if options.debug:
+        cmd.append('--debug')
     return subprocess.Popen(cmd)
 
 def run_elo_simulation(

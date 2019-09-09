@@ -69,11 +69,11 @@ class ELOMarket(BaseModel):
     tag = 'market'
 
     csv_meta = (
-        'timestamp', 'subsession_id',
-        'market_id', 'trigger_msg_type',
+        'timestamp', 'subsession_id', 'market_id', 'trigger_msg_type',
         'reference_price', 'best_bid', 'best_offer', 
         'next_bid', 'next_offer', 'volume_at_best_bid', 'volume_at_best_offer', 
-        'e_best_bid', 'e_best_offer', 'signed_volume', 'e_signed_volume')
+        'e_best_bid', 'e_best_offer', 'signed_volume', 'e_signed_volume',
+        'clearing_price', 'transacted_volume')
 
     subsession_id = CharField()
     market_id = IntegerField()
@@ -88,6 +88,8 @@ class ELOMarket(BaseModel):
     e_best_offer = IntegerField()
     signed_volume = FloatField()
     e_signed_volume = FloatField()
+    clearing_price = IntegerField(null=True)
+    transacted_volume = IntegerField(null=True)
 
 
 class ELOAgent(BaseModel):
@@ -194,9 +196,9 @@ fields_to_freeze =  {
         }
     },
     'market': {
-        'events_to_capture': ('Q', 'E', 'market_start', 'market_end',
+        'events_to_capture': ('Q', 'Z', 'E', 'market_start', 'market_end',
             'external_feed'), 
-        'properties_to_serialize': ('subsession_id', 'market_id'),
+        'properties_to_serialize': ('subsession_id', 'market_id', 'clearing_price', 'transacted_volume'),
         'subproperties_to_serialize': {
             'bbo': ('best_bid', 'best_offer', 'next_bid', 'next_offer', 
                     'volume_at_best_bid', 'volume_at_best_offer'),
