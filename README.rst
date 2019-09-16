@@ -192,7 +192,8 @@ the exchanges.
 Usage:
 =======
 
-:: 
+::
+
     python3 run_web_api.py
   
 This will start an HTTP server that listens on port 5000.
