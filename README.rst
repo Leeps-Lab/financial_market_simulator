@@ -32,7 +32,7 @@ public and private messages to their intended recipients.
 The rest of the subprocesses (the number is configurable) simulate traders,
 such as investors and high-frequency trading firms. The traders are simulated
 by tunable high-frequency trading algorithms. The logic for the trading
-algorithms is in the [high_frequency_trading](high_frequency_trading/)
+algorithms is in the `[high_frequency_trading](high_frequency_trading/)`
 submodule, which is an otree experiment.
 The code specific to otree (UI, models, pages, etc) is not used;
 the reason this simulator uses a subset of the high_frequency_trading submodule
