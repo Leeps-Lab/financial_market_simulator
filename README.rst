@@ -62,58 +62,68 @@ Next,
 Create a virtual environment
 
 ::
-  python3 -m venv simulations_venv
+
+    python3 -m venv simulations_venv
 
 and activate it.
 
 ::
-  source ~/simulations_venv/bin/activate
+
+    source ~/simulations_venv/bin/activate
   
 Given postgres is succesfully installed, 
 start a shell and
 switch to postgres user.
 
 ::
-  sudo su - postgres
+
+    sudo su - postgres
 
 Start postgres shell:
 
 ::
-  psql
+
+    psql
 
 Create a user and a database, and grant permissions to the user:
 
 ::
-  CREATE DATABASE fimsim;
-  CREATE USER simulation_user WITH PASSWORD '<somepassword>';
-  GRANT ALL PRIVILEGES ON DATABASE fimsim TO simulation_user;
+
+    CREATE DATABASE fimsim;
+    CREATE USER simulation_user WITH PASSWORD '<somepassword>';
+    GRANT ALL PRIVILEGES ON DATABASE fimsim TO simulation_user;
 
 and exit.
 
 ::
-  \q
+
+    \q
 
 Define and set some environmental variables
 for the application to use while talking to the database.
 You can also add these commands to your .bash_profile so they persist.
 
 ::
-  export DBUSER=simulation_user
-  export DBPASSWORD=<somepassword>
+
+    export DBUSER=simulation_user
+    export DBPASSWORD=<somepassword>
  
 Next, download and clone this repo:
 
 ::
+
     git clone https://github.com/hademircii/financial_market_simulator.git
   
 `cd` into the directory you just downloaded:
 
 ::
+
     cd financial_market_simulator
    
 Download and update submodules:
 
-::    
+::
+
     git submodule init
     git submodule update
 
@@ -129,6 +139,7 @@ Download and update submodules:
 Go back to the root directory and do the same for the exchange_server directory.
 
 ::
+
     cd ../exchange_server
     git submodule init
     git submodule update
@@ -137,11 +148,13 @@ Go back to the root directory and do the same for the exchange_server directory.
 Go back to the root directory.
 
 ::
+
    cd ..
  
 Install dependencies:
 
 ::
+
     pip install -r requirements.txt
     
     
@@ -149,19 +162,22 @@ From the root directory, create the required database tables.
 Note that if tables exist already, they will be destroyed and recreated.
 
 ::
+
     python3 resetdb.py
 
 You can also do this manually:
 start an interactive python session
 
 ::
-  python3
+
+    python3
   
 and create the relevant tables in the db.
 
 ::
-  from db import db_commands
-  db_commands.create_tables()
+
+    from db import db_commands
+    db_commands.create_tables()
 
 **matching engines**
 
