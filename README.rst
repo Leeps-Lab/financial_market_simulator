@@ -14,7 +14,7 @@ exchange types such as IEX are in development.
 When run, the simulator spawns multiple subprocesses. Two of these subprocesses
 simulate exchanges (like the NASDAQ, NYSE, etc). The exchanges are responsible
 for processing incoming orders and executing trades. The logic for the
-exchanges is in the [exchange_server](exchange_server/) submodule.
+exchanges is in the `exchange_server <exchange_server/>`_ submodule.
 The exchanges broadcast on their own ports.
 One exchange is called the focal/primary exchange, and the
 other is called the external/secondary exchange. We model the external
@@ -32,7 +32,7 @@ public and private messages to their intended recipients.
 The rest of the subprocesses (the number is configurable) simulate traders,
 such as investors and high-frequency trading firms. The traders are simulated
 by tunable high-frequency trading algorithms. The logic for the trading
-algorithms is in the `[high_frequency_trading](high_frequency_trading/)`
+algorithms is in the `high_frequency_trading <high_frequency_trading/>`_
 submodule, which is an otree experiment.
 The code specific to otree (UI, models, pages, etc) is not used;
 the reason this simulator uses a subset of the high_frequency_trading submodule
@@ -43,7 +43,7 @@ The simulator initially creates a simple HTTP server (default port 5000).
 When the `v1/simulate` endpoint is hit with a GET request, a simulation
 is run, and the above subprocesses are created. The parameters for the
 simulation are in
-[app/simulator_configs/parameters.yaml](app/simulator_configs/parameters.yaml).
+`app/simulator_configs/parameters.yaml <app/simulator_configs/parameters.yaml>`_.
 
 The simulator collects data about actions taken by traders and auctions run
 by the exchanges, and outputs 2 CSV files, one containing trader data and
