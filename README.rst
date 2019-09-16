@@ -112,7 +112,7 @@ Next, download and clone this repo:
 
 ::
 
-    git clone https://github.com/hademircii/financial_market_simulator.git
+    git clone https://github.com/Leeps-Lab/financial_market_simulator.git
   
 `cd` into the directory you just downloaded:
 
