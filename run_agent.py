@@ -33,15 +33,16 @@ def main(account_id):
     agent_type = options.agent_type
     session_duration = options.session_duration
     agent_parameters = {}
+    conf = get_simulation_parameters()
     if agent_type == 'rabbit':
         random_orders = draw.elo_draw(
-            session_duration, get_simulation_parameters(),
+            session_duration, conf,
             seed=options.random_seed, config_num=options.config_num)
         event_emitters = [RandomOrderEmitter(source_data=random_orders), ]
         agent_cls = PaceMakerAgent
 
     elif agent_type == 'elo':
-        events = utility.get_agent_state_config(config_number=options.config_num)
+        events = utility.transform_agent_events_array(conf['agent_state_configs'], options.config_num)
         event_emitters = [ELOSliderChangeEmitter(source_data=events['slider']), 
             ELOSpeedChangeEmitter(source_data=events['speed'])]
         agent_cls = DynamicAgent

@@ -6,7 +6,7 @@ import settings
 import configargparse
 from utility import (
     random_chars, get_interactive_agent_count, 
-    get_simulation_parameters, export_session_report)
+    get_simulation_parameters, copy_params_to_logs)
 import numpy as np
 from db.db import session_results_ready
 from db.db_commands import export_session
@@ -27,7 +27,6 @@ options, args = p.parse_known_args()
 # gets a list of `num_ports` of available ports between 9000 and 10000
 def get_available_ports(num_ports):
     ports = []
-    # return codes for connect_ex that indicate that a port is available
     for port in range(9000, 10000):
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
             res = sock.connect_ex(('localhost', port))
@@ -137,7 +136,7 @@ def run_elo_simulation(session_code):
                     random_seed), 'rabbit_agent_external'
 
     interactive_agents = []
-    for i in range(get_interactive_agent_count()):
+    for i in range(get_interactive_agent_count(params['agent_state_configs'])):
         agent_i = """run_agent.py --session_duration {0} --exchange_ouch_port {1} \
             --exchange_json_port {2}  --external_exchange_host 127.0.0.1 \
             --external_exchange_json_port {3} --session_code {4} \
@@ -164,7 +163,7 @@ def run_elo_simulation(session_code):
     external_exchange_proc.terminate()
     if sum(exit_codes) == 0 and session_results_ready(session_code):
         export_session(session_code)
-        export_session_report(session_code, options.note)
+        copy_params_to_logs(session_code)
 
     log.info('session %s complete!' % session_code)
 

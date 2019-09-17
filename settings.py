@@ -18,7 +18,7 @@ default_simulation_parameters = {
     'tax_rate': 0.1,
     'k_reference_price': 0.01,
     'k_signed_volume': 0.5,
-    'read_fundamental_values_from_file': False,
+    'read_fundamental_values_from_array': False,
     'a_x_multiplier': 1,   # a_x <-> signed volume
     'a_y_multiplier': 1,   # a_y <-> inventory
     'speed_unit_cost': 10000,  # per second
@@ -27,15 +27,15 @@ default_simulation_parameters = {
     'focal_market_fba_interval': 3,
     'external_market_fba_interval': 3,
     'random_seed': None,
+    'fundamental_values': [],
+    'agent_state_configs': [],
 }
 
 logs_dir = './app/logs/'
 results_export_path = './app/data/{session_id}_{record_class}_accessed_{timestamp}.csv'
-params_export_path = './app/data/{session_id}_report_{timestamp}.txt'
+params_export_path = './app/data/{session_id}_params_{timestamp}.yaml'
 
-custom_config_path = './app/simulator_configs/parameters.yaml'
-agent_event_config_path = './app/simulator_configs/agent_state_configs.csv'
-fundamental_values_config_path = './app/simulator_configs/fundamental_values.csv'
+custom_config_path = './app/parameters.yaml'
 
 focal_exchange_host = os.getenv('FOCAL_EXCHANGE_HOST', 'localhost')
 external_exchange_host = os.getenv('EXTERNAL_EXCHANGE_HOST', 'localhost')

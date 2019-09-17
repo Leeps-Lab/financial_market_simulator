@@ -118,12 +118,11 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
     first draws fundamental value series or read from a csv file
     then pipes this sequence to random order producer function
     """
-    if conf['read_fundamental_values_from_file']:
-        path = settings.fundamental_values_config_path
-        fundamental_values = utility.read_fundamental_values_from_csv(path)
-        fundamental_values.insert(0, (0, conf['initial_price']))
+    if conf['read_fundamental_values_from_array']:
+        fundamental_values = conf['fundamental_values'].copy()
+        fundamental_values.insert(0, [0, conf['initial_price']])
+        print(fundamental_values)
         fundamental_values = np.array(fundamental_values)
-        log.info('read fundamental value sequence from %s.' % path)
     else:
         with ContextSeed(seed):
             fundamental_values = _elo_asset_value_arr(
