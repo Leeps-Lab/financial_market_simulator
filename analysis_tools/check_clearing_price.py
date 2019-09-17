@@ -2,6 +2,40 @@ from termcolor import colored as c
 from math import ceil
 import argparse
 
+'''
+Author: Eli Pandolfo (github elip12)
+Description:
+    This script ensures that the exchange is calculating the
+    clearing price correctly. It reads the logs from the simulator
+    run with debug mode on, and parses the order books and market
+    clearing price for each batch auction.
+
+    It then performs an alternate algorithm for calculating clearing price,
+    and checks that the two clearing prices match.
+
+Usage:
+    In one shell:
+        `cd financial_market_simulator`
+        `python3 dbreset.py`
+        `python3 run_web_api.py 2> debug_output.out`
+    In another shell:
+        `curl http://localhost:5000/v1/simulate?debug=true`
+        or hit that endpoint in your browser
+    Wait for the simulation to run (usually about 10 more seconds than
+    session_duration specified in parameters.yaml). You know it ended
+    if you do `tail debug_output.out` and see a psycopg2 warning at the
+    end of the file.
+    In the first shell:
+        ctl-C the simulator
+        `cd analysis_tools`
+        `python3 check_clearing_price.py ../debug_output.out`
+
+    You can optionally turn on debug mode with the -d flag when you run
+    this program.
+    This program prints its output to stdout (even debug output)
+'''
+# TODO: make debug messages print to stderr
+
 DEBUG = False
 
 def perr(*args):
