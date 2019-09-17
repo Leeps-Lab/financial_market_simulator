@@ -38,32 +38,46 @@ Usage:
 
 DEBUG = False
 
+# print a red message for errors
 def perr(*args):
     s = ''.join(['{} ' for arg in args])
     s = s.format(*args)
     print(c(s, 'red'))
 
+# print a magenta message for warnings
 def pwarn(*args):
     s = ''.join(['{} ' for arg in args])
     s = s.format(*args)
     print(c(s, 'magenta'))
 
+# print a message only if DEBUG is on
 def printd(*args):
     if DEBUG:
         print(*args)
 
+# print a yellow info message only if DEBUG is on
 def pinfo(*args):
     if DEBUG:
         s = ''.join(['{} ' for arg in args])
         s = s.format(*args)
         print(c(s, 'yellow'))
 
+# print a green message for successes
 def pgrn(*args):
     s = ''.join(['{} ' for arg in args])
     s = s.format(*args)
     print(c(s, 'green'))
 
 '''
+Finds the clearing price for an auction, given a list of
+asks and a list of bids.
+Brute-force analyzes the figurative supply and demand curves
+corresponding to the asks and bids. Basically, if the highest bid
+is above the lowest offer, it 'walks' forward by 1 unit of
+quantity until it finds where bid and ask intersect,
+then does a little logic to ensure correct clearing price depending on
+how the curves cross.
+
 ai: ask index
 ca: current ask
 qa: quantity at current ask
@@ -119,7 +133,11 @@ def check_clearing_price(asks, bids, expected):
             return False
     return True
         
-
+'''
+Takes in a log file from the simulator, finds all the places where
+there is an auction, parses the salient data (asks, bids, clearing price),
+and sends them to the check_clearing_price fn.
+'''
 def parse_logs(path):
     success = True
     with open(path, 'r') as f:
@@ -170,6 +188,9 @@ def parse_logs(path):
                 perr('Clearing prices do not match')
                 success = False
 
+'''
+Processes the arguments and runs the parser.
+'''
 def main():
     parser = argparse.ArgumentParser(description='Check exchange clearing \
     prices are calculated correctly.')
