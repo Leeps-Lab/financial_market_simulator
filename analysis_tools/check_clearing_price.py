@@ -72,8 +72,14 @@ def check_clearing_price(asks, bids, expected):
                 qb = bids[bi][1]
         if ca == cb:
             p = ca
+        elif qa == asks[ai][1] and qb == bids[bi][1]:
+            prior_ask = asks[ai - 1][0]
+            prior_bid = bids[bi - 1][0]
+            h = min(prior_bid, ca)
+            l = max(prior_ask, cb)
+            p = ceil((h + l) / 2)
         else:
-            p = ceil((ca + cb) / 2)
+            p = min(ca, cb)
         printd('  calculated clearing price:', p)
         if p != int(expected):
             return False
