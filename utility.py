@@ -1,6 +1,7 @@
 from high_frequency_trading.hft.incoming_message import IncomingWSMessage, IncomingMessage
 from twisted.internet import reactor, error
 from random import randint, choice
+from shutil import copyfile
 import subprocess
 import shlex
 import settings
@@ -32,34 +33,17 @@ def get_elo_agent_parameters(
     return {k: all_parameters[k] for k in parameter_names}
 
 
-def export_session_report(session_id: str, session_note: str):
-    params = get_simulation_parameters()
-    timestamp = datetime.datetime.now()
-    path = settings.params_export_path.format(session_id=session_id, 
-        timestamp=timestamp)
-    str_params = '\n\t'.join('{0}:{1}'.format(k, v) for k, v in params.items())
-    report = 'session note:\n    %s\nparameters:\n\t%s' % (session_note, str_params)
-    with open(path, 'w') as f:
-        f.write(report)
+def copy_params_to_logs(session_id: str):
+    path = settings.params_export_path.format(
+        session_id=session_id, 
+        params=get_simulation_parameters(),
+        timestamp=datetime.datetime.now(),
+    )
+    copyfile(settings.custom_config_path, path)
 
 
-def get_agent_state_config(config_number=None):
-    events = read_agent_events_from_csv(settings.agent_event_config_path)
-    if config_number is not None:
-        try:
-            result = events[config_number]
-        except IndexError:
-            log.error('invalid config number %s.' % config_number)
-        else:
-            return result
-    else:
-        return events
-
-
-def get_interactive_agent_count():
-    result = len(get_agent_state_config())
-    log.info('%s agents found in event configurations.' % result)
-    return result
+def get_interactive_agent_count(agent_events):
+    return max([int(row[1]) for row in agent_events])
 
 
 def get_traders_initial_market_view():
@@ -136,35 +120,19 @@ def extract_firm_from_message(message):
     if hasattr(message, 'order_token'):
         return message.order_token[:4]
 
-
-def read_fundamental_values_from_csv(path):
-    """ well this code sucks but it is very specific to elo"""
-    with open(path, 'r') as f:
-        reader = csv.reader(f)
-        next(reader)  # first row is column names
-        rows = list(reader)
-    # assume values are valid
-    rows = [(float(row[0]), int(row[1])) for row in rows]
-    return rows
-
-def read_agent_events_from_csv(path):
-    """ some obvious duplication here, but it is good to keep them separate
-        both are very custom to context
-    """
-    with open(path, 'r') as f:
-        reader = csv.reader(f)
-        next(reader)  # first row is column names
-        rows = list(reader)
-        num_agents = max([int(row[1]) for row in rows])
-        input_lists = [{'speed': [], 'slider': []} for _ in range(num_agents)]
-        for row in rows:
-            arrival_time, agent_num, tech_subsc, a_x, a_y, a_z = row
-            agent_num = int(agent_num)
+def transform_agent_events_array(agent_events, config_number):
+    """transform an array of agent events from paramaters.yaml.
+    turn it into a usable set of speed and slider events for a specific player"""
+    input_list = {'speed': [], 'slider': []}
+    for row in agent_events:
+        arrival_time, agent_num, tech_subsc, a_x, a_y, a_z = row
+        agent_num = int(agent_num)
+        if agent_num-1 == config_number:
             speed_row = (arrival_time, tech_subsc)
             slider_row = (arrival_time, a_x, a_y, a_z)
-            input_lists[agent_num - 1]['speed'].append(speed_row)
-            input_lists[agent_num - 1]['slider'].append(slider_row)
-    return input_lists
+            input_list['speed'].append(speed_row)
+            input_list['slider'].append(slider_row)
+    return input_list
 
 
 def get_mock_market_msg(market_facts: dict, msg_type: str):
@@ -189,8 +157,5 @@ incoming_message_defaults = {'subsession_id': 0,  'market_id': 0, 'player_id': 0
 
 def read_yaml(path: str):
     with open(path, 'r') as f:
-        try:
-            config = yaml.load(f)
-        except yaml.YAMLError as e:
-            raise e
+        config = yaml.safe_load(f)
     return config

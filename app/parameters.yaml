@@ -3,14 +3,14 @@ initial_price: 1000000
 
 fundamental_value_noise_mean: 0
 fundamental_value_noise_std: 1400
-read_fundamental_values_from_file: True
+read_fundamental_values_from_array: True
 
 exogenous_order_price_noise_mean: 0
 exogenous_order_price_noise_std: 12000
 bid_ask_offset: 10000
 time_in_force: 7
 
-focal_market_format: FBA
+focal_market_format: CDA
 external_market_format: CDA
 focal_market_fba_interval: 2
 external_market_fba_interval: 1
@@ -28,3 +28,14 @@ a_y_multiplier: 2   # a_y <-> inventory
 speed_unit_cost: 20000  # per second
 
 random_seed: 12338
+
+fundamental_values:
+  #  time, fundamental value
+  - [1,    1000000]
+  - [5,     900000]
+
+agent_state_configs:
+  #  arrival_time, agent_num, speed, a_x, a_y, w
+  - [3,            1,         0,     1,   0.1, 0.5]
+  - [4,            2,         1,     0,   0.1, 0]
+  - [5,            3,         0,     0,   0.1, 0]
