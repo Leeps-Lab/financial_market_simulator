@@ -1,7 +1,6 @@
-from termcolor import colored as c
 from math import ceil
 import argparse
-
+from termcolor import colored as c
 '''
 Author: Eli Pandolfo (github elip12)
 Description:
