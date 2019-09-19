@@ -20,4 +20,5 @@ reset*
 !session_config/**
 app/data/*.yaml
 *.out
+*.swp
 

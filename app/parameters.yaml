@@ -1,16 +1,16 @@
-session_duration: 10
+session_duration: 5
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
-fundamental_value_noise_std: 1400
-read_fundamental_values_from_array: True
+fundamental_value_noise_std: 10000
+read_fundamental_values_from_array: False
 
 exogenous_order_price_noise_mean: 0
 exogenous_order_price_noise_std: 12000
 bid_ask_offset: 10000
 time_in_force: 7
 
-focal_market_format: FBA
+focal_market_format: CDA
 external_market_format: CDA
 focal_market_fba_interval: 2
 external_market_fba_interval: 1

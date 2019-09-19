@@ -27,10 +27,10 @@ def read_csv(code):
 
 # for now, we are just going to sum the total profits for trading firms
 def extract_profits(df):
-    df = df[['trigger_msg_type', 'trader_model_name', 'net_worth']]
+    df = df[['trigger_msg_type', 'trader_model_name', 'net_worth', 'account_id']]
     rows = df.loc[(df['trigger_msg_type'] == 'market_end') \
         & (df['trader_model_name'] == 'automated')]
-    return sum(rows['net_worth'])
+    return rows[['net_worth']], rows[['account_id']]
 
 def main():
     if len(argv) != 2:
