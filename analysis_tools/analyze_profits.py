@@ -30,7 +30,7 @@ def extract_profits(df):
     df = df[['trigger_msg_type', 'trader_model_name', 'net_worth', 'account_id']]
     rows = df.loc[(df['trigger_msg_type'] == 'market_end') \
         & (df['trader_model_name'] == 'automated')]
-    return rows[['net_worth']], rows[['account_id']]
+    return rows['net_worth'], rows['account_id']
 
 def main():
     if len(argv) != 2:
