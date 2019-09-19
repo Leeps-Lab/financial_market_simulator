@@ -18,3 +18,6 @@ __pycache__/
 *.png
 reset*
 !session_config/**
+app/data/*.yaml
+*.out
+

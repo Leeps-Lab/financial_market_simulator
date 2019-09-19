@@ -5,12 +5,7 @@
 PARAMS_FILE="app/parameters.yaml"
 
 usage() {
-    echo "Usage: ./analyis_tools/run_simulations.sh <step_size>"
-    echo -e "\t<step_size>: An integer in [1..100]."
-    echo -e "\tParameters get incremented by <step_size> / 100 each iteration."
-    echo -e "\tIf 1, simulations will run with parameters [0.00,0.01...0.99,1.0]."
-    echo -e "\tIf 50, simulations will run with parameters [0.0,0.5,1.0]."
-    echo -e "\tIf 100, simulations will run with parameters [0.0,1.0]."
+    echo "Usage: ./analyis_tools/run_simulations.sh [low=0] [high=100] step"
     exit 1
 }
 
@@ -84,15 +79,15 @@ main() {
     MAX_PROFIT=$((-1 * 2**32))
     MAX_CODE='########'
     COUNT=0
-    TOTAL=$(( (100 / $1 + 1)**3 ))
+    TOTAL=$(( (($2 - $1 + 1) / $3)**3 ))
     start_server
     sleep 2
     backup_param_file
     echo "Running simulations..."
     echo -ne "[                         ]\r"
-    for (( i=0; i<=100; i+=$1 )); do
-        for (( j=0; j<=100; j+=$1 )); do
-            for (( k=0; k<=100; k+=$1 )); do
+    for (( i=$1; i<=$2; i+=$3 )); do
+        for (( j=$1; j<=$2; j+=$3 )); do
+            for (( k=$1; k<=$2; k+=$3 )); do
                 A_X=$(echo "scale=2; $i / 100.0" | bc)
                 A_Y=$(echo "scale=2; $j / 100.0" | bc)
                 W=$(echo "scale=2; $k / 100.0" | bc) 
@@ -115,18 +110,20 @@ main() {
     echo "CODE......... $MAX_CODE"
 }
 
-if [[ $# -ne 1 ]]; then
-    usage
-else
-    re='^[0-9]+$'
+LOW=0
+HIGH=100
+re='^[0-9]+$'
+if [[ $# -eq 1 ]]; then
     if ! [[ $1 =~ $re ]]; then
         usage
     fi
-    main $1
+    main $LOW $HIGH $1
+elif [[ $# -eq 3 ]]; then
+    if ! [[ ($1 =~ $re) && ($2 =~ $re) && ($3 =~ $re) ]]; then
+        usage
+    fi
+    main $1 $2 $3
+else
+    usage
 fi
-
-
-
-
-
 
