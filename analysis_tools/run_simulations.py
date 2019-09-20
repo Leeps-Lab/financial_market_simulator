@@ -331,6 +331,7 @@ def main():
             surface = read_global_surface(options.read_global)
         if options.analyze_global:
             maxima = analyze_global_surface(**surface)
+            print(maxima)
         '''
         for each local maxima, explore_dynamic / explore_static with higher (lower) resolution
         '''
