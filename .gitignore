@@ -21,4 +21,5 @@ reset*
 app/data/*.yaml
 *.out
 *.swp
+*.pkl
 
