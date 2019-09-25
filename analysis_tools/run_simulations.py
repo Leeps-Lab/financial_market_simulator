@@ -180,10 +180,47 @@ def find_and_delete_files(code):
         for f in fpaths:
             remove(f)
 
+# this will become async
+def prep_and_run(path, agent_state_configs, endpoint, i, j, k, clean=False, **kwargs):
+    prep_for_sim(
+        path,
+        agent_state_configs=agent_state_configs,
+        **kwargs
+    )
+    session_code = run_sim(endpoint, kwargs['session_duration'])
+    profit = analyze_output(session_code)
+    if clean:
+        find_and_delete_files(session_code)
+    return {
+        'i': i,
+        'j': j,
+        'k': k,
+        'profit': profit,
+    }
+
 # tries all combinations of parameters for a_x, a_y, w (each separately
 # configurable), and returns a 3D numpy array.
 # ignores speed for now
 def explore_static(x, y, w, path, endpoint, clean=False, **kwargs):
+    '''
+    x_range, y_range, w_range = -np.inf
+    for agent in agents:
+        x = agent['x']
+        y = agent['y']
+        w = agent['w']
+        agent['x_range'] = int((x['high'] - x['low']) / x['step'] + 1)
+        agent['y_range'] = int((y['high'] - y['low']) / y['step'] + 1)
+        agent['w_range'] = int((w['high'] - w['low']) / w['step'] + 1)
+        if agent['x_range'] > x_range:
+            x_range = agent['x_range']
+        if agent['y_range'] > y_range:
+            y_range = agent['y_range']
+        if agent['w_range'] > w_range:
+            w_range = agent['w_range']
+    surface = np.full((len(agents), x_range, y_range, w_range), np.nan)
+    # total, count, and curr used for logging
+    total = len(agents) * x_range * y_range * w_range
+    ''' 
     x_range = int((x['high'] - x['low']) / x['step'] + 1)
     y_range = int((y['high'] - y['low']) / y['step'] + 1)
     w_range = int((w['high'] - w['low']) / w['step'] + 1)
@@ -206,20 +243,50 @@ def explore_static(x, y, w, path, endpoint, clean=False, **kwargs):
                     [0,           2,     speed, A_X,        A_Y,       W],
                     [0,           3,     speed, A_X,        A_Y,       W],
                 ]
-                prep_for_sim(
-                    path,
-                    agent_state_configs=agent_state_configs,
-                    **kwargs
-                )
-                session_code = run_sim(endpoint, kwargs['session_duration'])
-                profit = analyze_output(session_code)
-                surface[i][j][k] = profit
+                # this is going to get moved to an async task that goes into a queue
+                s = prep_and_run(path, agent_state_configs, endpoint, i, j, k, clean, **kwargs)
+                # this updates the surface and doesnt need to be done from inside the for loop
+                surface[s['i']][s['j']][s['k']] = s['profit']
+                
                 count += 1
                 curr = print_progress(count, total, curr)
-                if clean:
-                    find_and_delete_files(session_code)
     return surface
 
+def explore_dynamic(x, y, w, profit, path, endpoint, clean=False, **kwargs):
+    x_low, A_X, x_high = x['p'] - x['t'], x['p'], x['x'] + x['t'] 
+    y_low, A_Y, y_high = y['p'] - y['t'], y['p'], y['p'] + y['t'] 
+    w_low, W, w_high = w['p'] - w['t'], w['p'], w['p'] + w['t'] 
+    '''
+    this one has been done already; it is the config that generated the 
+    current point and profit
+    
+    agent_state_configs = [
+        #arrive time, index, speed, signed vol, inventory, external
+        [0,           1,     speed, A_X,        A_Y,       W],
+        [0,           2,     speed, A_X,        A_Y,       W],
+        [0,           3,     speed, A_X,        A_Y,       W],
+    ]
+    prep_for_sim(
+        path,
+        agent_state_configs=agent_state_configs,
+        **kwargs
+    )
+    profit = analyze_output(run_sim(endpoint, kwargs['session_duration']))
+    '''
+    
+    '''
+    we are given:
+        a point: an (x,y,w) coordinate each with a tolerance. We know that
+        a local maxima lies somewhere in the sphere with radius t and center
+        (x,y,w). What is the best way to search that sphere?
+    '''
+
+def pickle_surface(res, struct):
+    log.info('Dumping surface to pkl file')
+    t = dt.now().strftime('%Y-%m-%d_%H:%M:%S')
+    with open(f'global_surface_{res}_{t}.pkl', 'wb') as f:
+        pkl.dump(struct, f)
+    
 # generates a 3D numpy array w some metadata for the global parameter space
 # (0.0, 1.0], with specified resolution. More explanation in Examples.
 def generate_global_surface(res, path, endpoint, save=False, clean=False,
@@ -229,7 +296,7 @@ def generate_global_surface(res, path, endpoint, save=False, clean=False,
     res = float(res)
     step = int(res * high)
     log.info(f'Generating global surface with resolution {res}')
-    x = {'low': low, 'high': high, 'step': step}
+    x = {'low': 0, 'high': 0, 'step': 1} # X = signed volume, is being held constant at 0
     y = {'low': low, 'high': high, 'step': step}
     w = {'low': low, 'high': high, 'step': step}
     
@@ -242,10 +309,7 @@ def generate_global_surface(res, path, endpoint, save=False, clean=False,
         'surface': surface,
     }
     if save:
-        log.info('Dumping surface to pkl file')
-        t = dt.now().strftime('%Y-%m-%d_%H:%M:%S')
-        with open(f'global_surface_{res}_{t}.pkl', 'wb') as f:
-            pkl.dump(struct, f)
+        pickle_surface(res, struct)
     return struct
 
 # reads a pickled surface array + metadata from a file
@@ -309,6 +373,7 @@ def main():
         exit(1)
     if options.analyze_global and not (options.generate_global or options.read_global):
         log.error('--analyze_global option requires either generate_global option or read_global option')
+        exit(1)
 
     backup_param_file(param_filepath)
     try:
@@ -335,6 +400,7 @@ def main():
             print(maxima)
         '''
         for each local maxima, explore_dynamic / explore_static with higher (lower) resolution
+        order by decreasing profits
         '''
         
         restore_param_file_from_backup(param_filepath)
