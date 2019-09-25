@@ -145,7 +145,8 @@ def run_sim(endpoint, session_duration):
     search = 'code --> '
     i = metadata.index(search) + len(search)
     session_code = metadata[i: i + 8] # session code is always 8 digits
-    sleep(session_duration + 4) # 4 seconds of server-side overhead per simulation
+    sleep(session_duration + 4) # 4 seconds of server-side overhead per simulation,
+                                 # more if your cpu is being used heavily
     return session_code
 
 # extracts the profits from the current simulation agent csv
