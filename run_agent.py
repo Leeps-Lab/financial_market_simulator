@@ -70,6 +70,16 @@ def main(account_id):
     d.addCallback(lambda _ : reactor.stop())
     reactor.run()
 
+    '''
+    every message gets sent with an arrival time
+    - to send a message, need to use current time - start of simulation, or current time?
+    - update agent_parameters somehow
+    - user_slider_change method
+    '''
+
+    print('HERE')
+    #print(agent.user_slider_change)
+
 if __name__ == '__main__':
     account_id = generate_account_id()
     log.basicConfig(
