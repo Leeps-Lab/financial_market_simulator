@@ -5,6 +5,7 @@ import settings
 from discrete_event_emitter import *
 from agents.pacemaker_agent import PaceMakerAgent
 from agents.dynamic_agent import DynamicAgent 
+from agent_supervisor import AgentSupervisor
 from protocols.ouch_trade_client_protocol import OUCHClientFactory
 from protocols.json_line_protocol import JSONLineClientFactory
 from utility import (
@@ -27,7 +28,9 @@ p.add('--config_num', default=0, type=int, help='The configuration number, \
        index in the list of discrete event configurations')
 p.add('--random_seed', type=int)
 options, args = p.parse_known_args()
-        
+
+def at_end():
+    pass
         
 def main(account_id):
     agent_type = options.agent_type
@@ -68,17 +71,21 @@ def main(account_id):
 
     d = task.deferLater(reactor, session_duration, agent.close_session)
     d.addCallback(lambda _ : reactor.stop())
+    
+    ############################################################################
+    # This is code for optimizing agents' slider params during simulations.
+    # If you want to run simulations normally, MAKE SURE THIS CODE DOES NOT RUN
+    supervisor = AgentSupervisor(account_id, agent)
+    supervisor.at_start(isinstance(agent, DynamicAgent))
+    looper = task.LoopingCall(supervisor.on_tick, isinstance(agent, DynamicAgent))
+    looper.clock = reactor
+    looper.start(2.0, now=False)
+    d.addCallback(lambda _ : looper.stop())
+    d.addCallback(lambda _ : supervisor.at_end(isinstance(agent, DynamicAgent)))
+    ############################################################################
+    
     reactor.run()
 
-    '''
-    every message gets sent with an arrival time
-    - to send a message, need to use current time - start of simulation, or current time?
-    - update agent_parameters somehow
-    - user_slider_change method
-    '''
-
-    print('HERE')
-    #print(agent.user_slider_change)
 
 if __name__ == '__main__':
     account_id = generate_account_id()

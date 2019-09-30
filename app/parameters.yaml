@@ -1,8 +1,8 @@
-session_duration: 10
+session_duration: 60
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
-fundamental_value_noise_std: 1400
+fundamental_value_noise_std: 10000
 read_fundamental_values_from_array: True
 
 exogenous_order_price_noise_mean: 0

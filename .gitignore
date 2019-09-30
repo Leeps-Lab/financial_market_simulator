@@ -16,5 +16,7 @@ __pycache__/
 *.log
 *.vscode
 *.png
+*.swp
+app/data/*
 reset*
 !session_config/**
