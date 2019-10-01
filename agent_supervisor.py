@@ -1,31 +1,36 @@
 # This class tunes an agent's parameters in order to optimize profits. The
-# on_tick method gets called every 2 seconds for each agent.
+# on_tick method gets called every 3 seconds for each agent.
 
 from high_frequency_trading.hft.incoming_message import IncomingMessage
 import random
+import time
+from utility import get_interactive_agent_count, get_simulation_parameters
 
 class AgentSupervisor():
-    def __init__(self, account_id, agent):
-        self.account_id = account_id
+    def __init__(self, config_num, agent):
+        self.config_num = config_num
         self.agent = agent
+        self.num_agents = get_interactive_agent_count(
+            get_simulation_parameters()['agent_state_configs'])
+        self.elapsed_turns = -1
         self.market_id = agent.model.market_id
         self.subsession_id = agent.model.subsession_id
         self.prev_params = {
             'a_x': 0.0,
-            'a_y': 1.0,
-            'a_z': 0.5,
+            'a_y': 0.0,
+            'a_z': 0.0,
             'speed': 0,
         }
         self.curr_params = {
             'a_x': 0.0,
-            'a_y': 1.0,
-            'a_z': 0.5,
+            'a_y': 0.0,
+            'a_z': 0.0,
             'speed': 0,
         }
         self.current = 'a_y'
         self.current_profits = 0.0
         self.previous_profits = 0.0
-        self.tick = 0.04
+        self.tick = 0.1
 
     def get_profits(self):
         self.current_profits = self.agent.model.net_worth
@@ -45,20 +50,18 @@ class AgentSupervisor():
             self.bounds_check()
 
     def same_direction(self):
-        if self.curr_params[self.current] > self.prev_params[self.current]:
+        if self.curr_params[self.current] >= self.prev_params[self.current]:
             self.curr_params[self.current] += self.tick
             self.bounds_check()
         elif self.curr_params[self.current] < self.prev_params[self.current]:
             self.curr_params[self.current] -= self.tick
             self.bounds_check()
-        else:
-            self.random_direction()
 
     def opposite_direction(self):
         if self.curr_params[self.current] > self.prev_params[self.current]:
             self.curr_params[self.current] -= 2 * self.tick
             self.bounds_check()
-        elif self.curr_params[self.current] < self.prev_params[self.current]:
+        elif self.curr_params[self.current] <= self.prev_params[self.current]:
             self.curr_params[self.current] += 2 * self.tick
             self.bounds_check()
         else:
@@ -69,6 +72,15 @@ class AgentSupervisor():
             self.current = 'a_z'
         elif self.current == 'a_z':
             self.current = 'a_y'
+    
+    @staticmethod
+    def gel(cur, prev, tolerance=1000):
+        if cur - prev > tolerance / 2:
+            return 1
+        elif cur - prev < -tolerance / 2:
+            return -1
+        else:
+            return 0
 
     def update_params(self):
         '''
@@ -97,14 +109,14 @@ class AgentSupervisor():
                 the thing you just did had no effect,
                 change a different var in a random direction
         '''
-        if self.current_profits > self.previous_profits:
+        if self.gel(self.current_profits, self.previous_profits) == 1:
             self.same_direction()
-        elif self.current_profits < self.previous_profits:
+        elif self.gel(self.current_profits, self.previous_profits) == -1:
             self.opposite_direction()
         else:
             self.get_next_param()
             # since this param was the same as previously,                     
-            # it will automatically do a random direction
+            # it will automatically increment
             self.same_direction() 
         
         # update previous
@@ -126,15 +138,28 @@ class AgentSupervisor():
         self.agent.model.user_slider_change(event)
 
     def print_status(self):
-        print(self.account_id, 'profits:', self.agent.model.net_worth,
+        print(self.config_num, 'profits:', self.agent.model.net_worth,
             'a_x:', round(self.curr_params['a_x'], 2),
             'a_y:', round(self.curr_params['a_y'], 2),
             'a_z:', round(self.curr_params['a_z'], 2))
     
+    @property
+    def my_turn(self):
+        m = int(self.elapsed_turns / 4) % self.num_agents
+        if m == self.config_num:
+            #print(True, m, self.config_num, self.elapsed_turns)
+            return True
+        else:
+            #print(False, m, self.config_num, self.elapsed_turns)
+            return False
+
     def on_tick(self, is_dynamic):
+        self.elapsed_turns += 1
         if not is_dynamic:
             return
         self.get_profits()
+        if not self.my_turn:
+            return
         self.update_params()
         self.send_message()
         self.print_status()

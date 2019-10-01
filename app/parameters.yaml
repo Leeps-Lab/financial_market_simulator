@@ -1,29 +1,29 @@
-session_duration: 60
+session_duration: 300
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
-fundamental_value_noise_std: 10000
+fundamental_value_noise_std: 40000
 read_fundamental_values_from_array: True
 
 exogenous_order_price_noise_mean: 0
-exogenous_order_price_noise_std: 12000
-bid_ask_offset: 10000
-time_in_force: 7
+exogenous_order_price_noise_std: 30000
+bid_ask_offset: 20000
+time_in_force: 2
 
 focal_market_format: CDA
 external_market_format: CDA
-focal_market_fba_interval: 2
+focal_market_fba_interval: 1
 external_market_fba_interval: 1
 
 lambdaJ: 0.5
-lambdaI: [0.1, 0.1]  # first element: focal market, second element: external market
+lambdaI: [0.2, 0.1]  # first element: focal market, second element: external market
 
 tax_rate: 0.1
 k_reference_price: 0.2 # discount rate (half life)
-k_signed_volume: 0.5
+k_signed_volume: 0.2
 
-a_x_multiplier: 4   # a_x <-> signed volume
-a_y_multiplier: 2   # a_y <-> inventory
+a_x_multiplier: 5   # a_x <-> signed volume
+a_y_multiplier: 5   # a_y <-> inventory
 
 speed_unit_cost: 20000  # per second
 
@@ -31,8 +31,7 @@ random_seed: 12338
 
 fundamental_values:
   #  time, fundamental value
-  - [1,    1000000]
-  - [5,     900000]
+  - [0,    1000000]
 
 agent_state_configs:
   #  arrival_time, agent_num, speed, a_x, a_y, w
