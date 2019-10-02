@@ -5,6 +5,18 @@ from high_frequency_trading.hft.incoming_message import IncomingMessage
 import random
 import time
 from utility import get_interactive_agent_count, get_simulation_parameters
+import numpy as np
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import style
+style.use('./analysis_tools/elip12.mplstyle')
+import matplotlib.pyplot as plt   
+
+INIT_Y = 0.0
+INIT_Z = 0.0
+TICK = 0.05
+NUM_TURNS = 6
 
 class AgentSupervisor():
     def __init__(self, config_num, agent):
@@ -17,20 +29,23 @@ class AgentSupervisor():
         self.subsession_id = agent.model.subsession_id
         self.prev_params = {
             'a_x': 0.0,
-            'a_y': 0.0,
-            'a_z': 0.0,
+            'a_y': INIT_Y,
+            'a_z': INIT_Z,
             'speed': 0,
         }
         self.curr_params = {
             'a_x': 0.0,
-            'a_y': 0.0,
-            'a_z': 0.0,
+            'a_y': INIT_Y,
+            'a_z': INIT_Z, 
             'speed': 0,
         }
         self.current = 'a_y'
         self.current_profits = 0.0
         self.previous_profits = 0.0
-        self.tick = 0.1
+        self.tick = TICK
+        self.y_array = []
+        self.z_array = []
+        self.profit_array = []
 
     def get_profits(self):
         self.current_profits = self.agent.model.net_worth
@@ -50,18 +65,20 @@ class AgentSupervisor():
             self.bounds_check()
 
     def same_direction(self):
-        if self.curr_params[self.current] >= self.prev_params[self.current]:
+        if self.curr_params[self.current] > self.prev_params[self.current]:
             self.curr_params[self.current] += self.tick
             self.bounds_check()
         elif self.curr_params[self.current] < self.prev_params[self.current]:
             self.curr_params[self.current] -= self.tick
             self.bounds_check()
+        else:
+            self.random_direction()
 
     def opposite_direction(self):
         if self.curr_params[self.current] > self.prev_params[self.current]:
             self.curr_params[self.current] -= 2 * self.tick
             self.bounds_check()
-        elif self.curr_params[self.current] <= self.prev_params[self.current]:
+        elif self.curr_params[self.current] < self.prev_params[self.current]:
             self.curr_params[self.current] += 2 * self.tick
             self.bounds_check()
         else:
@@ -122,6 +139,9 @@ class AgentSupervisor():
         # update previous
         self.previous_profits = self.current_profits
         self.prev_params = self.curr_params.copy()
+        self.y_array.append(self.curr_params['a_y'])
+        self.z_array.append(self.curr_params['a_z'])
+        self.profit_array.append(self.current_profits)
 
     def send_message(self):
         message = {
@@ -145,12 +165,10 @@ class AgentSupervisor():
     
     @property
     def my_turn(self):
-        m = int(self.elapsed_turns / 4) % self.num_agents
+        m = int(self.elapsed_turns / NUM_TURNS) % self.num_agents
         if m == self.config_num:
-            #print(True, m, self.config_num, self.elapsed_turns)
             return True
         else:
-            #print(False, m, self.config_num, self.elapsed_turns)
             return False
 
     def on_tick(self, is_dynamic):
@@ -170,3 +188,7 @@ class AgentSupervisor():
     def at_end(self, is_dynamic):
         if is_dynamic:
             self.print_status()
+            df = pd.DataFrame(list(zip(self.y_array, self.z_array, self.profit_array)), columns=['A_Y', 'A_Z'])
+            df.plot(legend=True)
+            plt.savefig(f'agent{self.config_num}.png', dpi=150)
+
