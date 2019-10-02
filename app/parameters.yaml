@@ -1,4 +1,4 @@
-session_duration: 300
+session_duration: 10
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0

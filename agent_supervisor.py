@@ -12,6 +12,7 @@ matplotlib.use('Agg')
 from matplotlib import style
 style.use('./analysis_tools/elip12.mplstyle')
 import matplotlib.pyplot as plt   
+import itertools
 
 INIT_Y = 0.5
 INIT_Z = 0.5
@@ -46,6 +47,7 @@ class AgentSupervisor():
         self.y_array = []
         self.z_array = []
         self.profit_array = []
+        self.speed_array = []
 
     def get_profits(self):
         self.current_profits = self.agent.model.net_worth
@@ -88,7 +90,15 @@ class AgentSupervisor():
         if self.current == 'a_y':
             self.current = 'a_z'
         elif self.current == 'a_z':
+            self.current = 'speed'
+        elif self.current == 'speed':
             self.current = 'a_y'
+
+    def switch_speed(self):
+        if self.curr_params['speed'] == 0:
+            self.curr_params['speed'] = 1
+        elif self.curr_params['speed'] == 1:
+            self.curr_params['speed'] = 0
     
     @staticmethod
     def gel(cur, prev, tolerance=1000):
@@ -127,14 +137,17 @@ class AgentSupervisor():
                 change a different var in a random direction
         '''
         if self.gel(self.current_profits, self.previous_profits) == 1:
-            self.same_direction()
+            if self.current != 'speed':
+                self.same_direction()
         elif self.gel(self.current_profits, self.previous_profits) == -1:
-            self.opposite_direction()
+            if self.current != 'speed':
+                self.opposite_direction()
+            else:
+                self.switch_speed()
         else:
             self.get_next_param()
-            # since this param was the same as previously,                     
-            # it will automatically increment
-            self.same_direction() 
+            if self.current != 'speed':
+                self.same_direction()
         
         # update previous
         self.previous_profits = self.current_profits
@@ -142,6 +155,7 @@ class AgentSupervisor():
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
         self.profit_array.append(self.current_profits)
+        self.speed_array.append(self.curr_params['speed'])
 
     def send_message(self):
         message = {
@@ -159,7 +173,7 @@ class AgentSupervisor():
 
     def print_status(self):
         print(self.config_num, 'profits:', self.agent.model.net_worth,
-            'a_x:', round(self.curr_params['a_x'], 2),
+            'speed': self.curr_params['speed'],
             'a_y:', round(self.curr_params['a_y'], 2),
             'a_z:', round(self.curr_params['a_z'], 2))
     
@@ -188,7 +202,9 @@ class AgentSupervisor():
     def at_end(self, is_dynamic):
         if is_dynamic:
             self.print_status()
-            df = pd.DataFrame(list(zip(self.y_array, self.z_array, self.profit_array)), columns=['A_Y', 'A_Z', 'Profit'])
-            df.plot(legend=True)
-            plt.savefig(f'agent{self.config_num}.png', dpi=150)
+            df = pd.DataFrame(list(itertools.zip_longest(
+                self.y_array, self.z_array, self.profit_array, self.speed_array)),
+                columns=['A_Y', 'A_Z', 'Profit', 'Speed'])
+#            df.plot(legend=True)
+#            plt.savefig(f'app/data/agent{self.config_num}.png', dpi=150)
 
