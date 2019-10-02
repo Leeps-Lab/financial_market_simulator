@@ -23,7 +23,7 @@ k_reference_price: 0.2 # discount rate (half life)
 k_signed_volume: 0.2
 
 a_x_multiplier: 5   # a_x <-> signed volume
-a_y_multiplier: 5   # a_y <-> inventory
+a_y_multiplier: 11111111110   # a_y <-> inventory
 
 speed_unit_cost: 20000  # per second
 

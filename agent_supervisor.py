@@ -13,9 +13,9 @@ from matplotlib import style
 style.use('./analysis_tools/elip12.mplstyle')
 import matplotlib.pyplot as plt   
 
-INIT_Y = 0.0
-INIT_Z = 0.0
-TICK = 0.05
+INIT_Y = 0.5
+INIT_Z = 0.5
+TICK = 0.1
 NUM_TURNS = 6
 
 class AgentSupervisor():
@@ -188,7 +188,7 @@ class AgentSupervisor():
     def at_end(self, is_dynamic):
         if is_dynamic:
             self.print_status()
-            df = pd.DataFrame(list(zip(self.y_array, self.z_array, self.profit_array)), columns=['A_Y', 'A_Z'])
+            df = pd.DataFrame(list(zip(self.y_array, self.z_array, self.profit_array)), columns=['A_Y', 'A_Z', 'Profit'])
             df.plot(legend=True)
             plt.savefig(f'agent{self.config_num}.png', dpi=150)
 
