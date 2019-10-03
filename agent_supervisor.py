@@ -189,6 +189,6 @@ class AgentSupervisor():
             df = pd.DataFrame(list(itertools.zip_longest(
                 self.y_array, self.z_array, self.speed_array)),# self.profit_array)),
                 columns=['A_Y', 'A_Z', 'Speed'])#, 'Profit'])
-            df.plot(legend=True)
+            df.plot(linestyle=':', marker='o', legend=True)
             plt.savefig(f'app/data/agent{self.config_num}.png', dpi=150)
 
