@@ -17,7 +17,8 @@ import itertools
 INIT_Y = 0.5
 INIT_Z = 0.5
 TICK = 0.1
-NUM_TURNS = 6
+NUM_MOVES = 6
+MOVE_INTERVAL = 3.0
 
 class AgentSupervisor():
     def __init__(self, config_num, agent):
@@ -51,6 +52,9 @@ class AgentSupervisor():
 
     def get_profits(self):
         self.current_profits = self.agent.model.net_worth
+        if self.curr_params['speed'] == 1:
+            penalty = get_simulation_parameters()['speed_unit_cost'] * MOVE_INTERVAL
+            self.current_profits -= penalty
 
     def bounds_check(self):
         if self.curr_params[self.current] > 1.0:
@@ -67,6 +71,7 @@ class AgentSupervisor():
             self.bounds_check()
 
     def same_direction(self):
+        print('moving in same direction')
         if self.curr_params[self.current] > self.prev_params[self.current]:
             self.curr_params[self.current] += self.tick
             self.bounds_check()
@@ -77,6 +82,7 @@ class AgentSupervisor():
             self.random_direction()
 
     def opposite_direction(self):
+        print('switching directions')
         if self.curr_params[self.current] > self.prev_params[self.current]:
             self.curr_params[self.current] -= 2 * self.tick
             self.bounds_check()
@@ -101,50 +107,27 @@ class AgentSupervisor():
             self.curr_params['speed'] = 0
     
     @staticmethod
-    def gel(cur, prev, tolerance=1000):
-        if cur - prev > tolerance / 2:
+    def gel(cur, prev, tolerance=9999):
+        if cur - prev > tolerance:
             return 1
-        elif cur - prev < -tolerance / 2:
+        elif cur - prev < -tolerance:
             return -1
         else:
             return 0
 
     def update_params(self):
-        '''
-        A_X is being held constant at 0.
-        A_Y and A_Z/W are being manipulated.
-
-        - How should we change speed? It seems obvious that when one agent turns on speed,
-        it will get an advantage that goes away when all agents have speed on. I guess we
-        can start with it off, then turn it on like normal and see if it ends up turned off
-        again.
-        - When do we switch the parameters we optimize?
-            - After a set number of iterations?
-            - When a change in param doesnt result in a large
-              change in profit?
-        - Should only one agent change at a time?
-            - Yes
-            - Is previous profit the one from last tick, or the last tick
-            that I updated in?
-
-        Strategy:
-            if current profit > previous profit:
-                keep doing the thing you were doing
-            if current profit < previous profit
-                do the opposite of the thing you were doing
-            if current profit = previous profit:
-                the thing you just did had no effect,
-                change a different var in a random direction
-        '''
         if self.gel(self.current_profits, self.previous_profits) == 1:
+            print('profits have increased')
             if self.current != 'speed':
                 self.same_direction()
         elif self.gel(self.current_profits, self.previous_profits) == -1:
+            print('profits have decreased')
             if self.current != 'speed':
                 self.opposite_direction()
             else:
                 self.switch_speed()
         else:
+            print('profits stable')
             self.get_next_param()
             if self.current != 'speed':
                 self.same_direction()
@@ -152,6 +135,7 @@ class AgentSupervisor():
         # update previous
         self.previous_profits = self.current_profits
         self.prev_params = self.curr_params.copy()
+        # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
         self.profit_array.append(self.current_profits)
@@ -173,13 +157,13 @@ class AgentSupervisor():
 
     def print_status(self):
         print(self.config_num, 'profits:', self.agent.model.net_worth,
-            'speed': self.curr_params['speed'],
+            'speed', self.curr_params['speed'],
             'a_y:', round(self.curr_params['a_y'], 2),
             'a_z:', round(self.curr_params['a_z'], 2))
     
     @property
     def my_turn(self):
-        m = int(self.elapsed_turns / NUM_TURNS) % self.num_agents
+        m = int(self.elapsed_turns / NUM_MOVES) % self.num_agents
         if m == self.config_num:
             return True
         else:
@@ -203,8 +187,8 @@ class AgentSupervisor():
         if is_dynamic:
             self.print_status()
             df = pd.DataFrame(list(itertools.zip_longest(
-                self.y_array, self.z_array, self.profit_array, self.speed_array)),
-                columns=['A_Y', 'A_Z', 'Profit', 'Speed'])
-#            df.plot(legend=True)
-#            plt.savefig(f'app/data/agent{self.config_num}.png', dpi=150)
+                self.y_array, self.z_array, self.speed_array)),# self.profit_array)),
+                columns=['A_Y', 'A_Z', 'Speed'])#, 'Profit'])
+            df.plot(legend=True)
+            plt.savefig(f'app/data/agent{self.config_num}.png', dpi=150)
 
