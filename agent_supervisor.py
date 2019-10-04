@@ -17,7 +17,7 @@ import itertools
 INIT_Y = 0.5
 INIT_Z = 0.5
 TICK = 0.1
-NUM_MOVES = 6
+NUM_MOVES = 8
 MOVE_INTERVAL = 3.0
 
 class AgentSupervisor():
@@ -155,8 +155,8 @@ class AgentSupervisor():
         event = self.agent.event_cls('agent', message) 
         self.agent.model.user_slider_change(event)
 
-    def print_status(self):
-        print(self.config_num, 'profits:', self.agent.model.net_worth,
+    def print_status(self, msg=''):
+        print(msg, self.config_num, 'profits:', self.agent.model.net_worth,
             'speed', self.curr_params['speed'],
             'a_y:', round(self.curr_params['a_y'], 2),
             'a_z:', round(self.curr_params['a_z'], 2))
@@ -185,10 +185,13 @@ class AgentSupervisor():
 
     def at_end(self, is_dynamic):
         if is_dynamic:
-            self.print_status()
+            self.print_status('FINAL')
             df = pd.DataFrame(list(itertools.zip_longest(
-                self.y_array, self.z_array, self.speed_array)),# self.profit_array)),
-                columns=['A_Y', 'A_Z', 'Speed'])#, 'Profit'])
-            df.plot(legend=True)
+                self.y_array, self.z_array, self.speed_array, self.profit_array)),
+                columns=['Inventory', 'External', 'Speed', 'Profit'])
+            df.to_csv(f'app/data/agent{self.config_num}.csv')
+            #df['Speed'].plot(linestyle='None', marker='o')
+            df[['Inventory', 'External', 'Speed']].plot(marker='o', linestyle=':')
+            plt.legend()
             plt.savefig(f'app/data/agent{self.config_num}.png', dpi=150)
 

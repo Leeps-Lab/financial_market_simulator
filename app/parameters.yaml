@@ -1,4 +1,4 @@
-session_duration: 300
+session_duration: 1800
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
@@ -12,7 +12,7 @@ time_in_force: 2
 
 focal_market_format: CDA
 external_market_format: CDA
-focal_market_fba_interval: 1
+focal_market_fba_interval: 1.5
 external_market_fba_interval: 1
 
 lambdaJ: 0.5
@@ -25,7 +25,7 @@ k_signed_volume: 0.2
 a_x_multiplier: 5   # a_x <-> signed volume
 a_y_multiplier: 10   # a_y <-> inventory
 
-speed_unit_cost: 20000  # per second
+speed_unit_cost: 2000  # per second
 
 random_seed: 12338
 
