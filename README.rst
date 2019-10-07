@@ -239,12 +239,21 @@ To do this on the simulator:
     python3 dbreset.py
     nohup python3 simulate.py &
 
-Before doing the curl command, edit the params. Before doing that or resetting
+Before doing the simulate command, edit the params (app/parameters.yaml).
+
+Before doing that or resetting
 the database (dbreset.py), make sure no other sims are running:
 
 ::
 
     ps -a
+
+At the end, go into app/data. You will see files called <session_code>_agent<#>.csv.
+From financial_market_simulator:
+
+::
+
+    python3 analysis_tools/visualize.py app/data/<session_code>_agent1.csv app/data/<session_code>_agent2.csv app/data/<session_code>_agent2.csv
 
 If there is a python3 process running, a simulation is already running - don't
 run your own.
