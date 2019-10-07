@@ -136,11 +136,6 @@ class AgentSupervisor():
         # update previous
         self.previous_profits = self.current_profits
         self.prev_params = self.curr_params.copy()
-        # update arrays for graphing
-        self.y_array.append(self.curr_params['a_y'])
-        self.z_array.append(self.curr_params['a_z'])
-        self.profit_array.append(self.current_profits)
-        self.speed_array.append(self.curr_params['speed'])
 
     def send_message(self):
         message = {
@@ -175,11 +170,16 @@ class AgentSupervisor():
         if not is_dynamic:
             return
         self.get_profits()
-        if not self.my_turn:
-            return
-        self.update_params()
-        self.send_message()
-        self.print_status()
+        if self.my_turn:
+            self.update_params()
+            self.send_message()
+            self.print_status()
+
+        # update arrays for graphing
+        self.y_array.append(self.curr_params['a_y'])
+        self.z_array.append(self.curr_params['a_z'])
+        self.profit_array.append(self.current_profits)
+        self.speed_array.append(self.curr_params['speed'])
 
     def at_start(self, is_dynamic):
         self.send_message()
@@ -191,8 +191,4 @@ class AgentSupervisor():
                 self.y_array, self.z_array, self.speed_array, self.profit_array)),
                 columns=['Inventory', 'External', 'Speed', 'Profit'])
             df.to_csv(f'app/data/{self.session_code}_agent{self.config_num}.csv')
-            #df['Speed'].plot(linestyle='None', marker='o')
-            df[['Inventory', 'External', 'Speed']].plot(marker='o', linestyle=':')
-            plt.legend()
-            plt.savefig(f'app/data/{self.session_code}_agent{self.config_num}.png', dpi=150)
 
