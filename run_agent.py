@@ -75,7 +75,7 @@ def main(account_id):
     ############################################################################
     # This is code for optimizing agents' slider params during simulations.
     # If you want to run simulations normally, MAKE SURE THIS CODE DOES NOT RUN
-    supervisor = AgentSupervisor(options.config_num, agent)
+    supervisor = AgentSupervisor(options.session_code, options.config_num, agent)
     supervisor.at_start(isinstance(agent, DynamicAgent))
     looper = task.LoopingCall(supervisor.on_tick, isinstance(agent, DynamicAgent))
     looper.clock = reactor

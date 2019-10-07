@@ -16,12 +16,13 @@ import itertools
 
 INIT_Y = 0.5
 INIT_Z = 0.5
-TICK = 0.1
+TICK = 0.05
 NUM_MOVES = 8
 MOVE_INTERVAL = 3.0
 
 class AgentSupervisor():
-    def __init__(self, config_num, agent):
+    def __init__(self, session_code, config_num, agent):
+        self.session_code = session_code
         self.config_num = config_num
         self.agent = agent
         self.num_agents = get_interactive_agent_count(
@@ -189,9 +190,9 @@ class AgentSupervisor():
             df = pd.DataFrame(list(itertools.zip_longest(
                 self.y_array, self.z_array, self.speed_array, self.profit_array)),
                 columns=['Inventory', 'External', 'Speed', 'Profit'])
-            df.to_csv(f'app/data/agent{self.config_num}.csv')
+            df.to_csv(f'app/data/{self.session_code}_agent{self.config_num}.csv')
             #df['Speed'].plot(linestyle='None', marker='o')
             df[['Inventory', 'External', 'Speed']].plot(marker='o', linestyle=':')
             plt.legend()
-            plt.savefig(f'app/data/agent{self.config_num}.png', dpi=150)
+            plt.savefig(f'app/data/{self.session_code}_agent{self.config_num}.png', dpi=150)
 
