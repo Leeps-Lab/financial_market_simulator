@@ -1,4 +1,4 @@
-session_duration: 10800
+session_duration: 14400
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
@@ -10,7 +10,7 @@ exogenous_order_price_noise_std: 30000
 bid_ask_offset: 20000
 time_in_force: 2
 
-focal_market_format: FBA
+focal_market_format: CDA
 external_market_format: CDA
 focal_market_fba_interval: 1.5
 external_market_fba_interval: 1

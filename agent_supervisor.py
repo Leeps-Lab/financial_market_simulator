@@ -72,7 +72,6 @@ class AgentSupervisor():
             self.bounds_check()
 
     def same_direction(self):
-        print('moving in same direction')
         if self.curr_params[self.current] > self.prev_params[self.current]:
             self.curr_params[self.current] += self.tick
             self.bounds_check()
@@ -83,7 +82,6 @@ class AgentSupervisor():
             self.random_direction()
 
     def opposite_direction(self):
-        print('switching directions')
         if self.curr_params[self.current] > self.prev_params[self.current]:
             self.curr_params[self.current] -= 2 * self.tick
             self.bounds_check()
@@ -116,19 +114,24 @@ class AgentSupervisor():
         else:
             return 0
 
+    # NOTE: WIP
+    def compute_inventory_param(b):
+        a = 0.01
+        t = self.elapsed_turns
+        b = 100
+        tau = get_simulation_parameters()['session_duration']
+
+
     def update_params(self):
         if self.gel(self.current_profits, self.previous_profits) == 1:
-            print('profits have increased')
             if self.current != 'speed':
                 self.same_direction()
         elif self.gel(self.current_profits, self.previous_profits) == -1:
-            print('profits have decreased')
             if self.current != 'speed':
                 self.opposite_direction()
             else:
                 self.switch_speed()
         else:
-            print('profits stable')
             self.get_next_param()
             if self.current != 'speed':
                 self.same_direction()
@@ -138,18 +141,24 @@ class AgentSupervisor():
         self.prev_params = self.curr_params.copy()
 
     def send_message(self):
-        message = {
-            'type': 'slider',
-            'subsession_id': self.subsession_id,
-            'market_id': self.market_id,
-            'a_x': self.curr_params['a_x'],
-            'a_y': self.curr_params['a_y'],
-            'a_z': self.curr_params['a_z'],
-            'speed': self.curr_params['speed']
-        }
-        message = IncomingMessage(message) 
-        event = self.agent.event_cls('agent', message) 
-        self.agent.model.user_slider_change(event)
+        if self.current != 'speed':
+            message = {
+                'type': 'slider',
+                'subsession_id': self.subsession_id,
+                'market_id': self.market_id,
+                'a_x': self.curr_params['a_x'],
+                'a_y': self.curr_params['a_y'],
+                'a_z': self.curr_params['a_z'],
+            }
+            message = IncomingMessage(message) 
+            event = self.agent.event_cls('agent', message) 
+            self.agent.model.user_slider_change(event)
+        else:
+            s = self.agent.model.technology_subscription
+            if self.curr_params['speed'] == 1 and not s.is_active:
+                s.activate()
+            elif self.curr_params['speed'] == 0 and s.is_active:
+                s.deactivate()
 
     def print_status(self, msg=''):
         print(msg, self.config_num, 'profits:', self.agent.model.net_worth,
@@ -173,13 +182,15 @@ class AgentSupervisor():
         if self.my_turn:
             self.update_params()
             self.send_message()
-            self.print_status()
+        #    self.print_status()
 
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
         self.profit_array.append(self.current_profits)
         self.speed_array.append(self.curr_params['speed'])
+
+        print(self.curr_params['speed'], self.agent.model.technology_subscription.is_active)
 
     def at_start(self, is_dynamic):
         self.send_message()
