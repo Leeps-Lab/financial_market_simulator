@@ -237,8 +237,7 @@ To do this on the simulator:
     ssh <username>@128.114.96.151
     cd /shared/financial_market_simulator
     python3 dbreset.py
-    nohup python3 run_web_api &
-    curl localhost:5000/v1/simulate
+    nohup python3 simulate.py &
 
 Before doing the curl command, edit the params. Before doing that or resetting
 the database (dbreset.py), make sure no other sims are running:
