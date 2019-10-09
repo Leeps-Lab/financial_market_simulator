@@ -5,9 +5,10 @@ from matplotlib import style
 style.use('./analysis_tools/elip12.mplstyle')
 import matplotlib.pyplot as plt   
 import configargparse
+from utility import get_simulation_parameters
 
 TEXT = '#848484'
-plt.rcParams.update({'font.size': 8})
+plt.rcParams.update({'font.size': 6})
 A2_color = '#d22b10'
 A1_color = '#eb860d'
 A0_color = '#e0cc05'
@@ -23,14 +24,38 @@ def plot(a0, a1, a2, session_code):
     ax1.plot(a1['Profit'], label='A1', linewidth=.75, color=A1_color)
     ax1.plot(a2['Profit'], label='A2', linewidth=.75, color=A2_color)
     ax1.set_ylabel('Profit', color=TEXT)
-    ax1.set_title('Agent Optimization Parameters')
-    ax1.legend()
+    title = session_code.split('/')[-1]
+    ax1.set_title(f'{title} Agent Optimization Parameters')
+    ax1.legend(loc='upper left', bbox_to_anchor=(-0.255, 0.75))
 
     # agent 0
     ax2.plot(a0['Inventory'], zorder=3, linewidth=.5, color=inventory_color)
     ax2.plot(a0['External'], zorder=3, linewidth=.5, color=external_color)
     ax2.plot(a0['Speed'], zorder=2, linewidth=.5, color=speed_color, alpha=.7)
     ax2.set_ylabel('Agent 0 (A0)', color=A0_color)
+    params = get_simulation_parameters()
+    ax2.text(-1550, -2.1, '\n'.join([
+        'Parameters:',
+        f'- duration: {params["session_duration"]}',
+        f'- fund noise $\mu$: {params["fundamental_value_noise_mean"]}',
+        f'- fund noise $\sigma$: {params["fundamental_value_noise_std"]}',
+        f'- exo noise $\mu$: {params["exogenous_order_price_noise_mean"]}',
+        f'- exo noise $\sigma$: {params["exogenous_order_price_noise_std"]}',
+        f'- init price: {params["initial_price"]}',
+        f'- time in force: {params["time_in_force"]}',
+        f'- bid-ask offset: {params["bid_ask_offset"]}',
+        f'- focal format: {params["focal_market_format"]}',
+        f'- FBA interval: {params["focal_market_fba_interval"] if params["focal_market_format"] == "FBA" else "N/A"}',
+        f'- $\lambda$ J: {params["lambdaJ"]}',
+        f'- $\lambda$ I: {params["lambdaI"]}',
+        f'- tax rate: {params["tax_rate"]}',
+        f'- k ref price: {params["k_reference_price"]}',
+        f'- k signed vol: {params["k_signed_volume"]}',
+        f'- a_x mult: {params["a_x_multiplier"]}',
+        f'- a_y mult: {params["a_y_multiplier"]}',
+        f'- speed cost: {params["speed_unit_cost"]}']),
+        fontsize=5, 
+    )
     # agent 1
     ax3.plot(a1['Inventory'], zorder=3, linewidth=.5, color=inventory_color)
     ax3.plot(a1['External'], zorder=3, linewidth=.5, color=external_color)
@@ -44,10 +69,10 @@ def plot(a0, a1, a2, session_code):
     ax4.plot(a2['Speed'], zorder=2, linewidth=.5, color=speed_color, alpha=.7,
         label='Speed')
     ax4.set_ylabel('Agent 2 (A2)', color=A2_color)
-    ax4.legend(loc='upper center', bbox_to_anchor=(0.26, -0.05), ncol=3)
-    ax4.tick_params(labelbottom=False)
+    ax4.legend(loc='upper center', bbox_to_anchor=(-0.175, 3.15))
+    #ax4.tick_params(labelbottom=False)
     
-    fig.tight_layout()
+    plt.subplots_adjust(left=0.20, right=0.98, top=0.95, bottom=0.05)
     plt.savefig(f'{session_code}_agents.png', dpi=350)
 
 def read_csvs(a0, a1, a2):
