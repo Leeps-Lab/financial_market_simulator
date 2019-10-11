@@ -34,7 +34,7 @@ def plot(a0, a1, a2, session_code):
     ax2.plot(a0['Speed'], zorder=2, linewidth=.5, color=speed_color, alpha=.7)
     ax2.set_ylabel('Agent 0 (A0)', color=A0_color)
     params = get_simulation_parameters()
-    ax2.text(-5.75, -2.8, '\n'.join([
+    ax2.text(-0.25, -2.6, '\n'.join([
         'Parameters:',
         f'- duration: {params["session_duration"]}',
         f'- fund noise $\mu$: {params["fundamental_value_noise_mean"]}',
@@ -61,7 +61,8 @@ def plot(a0, a1, a2, session_code):
         f'- num moves: {params["num_moves"]}',
         f'- move interval: {params["move_interval"]}',
         ]),
-        fontsize=5, 
+        fontsize=5, transform=ax2.transAxes, horizontalalignment='left',
+        verticalalignment='bottom'
     )
     # agent 1
     ax3.plot(a1['Inventory'], zorder=3, linewidth=.5, color=inventory_color)
