@@ -1,10 +1,10 @@
-# This class tunes an agent's parameters in order to optimize profits. The
-# on_tick method gets called every 3 seconds for each agent.
+# agent_supervisor.py
+# Author: Eli Pandolfo <epandolf@ucsc.edu>
 
-from high_frequency_trading.hft.incoming_message import IncomingMessage
 import random
 import time
-from utility import get_interactive_agent_count, get_simulation_parameters
+import itertools
+import redis
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -12,99 +12,138 @@ matplotlib.use('Agg')
 from matplotlib import style
 style.use('./analysis_tools/elip12.mplstyle')
 import matplotlib.pyplot as plt   
-import itertools
+from high_frequency_trading.hft.incoming_message import IncomingMessage
+from utility import get_interactive_agent_count, get_simulation_parameters
 
-INIT_Y = 0.5
-INIT_Z = 0.5
-TICK = 0.05
-NUM_MOVES = 8
-MOVE_INTERVAL = 3.0
+''' 
+DESCRIPTION
+    This file defines a class called AgentSupervisor.
+    An AgentSupervisor acts as a puppetmaster for a DynamicAgent, and attempts
+    to optimize the agent's optimizable parameters (explained below) in order
+    to maximize that agent's profit.
+    One AgentSupervisor instance is invoked for each DynamicAgent per
+    simulation. The instantiation occurs in run_agent.py.
 
+    Note: when I say agent in the following sections, I am conflating
+    an agent with an AgentSupervisor, since they can be thought of
+    as interchangable in that they combine to become a sort of single supervised
+    agent entity.
+
+    A simulation is broken up into turns. Agents alternate turns. So,
+    agent0 takes a turn, then agent1 takes a turn, then agent2 takes a turn,
+    then agent0 takes a turn, and so on. ALL AGENTS ARE SUBMITTING ORDERS AT
+    ALL TIMES, NOT JUST ON THEIR TURN. Turns are broken up into moves.
+    Relevant parameters are num_moves and move_interval. So, if num_moves is
+    8, and move_interval is 3, each agent on its turn
+    makes 1 move every 3 seconds for 8 moves. Then their turn is over, and the
+    next agent takes 8 3-second moves.
+
+    "Taking a move" means adjusting a single parameter available for
+    optimization. Right now, those parameters are
+        - sensitivity to inventory: A_Y, a value in range [0,1]
+        - sensitivity to external market: A_Z, a value in range [0,1]
+        - speed: on/off (1/0)
+    Note that sensetivity to inventory is scaled by a multiplier, specified
+    in parameters.yaml.
+
+    An agent may only change one parameter per move. Speed is a boolean,
+    so it gets toggled from off to on or vice versa. A_Y and A_Z are continuous
+    values, but they are discretized into ranges with interval 'step'. Step
+    is defined in parameters.yaml. So, if step=0.05, on an agent's turn, it could
+    turn speed on, then change A_Y from 0.50 to 0.55, then change A_Y from 0.55
+    to 0.60, then change A_Z from 0.50 to 0.45, etc.
+
+    When switching to a new parameter, the order is always
+        A_Y -> A_Z -> speed -> A_Y... This is arbitrary.
+
+    A brief description of strategy:
+        if your profit immediately before this move is greater than your profit
+        immediately before the previous move (not necessarily your previous move)
+        by some threshhold:
+            whatever you changed previously was beneficial, so keep changing it
+            in the same direction
+        if your profit immediately before this move is less than your profit
+        immediately before the previous move (not necessarily your previous move)
+        by some threshhold:
+            whatever you changed previously was detrimental, so change it in
+            the opposite direction
+        if your profit immediately before this move is about the same as your profit
+        immediately before the previous move (not necessarily your previous move)
+        by some threshhold:
+            whatever you changed previously had little effect, so switch
+            parameters (eg if you were changing A_Y, switch to A_Z) and update
+            the new parameter.
+
+SYMMETRIC MODE
+    One modification of this is symmetric mode. You can define it to be on
+    in parameters.yaml (symmetric: true).
+    In this mode, at the beginning of an agent's turn, it adjusts its parameters
+    to match the parameters of the agent with the highest profits. We use redis
+    to accomplish this, because
+        (1) it's faster than writing to a file,
+        (2) it's easier than using websockets,
+        (3) the simulation already uses it so no new dependencies are needed.
+    
+    This is exciting because now that we have this feature, we can easily extend
+    it so that agents can analyze each other and learn from each other.
+
+TERMINOLOGY
+    agent:  a DynamicAgent object
+    tick:   every <move_interval> seconds, a tick occurs. On a tick, each agent
+            stores its current profits and params in redis, and, if it is that
+            agent's turn, takes a move.
+    move:   an opportunity for a single agent to adjust a single parameter.
+    turn:   <num_moves> consecutive moves makes up an agent's turn. They spend
+            their turn attempting to optimize their params to maximize profit.
+    profit: an agent's net worth, calculated at the most recent tick.
+    A_Y:    sensitivity to inventory, float in [0,1]
+    A_Z:    sensitivity to external, float in [0,1]
+    speed:  toggle whether agent is currently subscribed to speed technology
+    step:   the amount by which A_Y or A_Z can change on a move
+'''
 class AgentSupervisor():
     def __init__(self, session_code, config_num, agent):
-        self.session_code = session_code
-        self.config_num = config_num
-        self.agent = agent
-        self.num_agents = get_interactive_agent_count(
-            get_simulation_parameters()['agent_state_configs'])
-        self.elapsed_turns = -1
-        self.market_id = agent.model.market_id
-        self.subsession_id = agent.model.subsession_id
-        self.prev_params = {
+        # agent metadata, does not change during simulation
+        self.session_code = session_code # used for naming files
+        self.config_num = config_num # this agent's id in {0,1,2}
+        self.agent = agent # this agent object (isntanceof DynamicAgent)
+        self.sp = get_simulation_parameters() # sim params (from parameters.yaml)
+        self.num_agents = get_interactive_agent_count( # num DynamicAgents in sim
+            self.sp['agent_state_configs'])
+        self.market_id = agent.model.market_id # necessary for sending messages
+        self.subsession_id = agent.model.subsession_id # ""
+        self.step = self.sp['step'] # step size, described above
+        if self.sp['symmetric']: # redis connection
+            self.r = redis.Redis(
+                host='localhost',
+                port=6379,
+            )
+        else:
+            self.r = None
+        
+        # agent optimization data, changes during simulation
+        self.elapsed_ticks = -1 # number of elapsed ticks 
+        self.prev_params = { # params before most recent update
             'a_x': 0.0,
-            'a_y': INIT_Y,
-            'a_z': INIT_Z,
+            'a_y': self.sp['init_y'],
+            'a_z': self.sp['init_z'],
             'speed': 0,
         }
-        self.curr_params = {
+        self.curr_params = { # current parameters
             'a_x': 0.0,
-            'a_y': INIT_Y,
-            'a_z': INIT_Z, 
+            'a_y': self.sp['init_y'],
+            'a_z': self.sp['init_z'], 
             'speed': 0,
         }
-        self.current = 'a_y'
-        self.current_profits = 0.0
-        self.previous_profits = 0.0
-        self.tick = TICK
-        self.y_array = []
+        self.current = 'a_y' # current parameter being adjusted
+        self.current_profits = 0.0 # current profits
+        self.previous_profits = 0.0 # profits before most recent tick
+        self.y_array = [] # appended to each tick, used for creating graphs
         self.z_array = []
         self.profit_array = []
         self.speed_array = []
 
-    def get_profits(self):
-        self.current_profits = self.agent.model.net_worth
-        if self.curr_params['speed'] == 1:
-            penalty = get_simulation_parameters()['speed_unit_cost'] * MOVE_INTERVAL
-            self.current_profits -= penalty
-
-    def bounds_check(self):
-        if self.curr_params[self.current] > 1.0:
-            self.curr_params[self.current] = 1.0
-        elif self.curr_params[self.current] < 0.0:
-            self.curr_params[self.current] = 0.0
-
-    def random_direction(self):
-        if random.random() < 0.5:
-            self.curr_params[self.current] += self.tick
-            self.bounds_check()
-        else:
-            self.curr_params[self.current] -= self.tick
-            self.bounds_check()
-
-    def same_direction(self):
-        if self.curr_params[self.current] > self.prev_params[self.current]:
-            self.curr_params[self.current] += self.tick
-            self.bounds_check()
-        elif self.curr_params[self.current] < self.prev_params[self.current]:
-            self.curr_params[self.current] -= self.tick
-            self.bounds_check()
-        else:
-            self.random_direction()
-
-    def opposite_direction(self):
-        if self.curr_params[self.current] > self.prev_params[self.current]:
-            self.curr_params[self.current] -= 2 * self.tick
-            self.bounds_check()
-        elif self.curr_params[self.current] < self.prev_params[self.current]:
-            self.curr_params[self.current] += 2 * self.tick
-            self.bounds_check()
-        else:
-            self.random_direction()
-
-    def get_next_param(self): # add speed later
-        if self.current == 'a_y':
-            self.current = 'a_z'
-        elif self.current == 'a_z':
-            self.current = 'speed'
-        elif self.current == 'speed':
-            self.current = 'a_y'
-
-    def switch_speed(self):
-        if self.curr_params['speed'] == 0:
-            self.curr_params['speed'] = 1
-        elif self.curr_params['speed'] == 1:
-            self.curr_params['speed'] = 0
-    
+    # compares cur and prev given tolerance
     @staticmethod
     def gel(cur, prev, tolerance=9999):
         if cur - prev > tolerance:
@@ -113,15 +152,127 @@ class AgentSupervisor():
             return -1
         else:
             return 0
+    
+    # switches self.current_param to a the next param in the cycle
+    def get_next_param(self): # add speed later
+        if self.current == 'a_y':
+            self.current = 'a_z'
+        elif self.current == 'a_z':
+            self.current = 'speed'
+        elif self.current == 'speed':
+            self.current = 'a_y'
+    
+    # ensures params cannot go below 0 or above 1
+    def bounds_check(self):
+        if self.curr_params[self.current] > 1.0:
+            self.curr_params[self.current] = 1.0
+        elif self.curr_params[self.current] < 0.0:
+            self.curr_params[self.current] = 0.0
 
+    # adjust current parameter in random direction by 1 step
+    def random_direction(self):
+        if random.random() < 0.5:
+            self.curr_params[self.current] += self.step
+            self.bounds_check()
+        else:
+            self.curr_params[self.current] -= self.step
+            self.bounds_check()
+
+    # adjusts parameter in same direction it was adusted previously, by 1 tick
+    def same_direction(self):
+        if self.curr_params[self.current] > self.prev_params[self.current]:
+            self.curr_params[self.current] += self.step
+            self.bounds_check()
+        elif self.curr_params[self.current] < self.prev_params[self.current]:
+            self.curr_params[self.current] -= self.step
+            self.bounds_check()
+        else:
+            self.random_direction()
+
+    # adjust parameter in opposite direction it was ajusted previously, by 2 ticks
+    def opposite_direction(self):
+        if self.curr_params[self.current] > self.prev_params[self.current]:
+            self.curr_params[self.current] -= 2 * self.step
+            self.bounds_check()
+        elif self.curr_params[self.current] < self.prev_params[self.current]:
+            self.curr_params[self.current] += 2 * self.step
+            self.bounds_check()
+        else:
+            self.random_direction()
+
+    # toggles speed
+    def switch_speed(self):
+        if self.curr_params['speed'] == 0:
+            self.curr_params['speed'] = 1
+        elif self.curr_params['speed'] == 1:
+            self.curr_params['speed'] = 0
+    
     # NOTE: WIP
     def compute_inventory_param(b):
         a = 0.01
-        t = self.elapsed_turns
+        t = self.elapsed_ticks
         b = 100
-        tau = get_simulation_parameters()['session_duration']
+        tau = self.sp['session_duration']
+        pass
 
+    # prints current profit and params
+    def print_status(self, msg=''):
+        print(msg, self.config_num, 'profits:', self.agent.model.net_worth,
+            'speed', self.curr_params['speed'],
+            'a_y:', round(self.curr_params['a_y'], 2),
+            'a_z:', round(self.curr_params['a_z'], 2))
+    
+    # whether or not this tick falls on my turn
+    @property
+    def my_turn(self):
+        m = int(self.elapsed_ticks / self.sp['num_moves']) % self.num_agents
+        if m == self.config_num:
+            return True
+        else:
+            return False
+    # whether or not this tick falls on the first move of my turn
+    @property
+    def first_move(self):
+        m = float(self.elapsed_ticks / self.sp['num_moves']) % self.num_agents
+        if m == self.config_num:
+            return True
+        else:
+            return False
 
+    # called every tick
+    # get current net worth and store it in self.current_profits
+    def get_profits(self):
+        self.current_profits = self.agent.model.net_worth
+        if self.curr_params['speed'] == 1:
+            penalty = self.sp['speed_unit_cost'] * self.sp['move_interval']
+            self.current_profits -= penalty
+    
+    # called every tick. agent stores its current profit and parameters in redis
+    def store_profit_and_params(self):
+        self.r.set(f'{self.config_num}_profit', str(self.current_profits))
+        self.r.set(f'{self.config_num}_params', str(self.curr_params))
+    
+    # this method gets called when it becomes an agent's turn
+    # it updates its params to match the agent with the highest profit
+    def update_symmetric(self):
+        other_agents = ['0', '1', '2']
+        other_agents.remove(str(self.config_num))
+        other0_profit = self.r.get(f'{other_agents[0]}_profit')
+        other1_profit = self.r.get(f'{other_agents[1]}_profit')
+        if not (other0_profit and other1_profit): # possible on the first turn
+            return
+        other0_profit = float(other0_profit)
+        other1_profit = float(other1_profit)
+        if other0_profit > other1_profit:
+            del other_agents[1]
+        else:
+            del other_agents[0]
+            other0_profit = other1_profit
+        if other0_profit > self.current_profits:
+            param_string = self.r.get(f'{other_agents[0]}_params')
+            self.curr_params = eval(param_string)
+    
+    # updates A_Y or A_Z given current profits
     def update_params(self):
         if self.gel(self.current_profits, self.previous_profits) == 1:
             if self.current != 'speed':
@@ -140,6 +291,7 @@ class AgentSupervisor():
         self.previous_profits = self.current_profits
         self.prev_params = self.curr_params.copy()
 
+    # send message to DynamicAgent model to update params
     def send_message(self):
         if self.current != 'speed':
             message = {
@@ -160,41 +312,32 @@ class AgentSupervisor():
             elif self.curr_params['speed'] == 0 and s.is_active:
                 s.deactivate()
 
-    def print_status(self, msg=''):
-        print(msg, self.config_num, 'profits:', self.agent.model.net_worth,
-            'speed', self.curr_params['speed'],
-            'a_y:', round(self.curr_params['a_y'], 2),
-            'a_z:', round(self.curr_params['a_z'], 2))
-    
-    @property
-    def my_turn(self):
-        m = int(self.elapsed_turns / NUM_MOVES) % self.num_agents
-        if m == self.config_num:
-            return True
-        else:
-            return False
-
+    # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
-        self.elapsed_turns += 1
+        self.elapsed_ticks += 1
         if not is_dynamic:
             return
         self.get_profits()
+        if self.r:
+            self.store_profit_and_params()
         if self.my_turn:
+            if self.first_move and self.r:
+                self.update_symmetric()
             self.update_params()
             self.send_message()
-        #    self.print_status()
-
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
         self.profit_array.append(self.current_profits)
         self.speed_array.append(self.curr_params['speed'])
 
-        print(self.curr_params['speed'], self.agent.model.technology_subscription.is_active)
-
+    # initializes agent params at start of sim
     def at_start(self, is_dynamic):
         self.send_message()
+        if self.r:
+            self.store_profit_and_params()
 
+    # stores csv files at end of sim
     def at_end(self, is_dynamic):
         if is_dynamic:
             self.print_status('FINAL')

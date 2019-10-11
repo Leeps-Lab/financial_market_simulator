@@ -29,6 +29,12 @@ default_simulation_parameters = {
     'random_seed': None,
     'fundamental_values': [],
     'agent_state_configs': [],
+    'init_y': 0.5,
+    'init_z': 0.5,
+    'step': 0.05,
+    'symmetric': False,
+    'num_moves': 8,
+    'move_interval': 3.0,
 }
 
 logs_dir = './app/logs/'

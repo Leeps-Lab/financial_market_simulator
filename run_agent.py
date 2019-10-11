@@ -79,7 +79,7 @@ def main(account_id):
     supervisor.at_start(isinstance(agent, DynamicAgent))
     looper = task.LoopingCall(supervisor.on_tick, isinstance(agent, DynamicAgent))
     looper.clock = reactor
-    looper.start(3.0, now=False)
+    looper.start(conf['move_interval'], now=False)
     d.addCallback(lambda _ : looper.stop())
     d.addCallback(lambda _ : supervisor.at_end(isinstance(agent, DynamicAgent)))
     ############################################################################
