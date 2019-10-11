@@ -34,7 +34,7 @@ def plot(a0, a1, a2, session_code):
     ax2.plot(a0['Speed'], zorder=2, linewidth=.5, color=speed_color, alpha=.7)
     ax2.set_ylabel('Agent 0 (A0)', color=A0_color)
     params = get_simulation_parameters()
-    ax2.text(-1550, -2.1, '\n'.join([
+    ax2.text(-5.75, -2.8, '\n'.join([
         'Parameters:',
         f'- duration: {params["session_duration"]}',
         f'- fund noise $\mu$: {params["fundamental_value_noise_mean"]}',
@@ -53,7 +53,14 @@ def plot(a0, a1, a2, session_code):
         f'- k signed vol: {params["k_signed_volume"]}',
         f'- a_x mult: {params["a_x_multiplier"]}',
         f'- a_y mult: {params["a_y_multiplier"]}',
-        f'- speed cost: {params["speed_unit_cost"]}']),
+        f'- speed cost: {params["speed_unit_cost"]}',
+        f'- init y: {params["init_y"]}',
+        f'- init z: {params["init_z"]}',
+        f'- step: {params["step"]}',
+        f'- symmetric: {params["symmetric"]}',
+        f'- num moves: {params["num_moves"]}',
+        f'- move interval: {params["move_interval"]}',
+        ]),
         fontsize=5, 
     )
     # agent 1
