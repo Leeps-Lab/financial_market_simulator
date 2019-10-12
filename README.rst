@@ -248,15 +248,18 @@ the database (dbreset.py), make sure no other sims are running:
 
     ps -a
 
+If there is a python3 process running, a simulation is already running - don't
+run your own.
 At the end, go into app/data. You will see files called <session_code>_agent<#>.csv.
 From financial_market_simulator:
 
 ::
 
-    python3 analysis_tools/visualize.py app/data/<session_code>_agent1.csv app/data/<session_code>_agent2.csv app/data/<session_code>_agent2.csv
+    python3 visualize.py app/data/<session_code>_agent1.csv app/data/<session_code>_agent2.csv app/data/<session_code>_agent2.csv
 
-If there is a python3 process running, a simulation is already running - don't
-run your own.
+Note that you can do this on your own computer also. If you do, make sure redis
+is running. To do symmetric mode, make sure `symmetric` is `true` in
+app/parameters.yaml.
 
 .. _link: https://www.postgresql.org/download/
 .. _instructions: https://github.com/Leeps-Lab/exchange_server/blob/master/README.rst
