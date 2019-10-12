@@ -65,7 +65,7 @@ def run_elo_simulation(session_code):
     one for markets, one for agents
     """
     logging.basicConfig(
-        level=logging.DEBUG if options.debug else logging.INFO,
+        level=logging.ERROR,
         filename=settings.logs_dir + 'session_%s_manager.log' % (session_code),
         format="[%(asctime)s.%(msecs)03d] %(levelname)s \
         [%(name)s.%(funcName)s:%(lineno)d] %(message)s",

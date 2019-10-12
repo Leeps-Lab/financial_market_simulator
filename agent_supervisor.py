@@ -249,16 +249,18 @@ class AgentSupervisor():
     
     # called every tick. agent stores its current profit and parameters in redis
     def store_profit_and_params(self):
-        self.r.set(f'{self.config_num}_profit', str(self.current_profits))
-        self.r.set(f'{self.config_num}_params', str(self.curr_params))
+        self.r.set(f'{self.session_code}_{self.config_num}_profit',
+            str(self.current_profits))
+        self.r.set(f'{self.session_code}_{self.config_num}_params',
+            str(self.curr_params))
     
     # this method gets called when it becomes an agent's turn
     # it updates its params to match the agent with the highest profit
     def update_symmetric(self):
         other_agents = ['0', '1', '2']
         other_agents.remove(str(self.config_num))
-        other0_profit = self.r.get(f'{other_agents[0]}_profit')
-        other1_profit = self.r.get(f'{other_agents[1]}_profit')
+        other0_profit = self.r.get(f'{self.session_code}_{other_agents[0]}_profit')
+        other1_profit = self.r.get(f'{self.session_code}_{other_agents[1]}_profit')
         if not (other0_profit and other1_profit): # possible on the first turn
             return
         other0_profit = float(other0_profit)
@@ -269,7 +271,7 @@ class AgentSupervisor():
             del other_agents[0]
             other0_profit = other1_profit
         if other0_profit > self.current_profits:
-            param_string = self.r.get(f'{other_agents[0]}_params')
+            param_string = self.r.get(f'{self.session_code}_{other_agents[0]}_params')
             self.curr_params = eval(param_string)
     
     # updates A_Y or A_Z given current profits
@@ -312,6 +314,19 @@ class AgentSupervisor():
             elif self.curr_params['speed'] == 0 and s.is_active:
                 s.deactivate()
 
+    def trigger_tax(self):
+        self.agent.model.inventory.liquidify(
+            self.agent.model.market_facts['reference_price'], 
+            discount_rate=self.agent.model.market_facts['tax_rate'])
+        self.agent.model.cash += self.agent.model.inventory.cash
+        tax_paid = self.agent.model.inventory.cost
+        self.agent.model.cost += tax_paid
+        self.agent.model.tax_paid += tax_paid
+        self.agent.model.net_worth =  self.agent.model.net_worth\
+            - self.agent.model.cost
+        self.current_profits = self.agent.model.net_worth
+        
+    
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
         self.elapsed_ticks += 1
@@ -320,11 +335,12 @@ class AgentSupervisor():
         self.get_profits()
         if self.r:
             self.store_profit_and_params()
-        if self.my_turn:
-            if self.first_move and self.r:
+            if self.elapsed_ticks % 2 == 1:
                 self.update_symmetric()
+        if self.my_turn:
             self.update_params()
             self.send_message()
+        self.trigger_tax()
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
