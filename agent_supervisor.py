@@ -347,7 +347,7 @@ class AgentSupervisor():
         self.profit_array.append(self.current_profits)
         self.speed_array.append(self.curr_params['speed'])
 
-        if self.elapsed_ticks % 101 == 0:
+        if self.elapsed_ticks % 11 == 0:
             df = pd.DataFrame(list(itertools.zip_longest(
                 self.y_array, self.z_array, self.speed_array, self.profit_array)),
                 columns=['Inventory', 'External', 'Speed', 'Profit'])
