@@ -227,38 +227,37 @@ Optimizer:
 =======
 
 Make sure you are on this branch (ep-cont). Edit your parameters as normal in
-app/parameters.yaml. Edit the optimizer params at the top of agent_supervisor.py.
-Run your simulation as normal. At the end, graphs will get saved in app/data/.
+app/parameters.yaml. At the end, graphs will get saved in app/data/.
 
-To do this on the simulator:
+To do this on the socs-stats server:
 
 ::
 
-    ssh <username>@128.114.96.151
-    cd /shared/financial_market_simulator
+    ssh <username>@socs-stats.ucsc.edu
+    cd /data/KLAB
+    source vv_fms/bin/activate
+    cd financial_market_simulator
+    ***EDIT APP/PARAMETERS.YAML APPROPRIATELY***
     python3 dbreset.py
     nohup python3 simulate.py &
 
-Before doing the simulate command, edit the params (app/parameters.yaml).
-
-Before doing that or resetting
-the database (dbreset.py), make sure no other sims are running:
+At the end, go into app/data/ and figure out the session code for the
+simulation you just ran. If app/data has a lot of files, organize with
 
 ::
+    
+    ls -lht
 
-    ps -a
-
-If there is a python3 process running, a simulation is already running - don't
-run your own.
-At the end, go into app/data. You will see files called <session_code>_agent<#>.csv.
-From financial_market_simulator:
+The files at the top are the most recent; the first 8 characters are the session
+code. Now, go back to financial_market_simulator:
 
 ::
-
-    python3 visualize.py app/data/<session_code>_agent1.csv app/data/<session_code>_agent2.csv app/data/<session_code>_agent2.csv
+    
+    cd ../..
+    python3 visualize.py <session_code>
 
 Note that you can do this on your own computer also. If you do, make sure redis
-is running. To do symmetric mode, make sure `symmetric` is `true` in
+and postgres are running. To do symmetric mode, make sure `symmetric` is `true` in
 app/parameters.yaml.
 
 .. _link: https://www.postgresql.org/download/
