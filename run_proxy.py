@@ -42,7 +42,7 @@ def main(market_proxy_cls: BaseMarketProxy):
 
 if __name__ == '__main__':
     log.basicConfig(
-        level=log.DEBUG if options.debug else log.INFO,
+        level=log.ERROR,
         filename=settings.logs_dir + 'session_%s_market_%s.log' % (
             options.session_code, options.tag),
         format="[%(asctime)s.%(msecs)03d] %(levelname)s \
