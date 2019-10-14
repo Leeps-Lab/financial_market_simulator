@@ -6,6 +6,8 @@ style.use('./analysis_tools/elip12.mplstyle')
 import matplotlib.pyplot as plt   
 import configargparse
 from utility import get_simulation_parameters
+import settings
+from os import listdir
 
 TEXT = '#848484'
 plt.rcParams.update({'font.size': 6})
@@ -89,25 +91,37 @@ def read_csvs(a0, a1, a2):
     a2 = pd.read_csv(a2)
     return a0, a1, a2
 
-def parse_session_code(csv):
-    return csv.split('_')[0]
 
-def check_valid(options):
-    session_code = parse_session_code(options.csv[0])
-    expected = [f'{session_code}_agent{n}.csv' for n in range(3)]
-    if set(options.csv) != set(expected):
-        print('Error: all csvs must have the same session code, and each',
-            'must be for a different agent.')
+def parse_files(session_code):
+    a0, a1, a2 = None
+    custom_param = False
+    for f in listdir('app/data/'):
+        if f.startswith(session_code):
+            if f.endswith('.yaml'):
+                settings.custom_config_path = f'app/data/{f}'
+                custom_param = True
+            elif f.endswith('agent0.csv'):
+                a0 = f'app/data/{f}'
+            elif f.endswith('agent1.csv'):
+                a1 = f'app/data/{f}'
+            elif f.endswith('agent2.csv'):
+                a2 = f'app/data/{f}'
+    if not a0 and a1 and a2:
+        print('Error: could not find agent csv files')
+        print('Exiting')
         exit(1)
-    return session_code
+    if not custom_param:
+        print('Warning: could not find session parameters file')
+        print('Continuing using \'parameters.yaml\'')
+    return a0, a1, a2
 
 def main():
     p = configargparse.getArgParser()
-    p.add('csv', nargs=3, help='agent csv files (format: <session_code>_agent<#>.csv)')
+    p.add('session_code', help='8-digit alphanumeric')
     options, args = p.parse_known_args()
-    session_code = check_valid(options)
-    a0, a1, a2 = read_csvs(*options.csv)
-    plot(a0, a1, a2, session_code)
+    csvs = parse_files(options.session_code)
+    a0, a1, a2 = read_csvs(*csvs)
+    plot(a0, a1, a2, options.session_code)
 
 if __name__ == '__main__':
     main()
