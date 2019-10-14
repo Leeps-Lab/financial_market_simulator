@@ -347,6 +347,13 @@ class AgentSupervisor():
         self.profit_array.append(self.current_profits)
         self.speed_array.append(self.curr_params['speed'])
 
+        if self.elapsed_ticks % 101 == 0:
+            df = pd.DataFrame(list(itertools.zip_longest(
+                self.y_array, self.z_array, self.speed_array, self.profit_array)),
+                columns=['Inventory', 'External', 'Speed', 'Profit'])
+            df.to_csv(f'app/data/{self.session_code}_agent{self.config_num}.csv')
+            
+
     # initializes agent params at start of sim
     def at_start(self, is_dynamic):
         self.send_message()
