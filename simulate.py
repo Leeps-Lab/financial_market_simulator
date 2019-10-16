@@ -91,7 +91,13 @@ def run_elo_simulation(session_code):
     # when the experiment starts. not sure this is necessary, but just being safe
     sleep(1)
 
-    p = settings.ports
+    p = settings.ports # we overwrite this
+    p1, p2, p3, p4 = get_available_ports(4)
+    p['focal_proxy_ouch_port'] = p1
+    p['focal_proxy_json_port'] = p2
+    p['external_proxy_ouch_port'] = p3
+    p['external_proxy_json_port'] = p4
+
     session_dur = params['session_duration']
     if params['random_seed']:
         random_seed = int(params['random_seed'])
