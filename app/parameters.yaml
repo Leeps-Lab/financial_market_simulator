@@ -1,4 +1,4 @@
-session_duration: 18000
+session_duration: 10800
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
@@ -15,7 +15,7 @@ external_market_format: CDA
 focal_market_fba_interval: 0.5
 external_market_fba_interval: 1
 
-lambdaJ: .5
+lambdaJ: 2
 lambdaI: [0.1, 0.05]  # first element: focal market, second element: external market
 
 tax_rate: 0.1

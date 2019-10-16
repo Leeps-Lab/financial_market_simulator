@@ -340,7 +340,7 @@ class AgentSupervisor():
         if self.my_turn:
             self.update_params()
             self.send_message()
-        self.trigger_tax()
+        # self.trigger_tax() NOTE: IS THIS THE SOLE CAUSE OF BUG?
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])

@@ -26,8 +26,7 @@ def plot(a0, a1, a2, session_code):
     ax1.plot(a1['Profit'], label='A1', linewidth=.75, color=A1_color)
     ax1.plot(a2['Profit'], label='A2', linewidth=.75, color=A2_color)
     ax1.set_ylabel('Profit', color=TEXT)
-    title = session_code.split('/')[-1]
-    ax1.set_title(f'{title} Agent Optimization Parameters')
+    ax1.set_title(f'{session_code} Agent Optimization Parameters')
     ax1.legend(loc='upper left', bbox_to_anchor=(-0.255, 0.75))
 
     # agent 0
@@ -83,7 +82,7 @@ def plot(a0, a1, a2, session_code):
     #ax4.tick_params(labelbottom=False)
     
     plt.subplots_adjust(left=0.20, right=0.98, top=0.95, bottom=0.05)
-    plt.savefig(f'{session_code}_agents.png', dpi=350)
+    plt.savefig(f'app/data/{session_code}_agents.png', dpi=350)
 
 def read_csvs(a0, a1, a2):
     a0 = pd.read_csv(a0)
@@ -93,7 +92,7 @@ def read_csvs(a0, a1, a2):
 
 
 def parse_files(session_code):
-    a0, a1, a2 = None
+    a0, a1, a2 = None, None, None
     custom_param = False
     for f in listdir('app/data/'):
         if f.startswith(session_code):

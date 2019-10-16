@@ -6,7 +6,7 @@ attrs==19.1.0
 autobahn==0.16.0
 backcall==0.1.0
 bleach==3.1.0
-certifi==2019.3.9
+certifi==2019.6.16
 channels==0.17.3
 Click==7.0
 colorama==0.3.7
@@ -65,7 +65,7 @@ pickleshare==0.7.5
 pipenv==11.3.2
 prometheus-client==0.7.1
 prompt-toolkit==2.0.9
-psycopg2-binary==2.8.3
+psycopg2==2.7.7
 ptyprocess==0.6.0
 py==1.4.31
 Pygments==2.4.2
