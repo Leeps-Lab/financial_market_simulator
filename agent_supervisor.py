@@ -319,7 +319,7 @@ class AgentSupervisor():
     def trigger_tax(self):
         inventory = self.agent.model.inventory
         liquidation_price = self.agent.model.market_facts['reference_price']
-        discount_rate = self.agent.model.market_facts['tax_rate'])
+        discount_rate = self.agent.model.market_facts['tax_rate']
         shares_value = ceil(liquidation_price * inventory.position)
         tax_paid = abs(ceil(discount_rate * shares_value))
 
