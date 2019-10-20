@@ -52,10 +52,12 @@ Installation:
 =============
 
 This is tested with python 3.5 - 3.6 - 3.7. However, the exchange server needs
-python 3.6.
+python 3.6, so to make it easy on yourself, use python3.6
 
 Postgres database must be installed and running.
 Follow this `link`_ for instructions.
+If you are running the optimizer with symmetric mode, redis must also be
+running.
 
 Next,
 Create a virtual environment
@@ -64,7 +66,9 @@ Create a virtual environment
 
     python3 -m venv simulations_venv
 
-and activate it.
+and activate it. If you have your base python version > 3.6, we reccommend
+you use pyenv to create a python3.6 virtual environment. Assuming your stock
+python version is 3.6:
 
 ::
 
@@ -78,7 +82,14 @@ switch to postgres user.
 
     sudo su - postgres
 
-Start postgres shell:
+Note: you may not have a postgres user. If that is the case, use your default
+user - skip this step, and replace the next step with
+
+::
+
+    psql postgres
+
+If you do have a postgres user, start postgres shell:
 
 ::
 
@@ -100,7 +111,7 @@ and exit.
 
 Define and set some environmental variables
 for the application to use while talking to the database.
-You can also add these commands to your .bash_profile so they persist.
+You should add these commands to your .bash_profile so they persist.
 
 ::
 
@@ -133,7 +144,6 @@ Download and update submodules:
     cd high_frequency_trading
     git submodule init
     git submodule update
-    git pull origin master
 
 Go back to the root directory and do the same for the exchange_server directory.
 
@@ -142,7 +152,6 @@ Go back to the root directory and do the same for the exchange_server directory.
     cd ../exchange_server
     git submodule init
     git submodule update
-    git pull origin master
 
 Go back to the root directory.
 
@@ -177,16 +186,6 @@ and create the relevant tables in the db.
 
     from db import db_commands
     db_commands.create_tables()
-
-**matching engines**
-
-start two more shells
-and cd into the exchange_server directory in the repo
-you just downloaded.
-follow the `instructions`_ here to run an matching engine instance, run two matching engines in separate shells on ports 9001 and 9002 with the CDA format (if you need different ports, make sure to edit settings.py in the root directory accordingly).
-
-*NOTE* This is no longer necessary, no? The simulator automatically creates
-the exchanges.
 
 Usage:
 =======
