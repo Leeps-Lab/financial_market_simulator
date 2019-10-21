@@ -1,7 +1,7 @@
 # agent_supervisor.py
 # Author: Eli Pandolfo <epandolf@ucsc.edu>
 
-from math import exp
+from math import exp, ceil
 import random
 import time
 import itertools
@@ -123,6 +123,7 @@ class AgentSupervisor():
             self.r = None
         
         # agent optimization data, changes during simulation
+        self.elapsed_seconds = 0
         self.elapsed_ticks = -1 # number of elapsed ticks 
         self.prev_params = { # params before most recent update
             'a_x': 0.0,
@@ -214,8 +215,8 @@ class AgentSupervisor():
     def inventory_value():
         b = self.sp['a_y_multiplier']
         x = self.curr_params['a_y']
-        t = self.elapsed_ticks
-        tau = self.sp['session_duration']
+        t = self.elapsed_seconds % self.sp['move_interval']
+        tau = self.sp['move_interval']
         return exp(b * x * t / tau) - 1
 
     # prints current profit and params
@@ -292,6 +293,8 @@ class AgentSupervisor():
             if self.current != 'speed':
                 self.same_direction()
         
+        # round to 2 decimal places
+        self.curr_params[self.current] = (self.curr_params[self.current], 2)
         # update previous
         self.previous_profits = self.current_profits
         self.prev_params = self.curr_params.copy()
@@ -304,20 +307,19 @@ class AgentSupervisor():
                 'subsession_id': self.subsession_id,
                 'market_id': self.market_id,
                 'a_x': self.curr_params['a_x'],
-                'a_y': self.curr_params['a_y'],
+                'a_y': self.inventory_value,
                 'a_z': self.curr_params['a_z'],
             }
             message = IncomingMessage(message) 
             event = self.agent.event_cls('agent', message) 
             self.agent.model.user_slider_change(event)
-        else:
+        else: #replace this with agent.model.trader_role.speed_technology_change(...)
             s = self.agent.model.technology_subscription
             if self.curr_params['speed'] == 1 and not s.is_active:
                 s.activate()
             elif self.curr_params['speed'] == 0 and s.is_active:
                 s.deactivate()
-
-
+        self.elapsed_seconds += 1
 
     def trigger_tax(self):
         inventory = self.agent.model.inventory
@@ -329,7 +331,7 @@ class AgentSupervisor():
         self.agent.model.cost += tax_paid
         self.agent.model.tax_paid += tax_paid
         self.agent.model.cash -= tax_paid
-        self.agent.model.net_worth -= tax_paid # is this redundant on the above?
+        self.agent.model.net_worth -= tax_paid
         self.current_profits = self.agent.model.net_worth
     
     # entry point into the instance, called every tick
@@ -344,7 +346,6 @@ class AgentSupervisor():
                 self.update_symmetric()
         if self.my_turn:
             self.update_params()
-            self.send_message()
         self.trigger_tax()
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
