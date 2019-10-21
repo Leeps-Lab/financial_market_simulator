@@ -337,7 +337,6 @@ class AgentSupervisor():
         model.cost += tax_paid
         model.tax_paid += tax_paid
         model.net_worth -= model.cost
-        self.get_profits()
 
     def cancel_outstanding_orders(self):
         trader = self.agent.model
@@ -367,6 +366,9 @@ class AgentSupervisor():
             self.reset_fundamentals()
             self.cancel_outstanding_orders()
             return
+        # liquidate inventory and cancel all orders at end of session
+        self.liquidate()
+        self.cancel_outstanding_orders()
         self.get_profits()
         # if symmetric mode, store and update to maintain symmetry
         if self.r:
@@ -376,9 +378,6 @@ class AgentSupervisor():
         # if this agent's turn, update their params
         if self.my_turn:
             self.update_params()
-        # liquidate inventory and cancel all orders at end of session
-        self.liquidate()
-        self.cancel_outstanding_orders()
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
@@ -390,7 +389,6 @@ class AgentSupervisor():
                 self.y_array, self.z_array, self.speed_array, self.profit_array)),
                 columns=['Inventory', 'External', 'Speed', 'Profit'])
             df.to_csv(f'app/data/{self.session_code}_agent{self.config_num}.csv')
-            
 
     # initializes agent params at start of sim
     def at_start(self, is_dynamic):
