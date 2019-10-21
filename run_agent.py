@@ -77,11 +77,15 @@ def main(account_id):
     # If you want to run simulations normally, MAKE SURE THIS CODE DOES NOT RUN
     supervisor = AgentSupervisor(options.session_code, options.config_num, agent)
     supervisor.at_start(isinstance(agent, DynamicAgent))
-    looper = task.LoopingCall(supervisor.on_tick, isinstance(agent, DynamicAgent))
+    looper = task.LoopingCall(supervisor.on_tick, isinstance(agent, DynamicAgent)) 
     looper.clock = reactor
     looper.start(conf['move_interval'], now=False)
     d.addCallback(lambda _ : looper.stop())
     d.addCallback(lambda _ : supervisor.at_end(isinstance(agent, DynamicAgent)))
+    looper2 = task.LoopingCall(supervisor.send_message, isinstance(agent, DynamicAgent))
+    looper2.clock = reactor
+    looper2.start(1.0, now=True)
+    d.addCallback(lambda _ : looper2.stop())
     ############################################################################
     
     reactor.run()

@@ -1,7 +1,7 @@
 # agent_supervisor.py
 # Author: Eli Pandolfo <epandolf@ucsc.edu>
 
-from math import exp, ceil
+from math import expm1, ceil
 import random
 import time
 import itertools
@@ -15,6 +15,8 @@ style.use('./analysis_tools/elip12.mplstyle')
 import matplotlib.pyplot as plt   
 from high_frequency_trading.hft.incoming_message import IncomingMessage
 from utility import get_interactive_agent_count, get_simulation_parameters
+import draw
+from discrete_event_emitter import RandomOrderEmitter
 
 ''' 
 DESCRIPTION
@@ -212,12 +214,12 @@ class AgentSupervisor():
     # computes value for current inventory.
     # this method actually needs to be moved somewhere else
     @property
-    def inventory_value():
+    def inventory_value(self):
         b = self.sp['a_y_multiplier']
         x = self.curr_params['a_y']
         t = self.elapsed_seconds % self.sp['move_interval']
         tau = self.sp['move_interval']
-        return exp(b * x * t / tau) - 1
+        return expm1(b * x * t / tau)
 
     # prints current profit and params
     def print_status(self, msg=''):
@@ -294,13 +296,16 @@ class AgentSupervisor():
                 self.same_direction()
         
         # round to 2 decimal places
-        self.curr_params[self.current] = (self.curr_params[self.current], 2)
+        self.curr_params[self.current] = round(self.curr_params[self.current], 2)
         # update previous
         self.previous_profits = self.current_profits
         self.prev_params = self.curr_params.copy()
 
     # send message to DynamicAgent model to update params
-    def send_message(self):
+    def send_message(self, isDynamic):
+        if not isDynamic:
+            self.elapsed_seconds += 1
+            return
         if self.current != 'speed':
             message = {
                 'type': 'slider',
@@ -313,7 +318,7 @@ class AgentSupervisor():
             message = IncomingMessage(message) 
             event = self.agent.event_cls('agent', message) 
             self.agent.model.user_slider_change(event)
-        else: #replace this with agent.model.trader_role.speed_technology_change(...)
+        else:
             s = self.agent.model.technology_subscription
             if self.curr_params['speed'] == 1 and not s.is_active:
                 s.activate()
@@ -321,32 +326,59 @@ class AgentSupervisor():
                 s.deactivate()
         self.elapsed_seconds += 1
 
-    def trigger_tax(self):
-        inventory = self.agent.model.inventory
-        liquidation_price = self.agent.model.market_facts['reference_price']
-        discount_rate = self.agent.model.market_facts['tax_rate']
-        shares_value = ceil(liquidation_price * inventory.position)
-        tax_paid = abs(ceil(discount_rate * shares_value))
+    def liquidate(self):
+        model = self.agent.model
+        mf = model.market_facts
+        model.inventory.liquidify(
+            mf['reference_price'], 
+            discount_rate=mf['tax_rate'])
+        model.cash += model.inventory.cash
+        tax_paid = model.inventory.cost
+        model.cost += tax_paid
+        model.tax_paid += tax_paid
+        model.net_worth -= model.cost
+        self.get_profits()
 
-        self.agent.model.cost += tax_paid
-        self.agent.model.tax_paid += tax_paid
-        self.agent.model.cash -= tax_paid
-        self.agent.model.net_worth -= tax_paid
-        self.current_profits = self.agent.model.net_worth
+    def cancel_outstanding_orders(self):
+        trader = self.agent.model
+        trader_state = trader.trader_role
+        message = {
+            'type': 'C',
+            'subsession_id': self.subsession_id,
+            'market_id': self.market_id,
+        }
+        event = self.agent.event_cls('agent', IncomingMessage(message))
+        trader_state.cancel_all_orders(trader, event)
     
+    def reset_fundamentals(self):
+        random_orders = draw.elo_draw(
+            self.sp['session_duration'], self.sp,
+            seed=self.sp['random_seed'], config_num=self.config_num)
+        event_emitters = [RandomOrderEmitter(source_data=random_orders)]
+        
+        self.agent.event_emitters = event_emitters
+        self.agent.ready()
+
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
         self.elapsed_ticks += 1
+        # pacemaker agent resets fundamental values
         if not is_dynamic:
+            self.reset_fundamentals()
+            self.cancel_outstanding_orders()
             return
         self.get_profits()
+        # if symmetric mode, store and update to maintain symmetry
         if self.r:
             self.store_profit_and_params()
             if self.elapsed_ticks % 2 == 1:
                 self.update_symmetric()
+        # if this agent's turn, update their params
         if self.my_turn:
             self.update_params()
-        self.trigger_tax()
+        # liquidate inventory and cancel all orders at end of session
+        self.liquidate()
+        self.cancel_outstanding_orders()
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
@@ -362,7 +394,6 @@ class AgentSupervisor():
 
     # initializes agent params at start of sim
     def at_start(self, is_dynamic):
-        self.send_message()
         if self.r:
             self.store_profit_and_params()
 
