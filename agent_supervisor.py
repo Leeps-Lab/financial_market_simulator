@@ -1,6 +1,7 @@
 # agent_supervisor.py
 # Author: Eli Pandolfo <epandolf@ucsc.edu>
 
+from math import exp
 import random
 import time
 import itertools
@@ -207,13 +208,15 @@ class AgentSupervisor():
         elif self.curr_params['speed'] == 1:
             self.curr_params['speed'] = 0
     
-    # NOTE: WIP
-    def compute_inventory_param(b):
-        a = 0.01
+    # computes value for current inventory.
+    # this method actually needs to be moved somewhere else
+    @property
+    def inventory_value():
+        b = self.sp['a_y_multiplier']
+        x = self.curr_params['a_y']
         t = self.elapsed_ticks
-        b = 100
         tau = self.sp['session_duration']
-        pass
+        return exp(b * x * t / tau) - 1
 
     # prints current profit and params
     def print_status(self, msg=''):
@@ -342,7 +345,7 @@ class AgentSupervisor():
         if self.my_turn:
             self.update_params()
             self.send_message()
-        # self.trigger_tax() NOTE: IS THIS THE SOLE CAUSE OF BUG?
+        self.trigger_tax()
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])

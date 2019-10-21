@@ -144,6 +144,7 @@ Download and update submodules:
     cd high_frequency_trading
     git submodule init
     git submodule update
+    git checkout ep-cont origin/ep-cont
 
 Go back to the root directory and do the same for the exchange_server directory.
 
