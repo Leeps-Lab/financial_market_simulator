@@ -367,7 +367,7 @@ class AgentSupervisor():
             self.cancel_outstanding_orders()
             return
         # liquidate inventory and cancel all orders at end of session
-        self.liquidate()
+        #self.liquidate()
         self.cancel_outstanding_orders()
         self.get_profits()
         # if symmetric mode, store and update to maintain symmetry
