@@ -1,4 +1,4 @@
-session_duration: 1200
+session_duration: 10800
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
@@ -12,11 +12,11 @@ time_in_force: 1
 
 focal_market_format: CDA
 external_market_format: CDA
-focal_market_fba_interval: 1.5
+focal_market_fba_interval: .5
 external_market_fba_interval: 1
 
 lambdaJ: 2
-lambdaI: [0.2, 0.1]  # first element: focal market, second element: external market
+lambdaI: [0.1, 0.05]  # first element: focal market, second element: external market
 
 tax_rate: 0.1
 k_reference_price: 0.2 # discount rate (half life)

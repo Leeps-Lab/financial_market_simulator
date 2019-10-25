@@ -39,7 +39,7 @@ def main(account_id):
     conf = get_simulation_parameters()
     if agent_type == 'rabbit':
         random_orders = draw.elo_draw(
-            session_duration, conf,
+            conf['move_interval'], conf,
             seed=options.random_seed, config_num=options.config_num)
         event_emitters = [RandomOrderEmitter(source_data=random_orders), ]
         agent_cls = PaceMakerAgent

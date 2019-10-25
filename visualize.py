@@ -99,7 +99,7 @@ def parse_files(session_code):
     custom_param = False
     for f in listdir('app/data/'):
         if f.startswith(session_code):
-            if f.endswith('.yaml'):
+            if f.endswith('parameters.yaml'):
                 settings.custom_config_path = f'app/data/{f}'
                 custom_param = True
             elif f.endswith('agent0.csv'):

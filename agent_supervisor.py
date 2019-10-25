@@ -17,7 +17,7 @@ from high_frequency_trading.hft.incoming_message import IncomingMessage
 from utility import get_interactive_agent_count, get_simulation_parameters
 import draw
 from discrete_event_emitter import RandomOrderEmitter
-
+from shutil import copyfile
 ''' 
 DESCRIPTION
     This file defines a class called AgentSupervisor.
@@ -285,6 +285,8 @@ class AgentSupervisor():
         if self.gel(self.current_profits, self.previous_profits) == 1:
             if self.current != 'speed':
                 self.same_direction()
+            else:
+                self.switch_speed()
         elif self.gel(self.current_profits, self.previous_profits) == -1:
             if self.current != 'speed':
                 self.opposite_direction()
@@ -294,6 +296,8 @@ class AgentSupervisor():
             self.get_next_param()
             if self.current != 'speed':
                 self.same_direction()
+            else:
+                self.switch_speed()
         
         # round to 2 decimal places
         self.curr_params[self.current] = round(self.curr_params[self.current], 2)
@@ -351,23 +355,25 @@ class AgentSupervisor():
     
     def reset_fundamentals(self):
         random_orders = draw.elo_draw(
-            self.sp['session_duration'], self.sp,
+            self.sp['move_interval'], self.sp,
             seed=self.sp['random_seed'], config_num=self.config_num)
         event_emitters = [RandomOrderEmitter(source_data=random_orders)]
         
         self.agent.event_emitters = event_emitters
-        self.agent.ready()
+        for em in self.agent.event_emitters:
+            em.owner = self.agent
+            em.register_events()
 
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
         self.elapsed_ticks += 1
         # pacemaker agent resets fundamental values
         if not is_dynamic:
-            #self.reset_fundamentals()
+            self.reset_fundamentals()
             self.cancel_outstanding_orders()
             return
         #liquidate inventory and cancel all orders at end of session
-        self.liquidate()
+        #self.liquidate()
         self.cancel_outstanding_orders()
         self.get_profits()
         # if symmetric mode, store and update to maintain symmetry
@@ -392,6 +398,9 @@ class AgentSupervisor():
 
     # initializes agent params at start of sim
     def at_start(self, is_dynamic):
+        if self.config_num == 0:
+            copyfile('app/parameters.yaml',
+                f'app/data/{self.session_code}_parameters.yaml')
         if self.r:
             self.store_profit_and_params()
 
