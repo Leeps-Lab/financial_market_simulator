@@ -135,8 +135,9 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
                      '%s jumps per second.' % (
                         conf['initial_price'],
                         round(len(fundamental_values) / period_length, 2)))
-    log.info('fundamental values: %s' % (', '.join('{0}:{1}'.format(t, v) 
-                                            for t, v in fundamental_values)))
+    
+    #log.info('fundamental values: %s' % (', '.join('{0}:{1}'.format(t, v) 
+    #                                        for t, v in fundamental_values)))
     random_orders = elo_random_order_sequence(
         fundamental_values, 
         period_length, 
