@@ -1,4 +1,4 @@
-session_duration: 300
+session_duration: 900
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
@@ -31,8 +31,7 @@ random_seed: 12338
 
 fundamental_values:
   #  time, fundamental value
-  - [1,    1000000]
-  - [3,    900000]
+  - [0, 1000000]
 
 agent_state_configs:
   #  arrival_time, agent_num, speed, a_x, a_y, w
