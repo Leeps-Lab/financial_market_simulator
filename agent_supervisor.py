@@ -248,11 +248,12 @@ class AgentSupervisor():
     # called every tick
     # get current net worth and store it in self.current_profits
     def get_profits(self):
-        self.current_profits = self.agent.model.net_worth
-        if self.curr_params['speed'] == 1:
-            penalty = self.sp['speed_unit_cost'] * self.sp['move_interval']
-            self.current_profits -= penalty
-    
+        m = self.agent.model
+        invoice = m.technology_subscription.invoice_without_deactivating()
+        m.cash -= invoice
+        m.net_worth -= invoice
+        self.current_profits = m.net_worth
+        
     # called every tick. agent stores its current profit and parameters in redis
     def store_profit_and_params(self):
         self.r.set(f'{self.session_code}_{self.config_num}_profit',
