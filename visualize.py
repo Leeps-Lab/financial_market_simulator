@@ -119,11 +119,12 @@ def parse_files(session_code):
 
 def main():
     p = configargparse.getArgParser()
-    p.add('session_code', help='8-digit alphanumeric')
+    p.add('session_code', nargs='+', help='8-digit alphanumeric')
     options, args = p.parse_known_args()
-    csvs = parse_files(options.session_code)
-    a0, a1, a2 = read_csvs(*csvs)
-    plot(a0, a1, a2, options.session_code)
+    for code in options.session_code:
+        csvs = parse_files(code)
+        a0, a1, a2 = read_csvs(*csvs)
+        plot(a0, a1, a2, code)
 
 if __name__ == '__main__':
     main()

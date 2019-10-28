@@ -16,7 +16,7 @@ focal_market_fba_interval: .5
 external_market_fba_interval: 1
 
 lambdaJ: 2
-lambdaI: [0.1, 0.05]  # first element: focal market, second element: external market
+lambdaI: [0.5, 0.25]  # first element: focal market, second element: external market
 
 tax_rate: 0.1
 k_reference_price: 0.2 # discount rate (half life)
@@ -25,7 +25,7 @@ k_signed_volume: 0.2
 a_x_multiplier: 5   # a_x <-> signed volume
 a_y_multiplier: 3   # a_y <-> inventory, used in exp fn
 
-speed_unit_cost: 2000  # per second
+speed_unit_cost: 2000 # per second
 
 random_seed: 12338
 
