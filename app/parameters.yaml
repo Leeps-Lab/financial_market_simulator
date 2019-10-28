@@ -10,9 +10,9 @@ exogenous_order_price_noise_std: 30000
 bid_ask_offset: 20000
 time_in_force: 1
 
-focal_market_format: CDA
+focal_market_format: FBA
 external_market_format: CDA
-focal_market_fba_interval: .5
+focal_market_fba_interval: 0.5
 external_market_fba_interval: 1
 
 lambdaJ: 2
@@ -45,5 +45,5 @@ init_z: 0.5  # initial value of External
 step: 0.05  # amount y/z change per move, eg y_{t+1} = y_{t} + step 
 symmetric: false # symmetric mode (agents change strat to match best every turn)
 num_moves: 8 # number of moves in a turn
-move_interval: 10.0 # number of seconds per move
+move_interval: 10 # number of seconds per move
 
