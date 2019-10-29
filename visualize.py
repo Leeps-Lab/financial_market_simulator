@@ -33,8 +33,24 @@ def plot(a0, a1, a2, session_code):
     # agent 0
     ax2.plot(a0['Inventory'], zorder=3, linewidth=.5, color=inventory_color)
     ax2.plot(a0['External'], zorder=3, linewidth=.5, color=external_color)
-    ax2.fill_between(np.arange(len(a0['Speed'])), a0['Speed'], linestyle='None',
-	zorder=2, color=speed_color, alpha=.2)
+    #ax2.fill_between(np.arange(len(a0['Speed'])), a0['Speed'], linestyle='None',
+	#zorder=2, color=speed_color, alpha=.2)
+    
+    xs = [i for i, x in enumerate(a0['Speed']) \
+        if i > 0 and x == 1 and a0['Speed'][i - 1] == 0]
+    
+    num = 0
+    widths = []
+    for i, x in enumerate(a0['Speed']):
+        if i > 0 and a0['Speed'][i - 1] == 1 \
+            and (x == 0 or i == len(a0['Speed']) - 1):
+            widths.append(num)
+            num = 0
+        elif i > 0 and x == 1 and a0['Speed'][i - 1] == 1:
+            num += 1
+    assert(len(xs) == len(widths))
+#    ax2.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2, alpha=.2)
+    
     ax2.set_ylabel('Agent 0 (A0)', color=A0_color)
     params = get_simulation_parameters()
     ax2.text(-0.25, -2.6, '\n'.join([
