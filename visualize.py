@@ -19,6 +19,21 @@ inventory_color = '#60d515'
 speed_color = '#b113ef'
 external_color = '#1fa8e4'
 
+def bar(a):
+    xs = [i for i, x in enumerate(a['Speed']) \
+        if i > 0 and x == 1 and a['Speed'][i - 1] == 0]
+    num = 0
+    widths = []
+    for i, x in enumerate(a['Speed']):
+        if i > 0 and a['Speed'][i - 1] == 1 \
+            and (x == 0 or i == len(a['Speed']) - 1):
+            widths.append(num)
+            num = 0
+        elif i > 0 and x == 1:
+            num += 1
+    assert(len(xs) == len(widths))
+    return xs, widths
+
 def plot(a0, a1, a2, session_code):
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, sharex=True)
     
@@ -33,23 +48,9 @@ def plot(a0, a1, a2, session_code):
     # agent 0
     ax2.plot(a0['Inventory'], zorder=3, linewidth=.5, color=inventory_color)
     ax2.plot(a0['External'], zorder=3, linewidth=.5, color=external_color)
-    #ax2.fill_between(np.arange(len(a0['Speed'])), a0['Speed'], linestyle='None',
-	#zorder=2, color=speed_color, alpha=.2)
-    
-    xs = [i for i, x in enumerate(a0['Speed']) \
-        if i > 0 and x == 1 and a0['Speed'][i - 1] == 0]
-    
-    num = 0
-    widths = []
-    for i, x in enumerate(a0['Speed']):
-        if i > 0 and a0['Speed'][i - 1] == 1 \
-            and (x == 0 or i == len(a0['Speed']) - 1):
-            widths.append(num)
-            num = 0
-        elif i > 0 and x == 1 and a0['Speed'][i - 1] == 1:
-            num += 1
-    assert(len(xs) == len(widths))
-#    ax2.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2, alpha=.2)
+    xs, widths = bar(a0)
+    ax2.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2,
+        alpha=0.25)
     
     ax2.set_ylabel('Agent 0 (A0)', color=A0_color)
     params = get_simulation_parameters()
@@ -86,16 +87,18 @@ def plot(a0, a1, a2, session_code):
     # agent 1
     ax3.plot(a1['Inventory'], zorder=3, linewidth=.5, color=inventory_color)
     ax3.plot(a1['External'], zorder=3, linewidth=.5, color=external_color)
-    ax3.fill_between(np.arange(len(a1['Speed'])), a1['Speed'], linestyle='None',
-	zorder=2, color=speed_color, alpha=.2)
+    xs, widths = bar(a1)
+    ax3.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2,
+        alpha=0.25)
     ax3.set_ylabel('Agent 1 (A1)', color=A1_color)
-    # agent 0
+    # agent 2
     ax4.plot(a2['Inventory'], zorder=3, linewidth=.5, label='Inventory',
         color=inventory_color)
     ax4.plot(a2['External'], zorder=3, linewidth=.5, label='External',
         color=external_color)
-    ax4.fill_between(np.arange(len(a2['Speed'])), a2['Speed'], linestyle='None',
-	zorder=2, color=speed_color, alpha=.2, label='Speed')
+    xs, widths = bar(a2)
+    ax4.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2,
+        alpha=0.25, label='Speed')
     ax4.set_ylabel('Agent 2 (A2)', color=A2_color)
     ax4.legend(loc='upper center', bbox_to_anchor=(-0.175, 3.15))
     #ax4.tick_params(labelbottom=False)
