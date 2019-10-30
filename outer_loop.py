@@ -28,6 +28,7 @@ def update(sp, **kwargs):
     return sp
 
 def main():
+    processes = {}
     copy = settings.custom_config_path + '.copy'
     shutil.copyfile(settings.custom_config_path, copy)
     sp = get_simulation_parameters()
@@ -50,7 +51,9 @@ def main():
                             time_in_force=t
                         )
                         write_sim_params(sp)
-                        #run_sim()
+                        processes.append(run_sim())
+    for p in processes:
+        p.wait()
     shutil.move(copy, settings.custom_config_path)
 if __name__ == '__main__':
     main()
