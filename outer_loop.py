@@ -55,8 +55,9 @@ def main():
                             processes.append(run_sim())
         for p in processes:
             p.wait()
-    except Exception as e:
+    except:
         shutil.move(copy, settings.custom_config_path)
+        e = sys.exc_info()[0]
         raise(e)
 
 if __name__ == '__main__':
