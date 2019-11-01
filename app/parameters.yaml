@@ -1,52 +1,34 @@
-session_duration: 14400
-initial_price: 1000000
-
-fundamental_value_noise_mean: 0
-fundamental_value_noise_std: 40000
-read_fundamental_values_from_array: False
-
+a_x_multiplier: 5
+a_y_multiplier: 3
+agent_state_configs:
+- [0, 1, 0, 0, 0, 0]
+- [0, 2, 0, 0, 0, 0]
+- [0, 3, 0, 0, 0, 0]
+bid_ask_offset: 20000
 exogenous_order_price_noise_mean: 0
 exogenous_order_price_noise_std: 30000
-bid_ask_offset: 20000
-time_in_force: 1
-
-focal_market_format: FBA
+external_market_fba_interval: 1
 external_market_format: CDA
 focal_market_fba_interval: 0.5
-external_market_fba_interval: 1
-
-lambdaJ: 2
-lambdaI: [0.1, 0.05]  # first element: focal market, second element: external market
-
-tax_rate: 0.1
-k_reference_price: 0.2 # discount rate (half life)
-k_signed_volume: 0.2
-
-a_x_multiplier: 5   # a_x <-> signed volume
-a_y_multiplier: 3   # a_y <-> inventory, used in exp fn
-
-speed_unit_cost: 2000 # per second
-
-random_seed: 12338
-
+focal_market_format: CDA
+fundamental_value_noise_mean: 0
+fundamental_value_noise_std: 40000
 fundamental_values:
-  #  time, fundamental value
-  - [0, 1000000]
-
-agent_state_configs:
-  #  arrival_time, agent_num, speed, a_x, a_y, w
-  - [0,            1,         0,     0,   0, 0]
-  - [0,            2,         0,     0,   0, 0]
-  - [0,            3,         0,     0,   0, 0]
-  - [0,            4,         0,     0,   0, 0]
-  - [0,            5,         0,     0,   0, 0]
-  - [0,            6,         0,     0,   0, 0]
-
-# parameters for optimization, used by agent_supervisor
-init_y: 0.5  # inital value of Inventory
-init_z: 0.5  # initial value of External
-step: 0.05  # amount y/z change per move, eg y_{t+1} = y_{t} + step 
-symmetric: false # symmetric mode (agents change strat to match best every turn)
-num_moves: 8 # number of moves in a turn
-move_interval: 10 # number of seconds per move
-
+- [0, 1000000]
+init_y: 0.5
+init_z: 0.5
+initial_price: 1000000
+k_reference_price: 0.2
+k_signed_volume: 0.2
+lambdaI: [0.2, 0.1]
+lambdaJ: 0.5
+move_interval: 10
+num_moves: 8
+random_seed: 12338
+read_fundamental_values_from_array: false
+session_duration: 240
+speed_unit_cost: 10000
+step: 0.05
+symmetric: false
+tax_rate: 0.1
+time_in_force: 0.5

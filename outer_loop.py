@@ -28,7 +28,7 @@ def update(sp, **kwargs):
     return sp
 
 def main():
-    processes = {}
+    processes = []
     copy = settings.custom_config_path + '.copy'
     shutil.copyfile(settings.custom_config_path, copy)
     sp = get_simulation_parameters()
