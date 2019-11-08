@@ -32,18 +32,22 @@ def bar(a):
         elif i > 0 and x == 1:
             num += 1
     assert(len(xs) == len(widths))
+    if not xs and not widths:
+        xs.append(0)
+        widths.append(0)
     return xs, widths
 
-def plot(a0, a1, a2, session_code):
+def plot(a0, a1, a2, session_code, nums):
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, sharex=True)
     
     # profit graph
-    ax1.plot(a0['Profit'], label='A0', linewidth=.75, color=A0_color)
-    ax1.plot(a1['Profit'], label='A1', linewidth=.75, color=A1_color)
-    ax1.plot(a2['Profit'], label='A2', linewidth=.75, color=A2_color)
+    ax1.plot(a0['Profit'], label=f'A{nums[0]}', linewidth=.75, color=A0_color)
+    ax1.plot(a1['Profit'], label=f'A{nums[1]}', linewidth=.75, color=A1_color)
+    ax1.plot(a2['Profit'], label=f'A{nums[2]}', linewidth=.75, color=A2_color)
     ax1.set_ylabel('Profit', color=TEXT)
-    ax1.set_title(f'{session_code} Agent Optimization Parameters')
+    ax1.set_title(f'{session_code} Agents {nums[0]}, {nums[1]}, {nums[2]} Optimization Parameters')
     ax1.legend(loc='upper left', bbox_to_anchor=(-0.255, 0.75))
+    ax1.set_yscale('log')
 
     # agent 0
     ax2.plot(a0['Inventory'], zorder=3, linewidth=.5, color=inventory_color)
@@ -52,7 +56,7 @@ def plot(a0, a1, a2, session_code):
     ax2.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2,
         alpha=0.25)
     
-    ax2.set_ylabel('Agent 0 (A0)', color=A0_color)
+    ax2.set_ylabel(f'Agent {nums[0]} (A{nums[0]})', color=A0_color)
     params = get_simulation_parameters()
     ax2.text(-0.25, -2.6, '\n'.join([
         'Parameters:',
@@ -90,7 +94,7 @@ def plot(a0, a1, a2, session_code):
     xs, widths = bar(a1)
     ax3.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2,
         alpha=0.25)
-    ax3.set_ylabel('Agent 1 (A1)', color=A1_color)
+    ax3.set_ylabel(f'Agent {nums[1]} (A{nums[1]})', color=A1_color)
     # agent 2
     ax4.plot(a2['Inventory'], zorder=3, linewidth=.5, label='Inventory',
         color=inventory_color)
@@ -99,12 +103,11 @@ def plot(a0, a1, a2, session_code):
     xs, widths = bar(a2)
     ax4.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2,
         alpha=0.25, label='Speed')
-    ax4.set_ylabel('Agent 2 (A2)', color=A2_color)
+    ax4.set_ylabel(f'Agent {nums[2]} (A{nums[2]})', color=A2_color)
     ax4.legend(loc='upper center', bbox_to_anchor=(-0.175, 3.15))
-    #ax4.tick_params(labelbottom=False)
-    
+    #ax4.tick_params(labelbottom=False) 
     plt.subplots_adjust(left=0.20, right=0.98, top=0.95, bottom=0.05)
-    plt.savefig(f'app/data/{session_code}_agents.png', dpi=350)
+    plt.savefig(f'app/data/{session_code}_agents{nums[0]}{nums[1]}{nums[2]}.png', dpi=350)
 
 def read_csvs(a0, a1, a2):
     a0 = pd.read_csv(a0)
@@ -113,7 +116,7 @@ def read_csvs(a0, a1, a2):
     return a0, a1, a2
 
 
-def parse_files(session_code):
+def parse_files(session_code, nums):
     a0, a1, a2 = None, None, None
     custom_param = False
     for f in listdir('app/data/'):
@@ -121,11 +124,11 @@ def parse_files(session_code):
             if f.endswith('parameters.yaml'):
                 settings.custom_config_path = f'app/data/{f}'
                 custom_param = True
-            elif f.endswith('agent0.csv'):
+            elif f.endswith(f'agent{nums[0]}.csv'):
                 a0 = f'app/data/{f}'
-            elif f.endswith('agent1.csv'):
+            elif f.endswith(f'agent{nums[1]}.csv'):
                 a1 = f'app/data/{f}'
-            elif f.endswith('agent2.csv'):
+            elif f.endswith(f'agent{nums[2]}.csv'):
                 a2 = f'app/data/{f}'
     if not a0 and a1 and a2:
         print('Error: could not find agent csv files')
@@ -140,10 +143,11 @@ def main():
     p = configargparse.getArgParser()
     p.add('session_code', nargs='+', help='8-digit alphanumeric')
     options, args = p.parse_known_args()
+    nums = (0, 1, 2)
     for code in options.session_code:
-        csvs = parse_files(code)
+        csvs = parse_files(code, nums)
         a0, a1, a2 = read_csvs(*csvs)
-        plot(a0, a1, a2, code)
+        plot(a0, a1, a2, code, nums)
 
 if __name__ == '__main__':
     main()
