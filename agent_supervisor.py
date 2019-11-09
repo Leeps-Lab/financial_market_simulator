@@ -123,6 +123,7 @@ class AgentSupervisor():
             )
         else:
             self.r = None
+        self.prev_random_orders = None
         
         # agent optimization data, changes during simulation
         self.elapsed_seconds = 0
@@ -146,6 +147,8 @@ class AgentSupervisor():
         self.z_array = []
         self.profit_array = []
         self.speed_array = []
+        self.event_log = f'app/logs/{self.session_code}_agent{self.config_num}.log'
+        self.current_log_row = ''
 
     # compares cur and prev given tolerance
     @staticmethod
@@ -184,6 +187,7 @@ class AgentSupervisor():
 
     # adjusts parameter in same direction it was adusted previously, by 1 tick
     def same_direction(self):
+        temp = self.curr_params[self.current]
         if self.curr_params[self.current] > self.prev_params[self.current]:
             self.curr_params[self.current] += self.step
             self.bounds_check()
@@ -192,9 +196,12 @@ class AgentSupervisor():
             self.bounds_check()
         else:
             self.random_direction()
+        self.current_log_row += f'Adjusting {self.current} from {temp} ' +\
+            f'to {self.curr_params[self.current]}. '
 
     # adjust parameter in opposite direction it was ajusted previously, by 2 ticks
     def opposite_direction(self):
+        temp = self.curr_params[self.current]
         if self.curr_params[self.current] > self.prev_params[self.current]:
             self.curr_params[self.current] -= 2 * self.step
             self.bounds_check()
@@ -203,13 +210,17 @@ class AgentSupervisor():
             self.bounds_check()
         else:
             self.random_direction()
+        self.current_log_row += f'Adjusting {self.current} from {temp} ' +\
+            f'to {self.curr_params[self.current]}. '
 
     # toggles speed
     def switch_speed(self):
         if self.curr_params['speed'] == 0:
             self.curr_params['speed'] = 1
+            self.current_log_row += 'Switching speed from 0 to 1. '
         elif self.curr_params['speed'] == 1:
             self.curr_params['speed'] = 0
+            self.current_log_row += 'Switching speed from 1 to 0. '
     
     # computes value for current inventory.
     # this method actually needs to be moved somewhere else
@@ -253,6 +264,7 @@ class AgentSupervisor():
         m.cash -= invoice
         m.net_worth -= invoice
         self.current_profits = m.net_worth
+        self.current_log_row += f'Invoiced {invoice} for speed tech. '
         
     # called every tick. agent stores its current profit and parameters in redis
     def store_profit_and_params(self):
@@ -283,6 +295,7 @@ class AgentSupervisor():
     
     # updates A_Y or A_Z given current profits
     def update_params(self):
+        self.current_log_row += f'Previous profits: {self.previous_profits}. '
         if self.gel(self.current_profits, self.previous_profits) == 1:
             if self.current != 'speed':
                 self.same_direction()
@@ -303,7 +316,6 @@ class AgentSupervisor():
         # round to 2 decimal places
         self.curr_params[self.current] = round(self.curr_params[self.current], 2)
         # update previous
-        self.previous_profits = self.current_profits
         self.prev_params = self.curr_params.copy()
 
     # send message to DynamicAgent model to update params
@@ -334,6 +346,7 @@ class AgentSupervisor():
     def liquidate(self):
         model = self.agent.model
         mf = model.market_facts
+        size = model.inventory.position
         model.inventory.liquidify(
             mf['reference_price'], 
             discount_rate=mf['tax_rate'])
@@ -341,7 +354,9 @@ class AgentSupervisor():
         tax_paid = model.inventory.cost
         model.cost += tax_paid
         model.tax_paid += tax_paid
-        model.net_worth -= model.cost
+        self.current_log_row += f'Liquidated {size} shares at ' +\
+            f'{mf["reference_price"]} per share for {model.inventory.cash}' +\
+            f', including {tax_paid} tax. '
 
     def cancel_outstanding_orders(self):
         trader = self.agent.model
@@ -359,7 +374,10 @@ class AgentSupervisor():
             self.sp['move_interval'], self.sp,
             seed=self.sp['random_seed'], config_num=self.config_num)
         event_emitters = [RandomOrderEmitter(source_data=random_orders)]
-        
+        if isinstance(self.prev_random_orders, list):
+            assert(str(random_orders) == str(self.prev_random_orders))
+        else:
+            self.prev_random_orders = random_orders
         self.agent.event_emitters = event_emitters
         for em in self.agent.event_emitters:
             em.owner = self.agent
@@ -368,6 +386,7 @@ class AgentSupervisor():
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
         self.elapsed_ticks += 1
+        self.current_log_row = ''
         # pacemaker agent resets fundamental values
         if not is_dynamic:
             self.reset_fundamentals()
@@ -377,6 +396,8 @@ class AgentSupervisor():
         self.liquidate()
         self.cancel_outstanding_orders()
         self.get_profits()
+        self.current_log_row += f'Current profits: {self.current_profits}. '
+        self.current_log_row += f'Current params: {str(self.curr_params)}. '
         # if symmetric mode, store and update to maintain symmetry
         if self.r:
             self.store_profit_and_params()
@@ -396,7 +417,11 @@ class AgentSupervisor():
                 self.y_array, self.z_array, self.speed_array, self.profit_array)),
                 columns=['Inventory', 'External', 'Speed', 'Profit'])
             df.to_csv(f'app/data/{self.session_code}_agent{self.config_num}.csv')
+        
+        with open(self.event_log, 'a+') as f:
+            f.write(self.current_log_row + '\n')
 
+        self.previous_profits = self.current_profits
     # initializes agent params at start of sim
     def at_start(self, is_dynamic):
         if self.config_num == 0:
