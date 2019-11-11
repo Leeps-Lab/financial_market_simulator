@@ -347,15 +347,17 @@ class AgentSupervisor():
         model = self.agent.model
         mf = model.market_facts
         size = model.inventory.position
+        ref = mf['reference_price']
         model.inventory.liquidify(
-            mf['reference_price'], 
+            ref, 
             discount_rate=mf['tax_rate'])
-        model.cash += model.inventory.cash
+        cash = model.inventory.cash
+        model.cash += cash
         tax_paid = model.inventory.cost
         model.cost += tax_paid
         model.tax_paid += tax_paid
         self.current_log_row += f'Liquidated {size} shares at ' +\
-            f'{mf["reference_price"]} per share for {model.inventory.cash}' +\
+            f'{ref} per share for {cash}' +\
             f', including {tax_paid} tax. '
 
     def cancel_outstanding_orders(self):

@@ -91,7 +91,7 @@ def elo_random_order_sequence(
     orders_size = np.random.poisson(lam=(1 / lambdaI) * period_length, size=1)
     order_times = draw_arrival_times(
         orders_size, period_length, low=0.0, high=period_length)
-    unstacked_asset_values = np.swapaxes(asset_value_arr, 0, 1)
+    unstacked_asset_values = asset_value_arr #np.swapaxes(asset_value_arr, 0, 1)
     asset_value_jump_times, asset_values = unstacked_asset_values[0], unstacked_asset_values[1]
     asset_value_indexes = asof(asset_value_jump_times, order_times)
     asset_value_asof = asset_values[asset_value_indexes]
@@ -101,6 +101,7 @@ def elo_random_order_sequence(
             ) if x == 0 else np.random.normal(loc_noise + bid_ask_offset, scale_noise))
     noise_around_asset_value = noise_by_order_side(order_directions)
     order_prices = (asset_value_asof + noise_around_asset_value).astype(int)
+    #print(order_prices)
     grid = np.vectorize(price_grid)
     gridded_order_prices = grid(order_prices)
     orders_tif = np.full(orders_size, time_in_force).astype(int)
@@ -147,6 +148,7 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
         conf['lambdaI'][config_num],    # so rabbits differ in arrival rate..
         conf['time_in_force'])
     random_orders = np.swapaxes(random_orders, 0, 1)
+   # print(random_orders[:20])
     log.info(
         '%s random orders generated. period length: %s, per second: %s.' % (
             random_orders.shape[0], 
