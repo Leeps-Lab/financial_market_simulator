@@ -375,6 +375,7 @@ class AgentSupervisor():
         random_orders = draw.elo_draw(
             self.sp['move_interval'], self.sp,
             seed=self.sp['random_seed'], config_num=self.config_num)
+        #print(random_orders)
         event_emitters = [RandomOrderEmitter(source_data=random_orders)]
         if isinstance(self.prev_random_orders, list):
             assert(str(random_orders) == str(self.prev_random_orders))
