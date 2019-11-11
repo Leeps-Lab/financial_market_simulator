@@ -52,3 +52,10 @@ class PaceMakerAgent(BaseMarketAgent):
                 self.exchange_connection.sendMessage(message.translate(), message.delay)
             else:
                 self.outgoing_msg.append((message.translate(), message.delay))
+        od = order_data.copy()
+        del order_data['type']
+        del order_data['subsession_id']
+        del order_data['market_id']
+        del order_data['player_id']
+        del order_data['event_source']
+        log.critical(str(order_data))

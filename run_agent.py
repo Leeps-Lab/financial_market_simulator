@@ -97,8 +97,7 @@ if __name__ == '__main__':
         level=log.CRITICAL, 
         filename=settings.logs_dir + 'session_%s_trader_%s.log' % (
         options.session_code, account_id),
-        format = "[%(asctime)s.%(msecs)03d] %(levelname)s \
-            [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+        format = "[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s",
         datefmt = '%H:%M:%S')
     if options.random_seed:
         log.debug('%s agent started using random seed %d', options.agent_type, options.random_seed)
