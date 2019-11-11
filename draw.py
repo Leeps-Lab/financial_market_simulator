@@ -78,8 +78,8 @@ def _elo_asset_value_arr(initial_price, period_length, loc_delta, scale_delta,
     f_prices = np.random.normal(
         size=num_f_price_changes, loc=loc_delta, 
         scale=scale_delta).cumsum() + initial_price
-    return np.vstack((f_price_change_times, f_prices)).round(3)
-    
+    ret = np.vstack((f_price_change_times, f_prices)).round(3)
+    return np.swapaxes(ret, 0, 1)
 
 def elo_random_order_sequence(
         asset_value_arr, period_length, loc_noise, scale_noise, bid_ask_offset, 
