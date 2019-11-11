@@ -78,8 +78,8 @@ def _elo_asset_value_arr(initial_price, period_length, loc_delta, scale_delta,
     f_prices = np.random.normal(
         size=num_f_price_changes, loc=loc_delta, 
         scale=scale_delta).cumsum() + initial_price
-    return np.vstack((f_price_change_times, f_prices)).round(3)
-    
+    ret = np.vstack((f_price_change_times, f_prices)).round(3)
+    return np.swapaxes(ret, 0, 1)
 
 def elo_random_order_sequence(
         asset_value_arr, period_length, loc_noise, scale_noise, bid_ask_offset, 
@@ -91,7 +91,7 @@ def elo_random_order_sequence(
     orders_size = np.random.poisson(lam=(1 / lambdaI) * period_length, size=1)
     order_times = draw_arrival_times(
         orders_size, period_length, low=0.0, high=period_length)
-    unstacked_asset_values = asset_value_arr #np.swapaxes(asset_value_arr, 0, 1)
+    unstacked_asset_values = np.swapaxes(asset_value_arr, 0, 1)
     asset_value_jump_times, asset_values = unstacked_asset_values[0], unstacked_asset_values[1]
     asset_value_indexes = asof(asset_value_jump_times, order_times)
     asset_value_asof = asset_values[asset_value_indexes]
@@ -101,7 +101,6 @@ def elo_random_order_sequence(
             ) if x == 0 else np.random.normal(loc_noise + bid_ask_offset, scale_noise))
     noise_around_asset_value = noise_by_order_side(order_directions)
     order_prices = (asset_value_asof + noise_around_asset_value).astype(int)
-    #print(order_prices)
     grid = np.vectorize(price_grid)
     gridded_order_prices = grid(order_prices)
     orders_tif = np.full(orders_size, time_in_force).astype(int)
@@ -137,8 +136,8 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
                         conf['initial_price'],
                         round(len(fundamental_values) / period_length, 2)))
     
-    #log.info('fundamental values: %s' % (', '.join('{0}:{1}'.format(t, v) 
-    #                                        for t, v in fundamental_values)))
+    log.info('fundamental values: %s' % (', '.join('{0}:{1}'.format(t, v) 
+                                            for t, v in fundamental_values)))
     random_orders = elo_random_order_sequence(
         fundamental_values, 
         period_length, 
