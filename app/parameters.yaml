@@ -1,4 +1,4 @@
-session_duration: 60
+session_duration: 10800
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
@@ -12,7 +12,7 @@ time_in_force: 1
 
 focal_market_format: FBA
 external_market_format: CDA
-focal_market_fba_interval: 0.5
+focal_market_fba_interval: 1
 external_market_fba_interval: 1
 
 lambdaJ: 2
