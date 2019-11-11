@@ -72,7 +72,7 @@ def smallloop(sp):
             print(f'Starting process {n}')
             n += 1
             processes.append(run_sim())
-            sleep(5)
+            sleep(10)
     return processes
     
 
