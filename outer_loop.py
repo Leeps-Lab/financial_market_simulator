@@ -1,5 +1,6 @@
 import yaml
-import sys
+from time import sleep
+from sys import executable, argv
 import subprocess
 import settings
 from utility import (
@@ -9,7 +10,7 @@ import atexit
 
 def run_sim():
     cmd = [
-        sys.executable,
+        executable,
         'simulate.py',
     ]
     proc = subprocess.Popen(cmd)
@@ -26,9 +27,8 @@ def update(sp, **kwargs):
         sp[k] = v
     return sp
 
-def main():
+def bigloop(sp):
     processes = []
-    sp = get_simulation_parameters()
     formats = ['CDA', 'FBA']
     lambdaj = [0.5, 2, 5]
     lambdai = [[0.1, 0.05], [0.2, 0.1], [0.5, 0.25]]
@@ -52,6 +52,40 @@ def main():
                         print(f'Starting process {n}')
                         n += 1
                         processes.append(run_sim())
+                        sleep(5)
+
+    return processes
+
+def smallloop(sp):
+    processes = []
+    formats = ['CDA', 'FBA']
+    lambdaj = [0.5, 2]
+    n = 1
+
+    for f in formats:
+        for j in lambdaj:
+            sp = update(sp,
+                focal_market_format=f,
+                lambdaJ=j
+            )
+            write_sim_params(sp)
+            print(f'Starting process {n}')
+            n += 1
+            processes.append(run_sim())
+            sleep(5)
+    return processes
+    
+
+def main():
+    sp = get_simulation_parameters()
+    method = 'small'
+    if len(argv) > 1 and argv[1] == '--big':
+        method = 'big'
+    if method == 'big':
+        processes = bigloop(sp)
+    else:
+        processes = smallloop(sp)
+    
     n = 1
     for p in processes:
         p.wait()
