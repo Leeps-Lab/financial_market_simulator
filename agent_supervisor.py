@@ -242,19 +242,20 @@ class AgentSupervisor():
     # whether or not this tick falls on my turn
     @property
     def my_turn(self):
-        m = int(self.elapsed_ticks / self.sp['num_moves']) % self.num_agents
+        mvs = self.sp['num_moves']
+        if self.sp['explore_all']:
+            mvs *= self.sp['explore_all_num_submoves']
+        m = int(self.elapsed_ticks / mvs) % self.num_agents
         if m == self.config_num:
             return True
         else:
             return False
     # whether or not this tick falls on the first move of my turn
     @property
-    def first_move(self):
-        m = float(self.elapsed_ticks / self.sp['num_moves']) % self.num_agents
-        if m == self.config_num:
-            return True
-        else:
-            return False
+    def current_submove(self):
+        if not (self.sp['explore_all'] and self.my_turn):
+            return None
+        return self.elapsed_ticks % self.sp['explore_all_num_submoves']
 
     # called every tick
     # get current net worth and store it in self.current_profits
@@ -293,6 +294,44 @@ class AgentSupervisor():
             param_string = self.r.get(f'{self.session_code}_{other_agents[0]}_params')
             self.curr_params = eval(param_string)
     
+    def update_params_explore_all(self):
+        m = self.current_submove
+        assert(m is not None and m >= 0 and m <= 5)
+        
+        if m == 0:
+            self.submove_profits = {m: {} for m in range(5)}
+        if m != 5:
+            self.submove_profits[m]['initial'] = self.current_profits
+        if m != 0:
+            self.submove_profits[m - 1]['final'] = self.current_profits
+        
+        if m == 0:
+            prev = self.curr_params['a_y'] 
+            self.curr_params['a_y'] += self.step
+            curr = self.curr_params['a_y'] 
+        elif m == 1:
+            prev = self.curr_params['a_y'] 
+            self.curr_params['a_y'] -= self.step
+            curr = self.curr_params['a_y'] 
+        elif m == 2:
+            prev = self.curr_params['a_z'] 
+            self.curr_params['a_z'] += self.step
+            curr = self.curr_params['a_z'] 
+        elif m == 3:
+            prev = self.curr_params['a_z'] 
+            self.curr_params['a_z'] -= self.step
+            curr = self.curr_params['a_z'] 
+        elif m == 4:
+            prev = self.curr_params['speed'] 
+            self.switch_speed()
+            curr = self.curr_params['speed']
+        elif m == 5:
+            best = max(self.submove_profits,
+                key=lambda x: self.submove_profits[x]['final'] \
+                    - self.submove_profits[x]['initial'])
+        # un-update the interim ones each time, then reupdate the best one at the end
+
+
     # updates A_Y or A_Z given current profits
     def update_params(self):
         self.current_log_row += f'Previous profits: {self.previous_profits}. '
@@ -407,7 +446,9 @@ class AgentSupervisor():
             if self.elapsed_ticks % 2 == 1:
                 self.update_symmetric()
         # if this agent's turn, update their params
-        if self.my_turn:
+        if self.my_turn and self.sp['explore_all']:
+            self.update_params_explore_all()
+        elif self.my_turn:
             self.update_params()
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
