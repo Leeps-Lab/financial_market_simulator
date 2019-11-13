@@ -1,6 +1,3 @@
-# agent_supervisor.py
-# Author: Eli Pandolfo <epandolf@ucsc.edu>
-
 from math import expm1, ceil
 import random
 import time
@@ -18,6 +15,9 @@ from utility import get_interactive_agent_count, get_simulation_parameters
 import draw
 from discrete_event_emitter import RandomOrderEmitter
 from shutil import copyfile
+# agent_supervisor.py
+# Author: Eli Pandolfo <epandolf@ucsc.edu>
+
 ''' 
 DESCRIPTION
     This file defines a class called AgentSupervisor.
