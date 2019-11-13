@@ -84,6 +84,8 @@ def plot(a0, a1, a2, session_code, nums):
         f'- symmetric: {params["symmetric"]}',
         f'- num moves: {params["num_moves"]}',
         f'- move interval: {params["move_interval"]}',
+        f'- explore all: {params["explore_all"]}',
+        f'- submoves: {params["explore_all_num_submoves"]}',
         ]),
         fontsize=5, transform=ax2.transAxes, horizontalalignment='left',
         verticalalignment='bottom'
