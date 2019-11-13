@@ -31,28 +31,28 @@ def bigloop(sp):
     processes = []
     formats = ['CDA', 'FBA']
     lambdaj = [0.5, 2, 5]
-    lambdai = []#[0.1, 0.05], [0.2, 0.1], [0.5, 0.25]]
+    lambdai = [[0.1, 0.05], [0.2, 0.1], [0.5, 0.25]]
     speed = [1000, 10000]
-    time_in_force = []#0.5, 2]
+    time_in_force = [0.5, 2]
     n = 1
 
-    for f in formats:
-        for j in lambdaj:
-            for i in lambdai:
-                for s in speed:
-                    for t in time_in_force:
-                        sp = update(sp,
-                            focal_market_format=f,
-                            lambdaJ=j,
-                            lambdaI=i,
-                            speed_unit_cost=s,
-                            time_in_force=t
-                        )
-                        write_sim_params(sp)
-                        print(f'Starting process {n}')
-                        n += 1
-                        processes.append(run_sim())
-                        sleep(5)
+    #for f in formats:
+    #    for j in lambdaj:
+    #        for i in lambdai:
+    #            for s in speed:
+    #                for t in time_in_force:
+    #                    sp = update(sp,
+    #                        focal_market_format=f,
+    #                        lambdaJ=j,
+    #                        lambdaI=i,
+    #                        speed_unit_cost=s,
+    #                        time_in_force=t
+    #                    )
+    #                    write_sim_params(sp)
+    #                    print(f'Starting process {n}')
+    #                    n += 1
+    #                    processes.append(run_sim())
+    #                    sleep(30)
 
     return processes
 
@@ -78,9 +78,9 @@ def smallloop(sp):
 
 def main():
     sp = get_simulation_parameters()
-    method = 'small'
-    if len(argv) > 1 and argv[1] == '--big':
-        method = 'big'
+    method = 'big'
+    if len(argv) > 1 and argv[1] == '--small':
+        method = 'small'
     if method == 'big':
         processes = bigloop(sp)
     else:
