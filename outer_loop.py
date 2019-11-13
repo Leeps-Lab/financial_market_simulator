@@ -7,11 +7,16 @@ from utility import (
     random_chars, get_interactive_agent_count, 
     get_simulation_parameters, copy_params_to_logs)
 import atexit
+import numpy as np
 
-def run_sim():
+def 
+
+def run_sim(code):
     cmd = [
         executable,
         'simulate.py',
+        '--session_code',
+        code,
     ]
     proc = subprocess.Popen(cmd)
     # make sure this process is eventually killed
@@ -27,15 +32,40 @@ def update(sp, **kwargs):
         sp[k] = v
     return sp
 
+def create_imap(ff, jj, ii, ss, tt):
+    imap = {}
+    for f in range(ff):
+        for j in range(jj):
+            for i in range(ii):
+                for s in range(ss):
+                    for t in range(tt):
+                        key = f*jj*ii*ss*tt + j*ii*ss*tt + i*ss*tt + s*tt + t
+                        val = (f, j, i, s, t)
+                        imap[key] = val
+    return imap
+
 def bigloop(sp):
+    num_agents = 3
     processes = []
     formats = ['CDA', 'FBA']
     lambdaj = [0.5, 2, 5]
     lambdai = [[0.1, 0.05], [0.2, 0.1], [0.5, 0.25]]
     speed = [1000, 10000]
     time_in_force = [0.5, 2]
-    n = 1
 
+    ff = len(formats)
+    jj = len(lambdaj)
+    ii = len(lambdai)
+    ss = len(speed)
+    tt = len(time_in_force)
+    a = np.ndarray((ff, jj, ii, ss, tt, num_agents), dtype=tuple)
+    count = ff * jj * ii * ss * tt * num_agents
+    code = random_chars(6)
+    imap = create_imap(ff, jj, ii, ss, tt)
+    d = dict(code=code, array=a, imap=imap, count=count)
+    dump_pickle(d)
+
+    n = 1
     for f in formats:
         for j in lambdaj:
             for i in lambdai:
@@ -51,7 +81,11 @@ def bigloop(sp):
                         write_sim_params(sp)
                         print(f'Starting process {n}')
                         n += 1
-                        processes.append(run_sim())
+                        sn = str(n)
+                        if len(sn) == 1:
+                            sn = f'0{sn}'
+                        session_code = f'{code}{sn}'
+                        processes.append(run_sim(session_code))
                         sleep(5)
 
     return processes
