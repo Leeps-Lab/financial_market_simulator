@@ -31,9 +31,9 @@ def bigloop(sp):
     processes = []
     formats = ['CDA', 'FBA']
     lambdaj = [0.5, 2, 5]
-    lambdai = [[0.1, 0.05], [0.2, 0.1], [0.5, 0.25]]
+    lambdai = []#[0.1, 0.05], [0.2, 0.1], [0.5, 0.25]]
     speed = [1000, 10000]
-    time_in_force = [0.5, 2]
+    time_in_force = []#0.5, 2]
     n = 1
 
     for f in formats:
