@@ -35,6 +35,8 @@ default_simulation_parameters = {
     'symmetric': False,
     'num_moves': 8,
     'move_interval': 3.0,
+    'explore_all': False,
+    'explore_all_num_submoves': 6,
 }
 
 logs_dir = './app/logs/'
