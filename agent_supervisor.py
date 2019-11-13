@@ -294,43 +294,57 @@ class AgentSupervisor():
             param_string = self.r.get(f'{self.session_code}_{other_agents[0]}_params')
             self.curr_params = eval(param_string)
     
-    def update_params_explore_all(self):
-        m = self.current_submove
-        assert(m is not None and m >= 0 and m <= 5)
-        
+    def _update_params_inner(self, m):
         if m == 0:
-            self.submove_profits = {m: {} for m in range(5)}
-        if m != 5:
-            self.submove_profits[m]['initial'] = self.current_profits
-        if m != 0:
-            self.submove_profits[m - 1]['final'] = self.current_profits
-        
-        if m == 0:
+            self.current = 'a_y'
             prev = self.curr_params['a_y'] 
             self.curr_params['a_y'] += self.step
-            curr = self.curr_params['a_y'] 
+            curr = self.curr_params['a_y']
         elif m == 1:
+            self.current = 'a_y'
+            self.curr_params = self.curr_params_copy.copy()
             prev = self.curr_params['a_y'] 
             self.curr_params['a_y'] -= self.step
             curr = self.curr_params['a_y'] 
         elif m == 2:
+            self.current = 'a_z'
+            self.curr_params = self.curr_params_copy.copy()
             prev = self.curr_params['a_z'] 
             self.curr_params['a_z'] += self.step
             curr = self.curr_params['a_z'] 
         elif m == 3:
+            self.current = 'a_z'
+            self.curr_params = self.curr_params_copy.copy()
             prev = self.curr_params['a_z'] 
             self.curr_params['a_z'] -= self.step
             curr = self.curr_params['a_z'] 
         elif m == 4:
+            self.current = 'speed'
+            self.curr_params = self.curr_params_copy.copy()
             prev = self.curr_params['speed'] 
             self.switch_speed()
             curr = self.curr_params['speed']
-        elif m == 5:
+        self.current_log_row += f'Adjusting {self.current} from {prev} ' +\
+            f'to {curr}. '
+    
+    def update_params_explore_all(self):
+        m = self.current_submove
+        assert(m is not None and m >= 0 and m <= 5)
+        self.current_log_row += f'Current submove: {m}.'
+        if m == 0:
+            self.curr_params_copy = self.curr_params.copy()
+            self.submove_profits = {m: {} for m in range(5)}
+        else:
+            self.submove_profits[m - 1]['final'] = self.current_profits
+        self._update_params_inner(m)
+        if m != 5:
+            self.submove_profits[m]['initial'] = self.current_profits
+        else:
+            self.curr_params = self.curr_params_copy.copy()
             best = max(self.submove_profits,
                 key=lambda x: self.submove_profits[x]['final'] \
                     - self.submove_profits[x]['initial'])
-        # un-update the interim ones each time, then reupdate the best one at the end
-
+            self._update_params_inner(best)             
 
     # updates A_Y or A_Z given current profits
     def update_params(self):
