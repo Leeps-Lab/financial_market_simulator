@@ -47,7 +47,7 @@ def plot(a0, a1, a2, session_code, nums):
     ax1.set_ylabel('Profit', color=TEXT)
     ax1.set_title(f'{session_code} Agents {nums[0]}, {nums[1]}, {nums[2]} Optimization Parameters')
     ax1.legend(loc='upper left', bbox_to_anchor=(-0.255, 0.75))
-    ax1.set_yscale('log')
+    #ax1.set_yscale('log')
 
     # agent 0
     ax2.plot(a0['Inventory'], zorder=3, linewidth=.5, color=inventory_color)

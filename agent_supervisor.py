@@ -324,8 +324,9 @@ class AgentSupervisor():
             prev = self.curr_params['speed'] 
             self.switch_speed()
             curr = self.curr_params['speed']
-        self.current_log_row += f'Adjusting {self.current} from {prev} ' +\
-            f'to {curr}. '
+        if m != 5:
+            self.current_log_row += f'Adjusting {self.current} from {prev} ' +\
+                f'to {curr}. '
     
     def update_params_explore_all(self):
         m = self.current_submove
