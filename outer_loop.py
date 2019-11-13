@@ -69,27 +69,27 @@ def bigloop(sp):
     dump_pickle(d)
 
     n = 1
-    #for f in formats:
-    #    for j in lambdaj:
-    #        for i in lambdai:
-    #            for s in speed:
-    #                for t in time_in_force:
-    #                    sp = update(sp,
-    #                        focal_market_format=f,
-    #                        lambdaJ=j,
-    #                        lambdaI=i,
-    #                        speed_unit_cost=s,
-    #                        time_in_force=t
-    #                    )
-    #                    write_sim_params(sp)
-    #                    print(f'Starting process {n}')
-    #                    n += 1
-    #                    sn = str(n)
-    #                    if len(sn) == 1:
-    #                        sn = f'0{sn}'
-    #                    session_code = f'{code}{sn}'
-    #                    processes.append(run_sim(session_code))
-    #                    sleep(5)
+    for f in formats:
+        for j in lambdaj:
+            for i in lambdai:
+                for s in speed:
+                    for t in time_in_force:
+                        sp = update(sp,
+                            focal_market_format=f,
+                            lambdaJ=j,
+                            lambdaI=i,
+                            speed_unit_cost=s,
+                            time_in_force=t
+                        )
+                        write_sim_params(sp)
+                        print(f'Starting process {n}')
+                        n += 1
+                        sn = str(n)
+                        if len(sn) == 1:
+                            sn = f'0{sn}'
+                        session_code = f'{code}{sn}'
+                        processes.append(run_sim(session_code))
+                        sleep(5)
 
     return processes
 
