@@ -28,7 +28,7 @@ options, args = p.parse_known_args()
 def get_available_ports(num_ports):
     ports = []
     for port in range(9000, 10000):
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             res = sock.connect_ex(('localhost', port))
             if res != 0:
                 ports.append(port)

@@ -62,13 +62,13 @@ def bigloop(sp):
     ss = len(speed)
     tt = len(time_in_force)
     a = np.ndarray((ff, jj, ii, ss, tt, num_agents), dtype=tuple)
-    count = ff * jj * ii * ss * tt * num_agents
+    count = ff * jj * ii * ss * tt
     code = random_chars(6)
     imap = create_imap(ff, jj, ii, ss, tt)
     d = dict(code=code, array=a, imap=imap, count=count)
     dump_pickle(d)
 
-    n = 1
+    n = 0
     for f in formats:
         for j in lambdaj:
             for i in lambdai:
@@ -83,12 +83,12 @@ def bigloop(sp):
                         )
                         write_sim_params(sp)
                         print(f'Starting process {n}')
-                        n += 1
                         sn = str(n)
                         if len(sn) == 1:
                             sn = f'0{sn}'
                         session_code = f'{code}{sn}'
                         processes.append(run_sim(session_code))
+                        n += 1
                         sleep(30)
 
     return processes
