@@ -28,7 +28,7 @@ options, args = p.parse_known_args()
 def get_available_ports(num_ports):
     ports = []
     try:
-        x = int(session_code[-2:])
+        x = int(options.session_code[-2:])
     except ValueError as e:
         x = 0
     x *= 10 # each simulation only needs 9 threads (for 3 dynamic agents) but
