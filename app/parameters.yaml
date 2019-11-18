@@ -1,4 +1,4 @@
-session_duration: 120
+session_duration: 10800
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
@@ -46,6 +46,6 @@ step: 0.05  # amount y/z change per move, eg y_{t+1} = y_{t} + step
 symmetric: false # symmetric mode (agents change strat to match best every turn)
 num_moves: 8 # number of moves in a turn
 move_interval: 10 # number of seconds per move
-explore_all: false
+explore_all: true
 explore_all_num_submoves: 6
 
