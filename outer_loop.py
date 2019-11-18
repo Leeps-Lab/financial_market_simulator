@@ -14,13 +14,19 @@ def dump_pickle(d):
     with open('app/data/sim_meta.pickle', 'wb') as f:
         pickle.dump(d, f)
 
-def run_sim(code):
-    cmd = [
-        executable,
-        'simulate.py',
-        '--session_code',
-        code,
-    ]
+def run_sim(code=None):
+    if code != None:
+        cmd = [
+            executable,
+            'simulate.py',
+            '--session_code',
+            code,
+        ]
+    else:
+        cmd = [
+            executable,
+            'simulate.py',
+        ]
     proc = subprocess.Popen(cmd)
     # make sure this process is eventually killed
     atexit.register(proc.terminate)
