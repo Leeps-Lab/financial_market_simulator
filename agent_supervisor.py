@@ -294,39 +294,37 @@ class AgentSupervisor():
             param_string = self.r.get(f'{self.session_code}_{other_agents[0]}_params')
             self.curr_params = eval(param_string)
     
+    def copy_and_update(self, inc):
+        prev = self.curr_params[self.current] 
+        if inc == True:
+            self.curr_params[self.current] += self.step
+        else:
+            self.curr_params[self.current] -= self.step
+        self.bounds_check()
+        curr = self.curr_params[self.current]
+        return prev, curr
+
     def _update_params_inner(self, m):
         if m == 0:
             self.current = 'a_y'
-            prev = self.curr_params['a_y'] 
-            self.curr_params['a_y'] += self.step
-            curr = self.curr_params['a_y']
+            prev, curr = self.copy_and_update(True)
         elif m == 1:
             self.current = 'a_y'
-            self.curr_params = self.curr_params_copy.copy()
-            prev = self.curr_params['a_y'] 
-            self.curr_params['a_y'] -= self.step
-            curr = self.curr_params['a_y'] 
+            prev, curr = self.copy_and_update(False)
         elif m == 2:
             self.current = 'a_z'
-            self.curr_params = self.curr_params_copy.copy()
-            prev = self.curr_params['a_z'] 
-            self.curr_params['a_z'] += self.step
-            curr = self.curr_params['a_z'] 
+            prev, curr = self.copy_and_update(True)
         elif m == 3:
             self.current = 'a_z'
-            self.curr_params = self.curr_params_copy.copy()
-            prev = self.curr_params['a_z'] 
-            self.curr_params['a_z'] -= self.step
-            curr = self.curr_params['a_z'] 
+            prev, curr = self.copy_and_update(False)
         elif m == 4:
             self.current = 'speed'
             self.curr_params = self.curr_params_copy.copy()
             prev = self.curr_params['speed'] 
             self.switch_speed()
             curr = self.curr_params['speed']
-        if m != 5:
-            self.current_log_row += f'Adjusting {self.current} from {prev} ' +\
-                f'to {curr}. '
+        self.current_log_row += f'Adjusting {self.current} from {prev} ' +\
+            f'to {curr}. '
     
     def update_params_explore_all(self):
         m = self.current_submove
@@ -335,17 +333,18 @@ class AgentSupervisor():
         if m == 0:
             self.curr_params_copy = self.curr_params.copy()
             self.submove_profits = {m: {} for m in range(5)}
+            self.co = random.sample([0, 1, 2, 3, 4], k=5)
         else:
-            self.submove_profits[m - 1]['final'] = self.current_profits
-        self._update_params_inner(m)
+            self.submove_profits[self.co[m - 1]]['final'] = self.current_profits
         if m != 5:
-            self.submove_profits[m]['initial'] = self.current_profits
+            self._update_params_inner(self.co[m])
+            self.submove_profits[self.co[m]]['initial'] = self.current_profits
         else:
             self.curr_params = self.curr_params_copy.copy()
             best = max(self.submove_profits,
                 key=lambda x: self.submove_profits[x]['final'] \
                     - self.submove_profits[x]['initial'])
-            self._update_params_inner(best)             
+            self._update_params_inner(self.co[best])             
 
     # updates A_Y or A_Z given current profits
     def update_params(self):
