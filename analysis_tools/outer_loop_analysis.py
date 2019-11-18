@@ -1,4 +1,5 @@
 from os import walk
+import pandas as pd
 import numpy as np
 import pickle
 from os import listdir
@@ -41,38 +42,39 @@ def parse_files(session_code, nums):
                 a2 = f'app/data/{f}'
     return a0, a1, a2
 
-def fill_array(code, array, imap, count):
+def build_df(code, params, imap, count):
+    cols = ['Session Code', 'Agent ID', 'Tick']
+    param_cols = list(params.keys())
+    cols.extend(param_cols)
+    cols.extend(['Inventory', 'External', 'Speed', 'Profit'])
+    df = pd.DataFrame(columns=cols)
     for j in range(count):
         i = str(j)
         if len(i) == 1:
             i = f'0{i}'
         session = f'{code}{i}'
         nums = (0, 1, 2)
+        tup = imap[j]
+        cparams = {k: v[tup[i]] for i, (k, v) in enumerate(params.items())}
         files = parse_files(session, nums)
-        for k, fname in enumerate(files):
+        for c, fname in enumerate(files):
             if fname == None:
                 continue
-            with open(fname, 'r') as f:
-                lines = f.readlines()
-            profit_line = lines[-1]
-            params_line = lines[-2]
-            profit = float(profit_line.split(',')[-1])
-            params = params_line.split(',')
-            y = float(params[1])
-            z = float(params[2])
-            speed = float(params[3])
-            val = (y, z, speed, profit)
-            indices = list(imap[j])
-            indices.append(k)
-            indices = tuple(indices)
-            array.itemset(indices, val)
-    return array
+            agent_df = pd.read_csv(fname, index_col=0)
+            for k, v in cparams.items():
+                agent_df[k] = np.full(agent_df.shape[0], str(v))
+            agent_df['Session Code'] = np.full(agent_df.shape[0], session)
+            agent_df['Agent ID'] = np.full(agent_df.shape[0], c)
+            agent_df['Tick'] = agent_df.index
+            df = pd.concat([df, agent_df], ignore_index=True)
+    df = df[cols]
+    df.to_csv(f'app/data/{code}##_combined.csv')
+    return df
 
 def main():
     m = load_pickle()
-    a = fill_array(**m)
-    print(a)
-    dump_pickle(a)
+    df = build_df(**m)
+    print(df.head())
 
 if __name__ == '__main__':
     main()

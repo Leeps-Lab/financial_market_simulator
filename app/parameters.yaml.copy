@@ -22,7 +22,7 @@ init_z: 0.5
 initial_price: 1000000
 k_reference_price: 0.2
 k_signed_volume: 0.2
-lambdaI: [0.1, 0.05]
+lambdaI: [0.5, 0.25]
 lambdaJ: 5
 move_interval: 10
 num_moves: 8

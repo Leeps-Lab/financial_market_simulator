@@ -52,7 +52,7 @@ def bigloop(sp):
     processes = []
     formats = ['CDA', 'FBA']
     lambdaj = [0.5, 2, 5]
-    lambdai = [[0.1, 0.05], [0.2, 0.1], [0.5, 0.25]]
+    lambdai = [[0.1, 0.05]]#, [0.2, 0.1], [0.5, 0.25]]
     speed = [1000, 10000]
     time_in_force = [0.5, 2]
 
@@ -61,11 +61,17 @@ def bigloop(sp):
     ii = len(lambdai)
     ss = len(speed)
     tt = len(time_in_force)
-    a = np.ndarray((ff, jj, ii, ss, tt, num_agents), dtype=tuple)
+    params = {
+        'Format': formats,
+        'Lambda J': lambdaj,
+        'Lambda I': lambdai,
+        'Speed Cost': speed,
+        'Time in Force': time_in_force,
+    }
     count = ff * jj * ii * ss * tt
     code = random_chars(6)
     imap = create_imap(ff, jj, ii, ss, tt)
-    d = dict(code=code, array=a, imap=imap, count=count)
+    d = dict(code=code, params=params, imap=imap, count=count)
     dump_pickle(d)
 
     n = 0
