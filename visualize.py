@@ -21,7 +21,7 @@ external_color = '#1fa8e4'
 
 def bar(a):
     xs = [i for i, x in enumerate(a['Speed']) \
-        if i > 0 and x == 1 and a['Speed'][i - 1] == 0]
+        if i > 0 and x == 1 and (a['Speed'][i - 1] == 0 or i == 1)]
     num = 0
     widths = []
     for i, x in enumerate(a['Speed']):
@@ -52,9 +52,11 @@ def plot(a0, a1, a2, session_code, nums):
     # agent 0
     ax2.plot(a0['Inventory'], zorder=3, linewidth=.5, color=inventory_color)
     ax2.plot(a0['External'], zorder=3, linewidth=.5, color=external_color)
+    #ax2.fill_between(a0['Speed'], np.zeros(len(a1['Speed'])), zorder=2, drawstyle='steps-post', color=speed_color,
+    #    alpha=0.25)
+    
     xs, widths = bar(a0)
-    ax2.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2,
-        alpha=0.25)
+    ax2.bar(xs, np.ones(len(xs)), width=widths, align='edge', color=speed_color, zorder=2, alpha=0.25)
     
     ax2.set_ylabel(f'Agent {nums[0]} (A{nums[0]})', color=A0_color)
     params = get_simulation_parameters()
@@ -93,8 +95,10 @@ def plot(a0, a1, a2, session_code, nums):
     # agent 1
     ax3.plot(a1['Inventory'], zorder=3, linewidth=.5, color=inventory_color)
     ax3.plot(a1['External'], zorder=3, linewidth=.5, color=external_color)
+    #ax3.fill_between(a1['Speed'], np.zeros(len(a1['Speed'])), zorder=2, drawstyle='steps-post', color=speed_color,
+    #    alpha=0.25)
     xs, widths = bar(a1)
-    ax3.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2,
+    ax3.bar(xs, np.ones(len(xs)), width=widths, align='edge', color=speed_color, zorder=2,
         alpha=0.25)
     ax3.set_ylabel(f'Agent {nums[1]} (A{nums[1]})', color=A1_color)
     # agent 2
@@ -102,8 +106,10 @@ def plot(a0, a1, a2, session_code, nums):
         color=inventory_color)
     ax4.plot(a2['External'], zorder=3, linewidth=.5, label='External',
         color=external_color)
+    #ax4.fill_between(a2['Speed'], np.zeros(len(a2['Speed'])),  zorder=2, drawstyle='steps-post', color=speed_color,
+    #    alpha=0.25)
     xs, widths = bar(a2)
-    ax4.bar(xs, 1, width=widths, align='edge', color=speed_color, zorder=2,
+    ax4.bar(xs, np.ones(len(xs)), width=widths, align='edge', color=speed_color, zorder=2,
         alpha=0.25, label='Speed')
     ax4.set_ylabel(f'Agent {nums[2]} (A{nums[2]})', color=A2_color)
     ax4.legend(loc='upper center', bbox_to_anchor=(-0.175, 3.15))
