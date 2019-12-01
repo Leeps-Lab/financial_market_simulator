@@ -321,22 +321,29 @@ class AgentSupervisor():
             self.current = 'speed'
             self.curr_params = self.curr_params_copy.copy()
             prev = self.curr_params['speed'] 
-            self.switch_speed()
+            self.curr_params['speed'] = 0
+            curr = self.curr_params['speed']
+        elif m == 5:
+            self.current = 'speed'
+            self.curr_params = self.curr_params_copy.copy()
+            prev = self.curr_params['speed'] 
+            self.curr_params['speed'] = 1
             curr = self.curr_params['speed']
         self.current_log_row += f'Adjusting {self.current} from {prev} ' +\
             f'to {curr}. '
     
     def update_params_explore_all(self):
         m = self.current_submove
-        assert(m is not None and m >= 0 and m <= 5)
+        n = self.sp['explore_all_num_submoves']
+        assert(m is not None and m >= 0 and m < n)
         self.current_log_row += f'Current submove: {m}.'
         if m == 0:
             self.curr_params_copy = self.curr_params.copy()
-            self.submove_profits = {m: {} for m in range(5)}
-            self.co = random.sample([0, 1, 2, 3, 4], k=5)
+            self.submove_profits = {m: {} for m in range(n)}
+            self.co = random.sample(list(range(n)), k=n-1)
         else:
             self.submove_profits[self.co[m - 1]]['final'] = self.current_profits
-        if m != 5:
+        if m != n:
             self._update_params_inner(self.co[m])
             self.submove_profits[self.co[m]]['initial'] = self.current_profits
         else:
