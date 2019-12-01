@@ -49,3 +49,4 @@ move_interval: 10 # number of seconds per move
 explore_all: true
 explore_all_num_submoves: 7 # do not change this from 7
 
+
