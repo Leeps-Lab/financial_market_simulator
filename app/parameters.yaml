@@ -10,10 +10,13 @@ exogenous_order_price_noise_std: 30000
 bid_ask_offset: 20000
 time_in_force: 1
 
-focal_market_format: IEX
+focal_market_format: FBA
 external_market_format: CDA
 focal_market_fba_interval: 0.5
 external_market_fba_interval: 1
+
+iex_delay: 0.035
+peg_proportion: 0.5
 
 lambdaJ: 2
 lambdaI: [0.1, 0.05]  # first element: focal market, second element: external market
@@ -25,7 +28,7 @@ k_signed_volume: 0.2
 a_x_multiplier: 5   # a_x <-> signed volume
 a_y_multiplier: 3   # a_y <-> inventory, used in exp fn
 
-speed_unit_cost: 2000 # per second
+speed_unit_cost: 0 # per second
 
 random_seed: 12338
 

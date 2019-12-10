@@ -42,7 +42,7 @@ def get_available_ports(num_ports):
                     return ports
     raise RuntimeError('no available ports')
 
-def start_exchange(port, exchange_format, fba_interval):
+def start_exchange(port, exchange_format, fba_interval, iex_delay):
     cmd = [
         sys.executable,
         'exchange_server/run_exchange_server.py',
@@ -53,6 +53,11 @@ def start_exchange(port, exchange_format, fba_interval):
     if exchange_format.lower() == 'fba':
         cmd.extend([
             '--interval', str(fba_interval),
+        ])
+    # delay in seconds. defaults to 350us, or 0.035s
+    if exchange_format.lower() == 'iex':
+        cmd.extend([
+            '--delay', str(iex_delay),
         ])
     if options.debug:
         cmd.append('--debug')
@@ -86,12 +91,14 @@ def run_elo_simulation(session_code):
     focal_exchange_proc = start_exchange(
         focal_exchange_port,
         params['focal_market_format'],
-        params['focal_market_fba_interval']
+        params['focal_market_fba_interval'],
+        params['iex_delay'],
     )
     external_exchange_proc = start_exchange(
         external_exchange_port,
         params['external_market_format'],
-        params['external_market_fba_interval']
+        params['external_market_fba_interval'],
+        params['iex_delay'],
     )
     # sleep for a second after making the exchanges to ensure they don't buffer messages
     # when the experiment starts. not sure this is necessary, but just being safe

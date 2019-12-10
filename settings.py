@@ -26,6 +26,8 @@ default_simulation_parameters = {
     'external_market_format': 'CDA',
     'focal_market_fba_interval': 3,
     'external_market_fba_interval': 3,
+    'iex_delay': 0.035, 
+    'peg_proportion': 0.5,
     'random_seed': None,
     'fundamental_values': [],
     'agent_state_configs': [],

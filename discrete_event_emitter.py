@@ -33,8 +33,8 @@ class DiscreteEventEmitter:
 
 
 class RandomOrderEmitter(DiscreteEventEmitter):
-    fieldnames = ('fundamental_price', 'price', 'buy_sell_indicator', 'time_in_force')
-    fieldprocessors = (float, int, str, int)
+    fieldnames = ('fundamental_price', 'price', 'buy_sell_indicator', 'time_in_force', 'midpoint_peg')
+    fieldprocessors = (float, int, str, int, bool)
     name = 'investor_arrivals'
 
 class ELOSpeedChangeEmitter(DiscreteEventEmitter):

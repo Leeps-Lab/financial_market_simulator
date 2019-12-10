@@ -148,9 +148,9 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
         conf['bid_ask_offset'],
         conf['lambdaI'][config_num],    # so rabbits differ in arrival rate..
         conf['time_in_force'],
-        conf['peg_proportion']),
+        conf['peg_proportion'])
     random_orders = np.swapaxes(random_orders, 0, 1)
-    print(random_orders[0])
+#    print(random_orders[:20])
     log.info(
         '%s random orders generated. period length: %s, per second: %s.' % (
             random_orders.shape[0], 
