@@ -10,7 +10,7 @@ exogenous_order_price_noise_std: 30000
 bid_ask_offset: 20000
 time_in_force: 1
 
-focal_market_format: FBA
+focal_market_format: CDA
 external_market_format: CDA
 focal_market_fba_interval: 0.5
 external_market_fba_interval: 1
