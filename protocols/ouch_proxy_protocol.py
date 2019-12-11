@@ -15,7 +15,7 @@ class ProxyOuchServerProtocol(OUCH):
     bytes_needed = {
         'S': 10,
         'C': 29,
-        'O': 49,
+        'O': 50,
         'U': 81,
         'L': 17,
     }
@@ -93,6 +93,7 @@ class ProxyOuchClient(OUCH):
         original_msg = bytes(self.buffer)
         msg = IncomingOuchMessage(
             original_msg, message_cls=self.message_cls, **incoming_message_defaults)
+        
         self.market.handle_OUCH(msg, original_msg, 1)     
 
     def connectionMade(self):

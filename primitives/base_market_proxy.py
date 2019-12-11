@@ -30,7 +30,7 @@ class BaseMarketProxy:
         # queue to store messages 
         # when ouch channel to exchange is down.
         self.outgoing_queue = deque(maxlen=100)
-    
+
     @db.freeze_state()     
     def handle_OUCH(self, message: IncomingOuchMessage, original_msg: bytes, direction: int):
         # outbound message
