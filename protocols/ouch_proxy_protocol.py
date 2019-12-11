@@ -14,9 +14,10 @@ class ProxyOuchServerProtocol(OUCH):
     name = 'private OUCH channel'
     bytes_needed = {
         'S': 10,
-        'C': 19,
+        'C': 29,
         'O': 49,
-        'U': 47,
+        'U': 81,
+        'L': 17,
     }
     message_cls = ouch_messages.OuchClientMessages
 
@@ -73,12 +74,13 @@ class ProxyOuchServerFactory(protocol.ServerFactory):
 class ProxyOuchClient(OUCH):
     bytes_needed = {
         'S': 10,
-        'E': 40,
-        'C': 28,
-        'U': 80,
-        'A': 66,
+        'E': 41,
+        'C': 29,
+        'U': 81,
+        'A': 67,
         'Q': 41,
         'Z': 49,
+        'L': 17,
     }
     message_cls = ouch_messages.OuchServerMessages
 

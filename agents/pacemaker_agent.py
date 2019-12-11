@@ -48,8 +48,9 @@ class PaceMakerAgent(BaseMarketAgent):
         self.model.handle_event(event)
         while event.exchange_msgs:
             message = event.exchange_msgs.pop()
+            print(len(message.translate()))
             if self.exchange_connection is not None:
-                print(self.exchange_connection)
+                print('sending message')
                 self.exchange_connection.sendMessage(message.translate(), message.delay)
             else:
                 self.outgoing_msg.append((message.translate(), message.delay))
