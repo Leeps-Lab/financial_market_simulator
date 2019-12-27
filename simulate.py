@@ -155,7 +155,7 @@ def run_elo_simulation(session_code):
                     random_seed), 'rabbit_agent_external'
 
     interactive_agents = []
-    for i in range(get_interactive_agent_count(params['agent_state_configs'])):
+    for i in range(0):#get_interactive_agent_count(params['agent_state_configs'])):
         agent_i = """run_agent.py --session_duration {0} --exchange_ouch_port {1} \
             --exchange_json_port {2}  --external_exchange_host 127.0.0.1 \
             --external_exchange_json_port {3} --session_code {4} \

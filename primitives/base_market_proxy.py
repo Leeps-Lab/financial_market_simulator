@@ -55,7 +55,6 @@ class BaseMarketProxy:
                     account_conn.sendMessage(original_msg, 0)
         # inbound message
         elif direction is 2:
-            print('proxy receiving inbound message')
             if self.exchange_connection is None:
                 self.outgoing_queue.append(message)
                 log.debug('message %s in queue..' % message)

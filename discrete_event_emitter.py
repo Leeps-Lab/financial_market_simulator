@@ -21,9 +21,11 @@ class DiscreteEventEmitter:
         for row in self.data:
             if self.has_changed(row):
                 arrival_time = float(row[0])
+                #print('discrete raw row',row)
                 row_as_dict = {
                     self.fieldnames[ix]: self.fieldprocessors[ix](value) for ix, 
                         value in enumerate(row[1:])}
+                #print('discrete row', row_as_dict)
                 row_as_dict['type'] = self.name
                 reactor.callLater(arrival_time, self.owner.handle_discrete_event, row_as_dict)
                 self.previous_state = row
@@ -34,7 +36,7 @@ class DiscreteEventEmitter:
 
 class RandomOrderEmitter(DiscreteEventEmitter):
     fieldnames = ('fundamental_price', 'price', 'buy_sell_indicator', 'time_in_force', 'midpoint_peg')
-    fieldprocessors = (float, int, str, int, bool)
+    fieldprocessors = (float, int, str, int, eval)
     name = 'investor_arrivals'
 
 class ELOSpeedChangeEmitter(DiscreteEventEmitter):

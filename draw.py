@@ -123,7 +123,7 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
     if conf['read_fundamental_values_from_array']:
         fundamental_values = conf['fundamental_values'].copy()
         fundamental_values.insert(0, [0, conf['initial_price']])
-        print(fundamental_values)
+ #       print(fundamental_values)
         fundamental_values = np.array(fundamental_values)
     else:
         with ContextSeed(seed):
