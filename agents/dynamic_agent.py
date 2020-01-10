@@ -22,7 +22,7 @@ def generate_account_id(size=4):
 class DynamicAgent(BaseMarketAgent):
     trader_model_cls = ELOTrader
     typecode = 'elo_interactive_agent'
-    handled_ouch_events = ('C', 'U', 'E', 'A')
+    handled_ouch_events = ('C', 'U', 'E', 'A', 'L')
     handled_external_market_events = ('external_feed_change', )
     handled_focal_market_events = ('post_batch', 'bbo_change', 'signed_volume_change', 'reference_price_change')
 
@@ -47,6 +47,10 @@ class DynamicAgent(BaseMarketAgent):
         if (type_code == 'focal' and msg_type in self.handled_focal_market_events) or (
             type_code == 'external' and msg_type in self.handled_external_market_events):
             msg = IncomingMessage(clean_message)
+            if msg_type == 'external_feed_change': # and random.randint(0,2) % 3 == 0:
+                event = self.event_cls('focal', msg) # redirect external feed change to focal market
+                #self.model.handle_event(event)
+                #self.process_event(event)
             log.info('agent %s:%s --> handling json message %s:%s' % (
                 self.account_id, self.typecode, type_code, msg))
             event = self.event_cls(type_code, msg)

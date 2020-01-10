@@ -68,6 +68,7 @@ class BaseMarketAgent:
                     utility.get_traders_initial_market_view(), 'market_start')
         event = self.event_cls('initial state', msg)
         self.model.handle_event(event)
+
         return event
 
     @db.freeze_state()       
