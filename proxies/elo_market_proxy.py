@@ -3,7 +3,7 @@ from high_frequency_trading.hft.event import ELOEvent
 from primitives.base_market_proxy import BaseMarketProxy
 
 class ELOMarketProxy(BaseMarketProxy):
-    market_event_headers = ('E', 'Q', 'Z', 'K')
-    private_exchange_message_headers = ('A', 'U', 'C', 'E', 'L')
+    market_event_headers = ('E', 'Q', 'Z')
+    private_exchange_message_headers = ('A', 'U', 'C', 'E', 'L', 'K')
     market_cls =  ELOMarket
     event_cls = ELOEvent
