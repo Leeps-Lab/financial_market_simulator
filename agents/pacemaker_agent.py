@@ -50,7 +50,6 @@ class PaceMakerAgent(BaseMarketAgent):
             message = event.exchange_msgs.pop()
             if self.exchange_connection is not None:
 #                print('placing order:', order_data)
-                #print(vars(message))
                 self.exchange_connection.sendMessage(message.translate(), message.delay)
             else:
                 self.outgoing_msg.append((message.translate(), message.delay))

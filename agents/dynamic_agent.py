@@ -58,6 +58,7 @@ class DynamicAgent(BaseMarketAgent):
                 #print(vars(redirect_msg))
                 #print(redirect_msg.translate())
                 if self.exchange_connection is not None:
+                    #print('agent', redirect_msg.translate())
                     self.exchange_connection.sendMessage(redirect_msg.translate(), redirect_msg.delay)
                 else:
                     self.outgoing_msg.append((redirect_msg.translate(), redirect_msg.delay))
