@@ -500,7 +500,7 @@ class AgentSupervisor():
         if is_dynamic:
             self.get_profits()
             self.profit_array.append(self.current_profits)
-            self.print_status('FINAL')
+#            self.print_status('FINAL')
             df = pd.DataFrame(list(itertools.zip_longest(
                 self.y_array, self.z_array, self.speed_array, self.profit_array)),
                 columns=['Inventory', 'External', 'Speed', 'Profit'])
