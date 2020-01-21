@@ -16,7 +16,7 @@ focal_market_fba_interval: 0.5
 external_market_fba_interval: 1
 
 iex_delay: 0.035
-peg_proportion: 0.5
+peg_proportion: 1.0
 
 lambdaJ: 2
 lambdaI: [0.1, 0.05]  # first element: focal market, second element: external market
