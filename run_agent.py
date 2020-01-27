@@ -41,6 +41,16 @@ def main(account_id):
         random_orders = draw.elo_draw(
             conf['move_interval'], conf,
             seed=options.random_seed, config_num=options.config_num)
+        # Useful for testing to ensure pegged orders get executed correctly
+        #random_orders = [
+        #    ['0.2', '999995', '999991', 'B', '5', 'False'],
+        #    ['0.2', '999995', '999991', 'B', '5', 'False'],
+        #    ['0.2', '999995', '1000000', 'S', '5', 'False'],
+        #    ['1.7', '999995', '999991', 'S', '5', 'True'],
+        #    ['2.8', '999995', '999980', 'B', '5', 'False'],
+        #    ['2.81', '999995', '999979', 'S', '5', 'False'],
+        #]
+        #print(random_orders)
         event_emitters = [RandomOrderEmitter(source_data=random_orders), ]
         agent_cls = PaceMakerAgent
 
@@ -53,7 +63,7 @@ def main(account_id):
  
     agent = agent_cls(options.session_code, options.exchange_host, 
         options.exchange_ouch_port, event_emitters=event_emitters, 
-        account_id=account_id, **agent_parameters)
+        account_id=account_id, config_num=options.config_num, **agent_parameters)
 
     reactor.connectTCP(options.exchange_host, options.exchange_ouch_port,
         OUCHClientFactory(agent))

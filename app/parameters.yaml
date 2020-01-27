@@ -1,4 +1,4 @@
-session_duration: 10
+session_duration: 30
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
@@ -16,7 +16,7 @@ focal_market_fba_interval: 0.5
 external_market_fba_interval: 1
 
 iex_delay: 0.035
-peg_proportion: 1.0
+peg_proportion: 0.5
 
 lambdaJ: 2
 lambdaI: [0.1, 0.05]  # first element: focal market, second element: external market
@@ -48,7 +48,7 @@ init_z: 0.5  # initial value of External
 step: 0.05  # amount y/z change per move, eg y_{t+1} = y_{t} + step 
 symmetric: false # symmetric mode (agents change strat to match best every turn)
 num_moves: 3 # number of moves in a turn
-move_interval: 5 # number of seconds per move
+move_interval: 10 # number of seconds per move
 explore_all: false
 explore_all_num_submoves: 7 # do not change this from 7
 

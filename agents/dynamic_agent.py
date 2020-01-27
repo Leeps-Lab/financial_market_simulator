@@ -7,6 +7,7 @@ import utility
 import string
 from random import choice
 import logging
+from copy import deepcopy
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ class DynamicAgent(BaseMarketAgent):
         self.model = self.trader_model_cls(
             self.session_id, 0, self.id, self.id, 'automated', '', 0, 
             firm=self.account_id, **kwargs)
+        self.config_num = kwargs.get('config_num', 1)
         # the agent expects an external feed message
         # with fields e_best_bid e_best_offer e_signed_volume
         # so I need a hack as market proxies always send those 
@@ -48,27 +50,16 @@ class DynamicAgent(BaseMarketAgent):
         if (type_code == 'focal' and msg_type in self.handled_focal_market_events) or (
             type_code == 'external' and msg_type in self.handled_external_market_events):
             msg = IncomingMessage(clean_message)
-            if msg_type == 'external_feed_change': # and random.randint(0,2) % 3 == 0:
-                #clean_message['market_id'] = 1
-                redirect_msg = ExternalFeedChangeMessage(clean_message)
+            if msg_type == 'external_feed_change' and self.config_num == 1:
+                redirect_msg = ExternalFeedChangeMessage(deepcopy(clean_message))
                 redirect_msg.data['type'] = 'external_feed'
                 redirect_msg.data['exchange_host'] = 0
                 redirect_msg.data['exchange_port'] = 0
                 redirect_msg.data['delay'] = 0.0
-                #print(vars(redirect_msg))
-                #print(redirect_msg.translate())
                 if self.exchange_connection is not None:
-                    #print('agent', redirect_msg.translate())
                     self.exchange_connection.sendMessage(redirect_msg.translate(), redirect_msg.delay)
                 else:
                     self.outgoing_msg.append((redirect_msg.translate(), redirect_msg.delay))
-                
-                #event = self.event_cls('external', redirect_msg) # redirect external feed change to focal market
-                #print(event)
-                #self.model.handle_event(event)
-                #event.exchange_msgs(event.original_message)
-                #print(event)
-                #self.process_event(event)
             log.info('agent %s:%s --> handling json message %s:%s' % (
                 self.account_id, self.typecode, type_code, msg))
             event = self.event_cls(type_code, msg)

@@ -435,7 +435,6 @@ class AgentSupervisor():
         random_orders = draw.elo_draw(
             self.sp['move_interval'], self.sp,
             seed=self.sp['random_seed'], config_num=self.config_num)
-        #print(random_orders)
         event_emitters = [RandomOrderEmitter(source_data=random_orders)]
         if isinstance(self.prev_random_orders, list):
             assert(str(random_orders) == str(self.prev_random_orders))
@@ -500,7 +499,7 @@ class AgentSupervisor():
         if is_dynamic:
             self.get_profits()
             self.profit_array.append(self.current_profits)
-#            self.print_status('FINAL')
+            self.print_status('FINAL')
             df = pd.DataFrame(list(itertools.zip_longest(
                 self.y_array, self.z_array, self.speed_array, self.profit_array)),
                 columns=['Inventory', 'External', 'Speed', 'Profit'])
