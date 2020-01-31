@@ -39,6 +39,10 @@ default_simulation_parameters = {
     'move_interval': 3.0,
     'explore_all': False,
     'explore_all_num_submoves': 7,
+    'grid_search': False,
+    'ys': [],
+    'zs': [],
+    'speeds': [],
 }
 
 logs_dir = './app/logs/'

@@ -445,6 +445,26 @@ class AgentSupervisor():
             em.owner = self.agent
             em.register_events()
 
+    def update_params_from_grid(self):
+        y, z, speed = self.get_current_grid_params()
+        self.prev_params = self.curr_params.copy()
+        self.curr_params['a_y'] = y
+        self.curr_params['a_z'] = z
+        self.curr_params['speed'] = speed
+
+    def get_current_grid_params(self):
+        flatlist = []
+        for y in self.sp['ys']:
+            for z in self.sp['zs']:
+                for speed in self.sp['speeds']:
+                    flatlist.append((y, z, speed))
+        return flatlist[self.elapsed_ticks]
+
+    def reset_profits(self):
+        self.agent.model.cash = 0
+        self.agent.model.net_worth = 0
+        self.current_profits = 0
+
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
         self.elapsed_ticks += 1
@@ -469,7 +489,10 @@ class AgentSupervisor():
         if self.my_turn and self.sp['explore_all']:
             self.update_params_explore_all()
         elif self.my_turn:
-            self.update_params()
+            if self.sp['grid_search']:
+                self.update_params_from_grid()
+            else:
+                self.update_params()
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
@@ -486,6 +509,8 @@ class AgentSupervisor():
             f.write(self.current_log_row + '\n')
 
         self.previous_profits = self.current_profits
+        if self.sp['grid_search']:
+            self.reset_profits()
     # initializes agent params at start of sim
     def at_start(self, is_dynamic):
         if self.config_num == 0:
