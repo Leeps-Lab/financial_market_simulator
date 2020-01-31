@@ -15,6 +15,7 @@ from utility import get_interactive_agent_count, get_simulation_parameters
 import draw
 from discrete_event_emitter import RandomOrderEmitter
 from shutil import copyfile
+from high_frequency_trading.hft.market_elements.inventory import Inventory
 # agent_supervisor.py
 # Author: Eli Pandolfo <epandolf@ucsc.edu>
 
@@ -416,6 +417,8 @@ class AgentSupervisor():
         tax_paid = model.inventory.cost
         model.cost += tax_paid
         model.tax_paid += tax_paid
+        ticker = model.inventory.ticker
+        model.inventory = Inventory(ticker=ticker) # reset inventory so that tax paid and cost dont translate over to the next tick
         self.current_log_row += f'Liquidated {size} shares at ' +\
             f'{ref} per share for {cash}' +\
             f', including {tax_paid} tax. '
@@ -463,6 +466,8 @@ class AgentSupervisor():
     def reset_profits(self):
         self.agent.model.cash = 0
         self.agent.model.net_worth = 0
+        self.agent.model.cost = 0
+        self.agent.model.tax_paid = 0
         self.current_profits = 0
 
     # entry point into the instance, called every tick
