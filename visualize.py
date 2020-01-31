@@ -41,9 +41,9 @@ def plot(a0, a1, a2, session_code, nums):
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, sharex=True)
     
     # profit graph
-    ax1.plot(a0['Profit'], label=f'A{nums[0]}', linewidth=.75, color=A0_color)
-    ax1.plot(a1['Profit'], label=f'A{nums[1]}', linewidth=.75, color=A1_color)
-    ax1.plot(a2['Profit'], label=f'A{nums[2]}', linewidth=.75, color=A2_color)
+    ax1.plot(a1['Profit'], label=f'A{nums[1]}', linewidth=.75, marker='o', markersize='1', linestyle=':', color=A1_color)
+    ax1.plot(a2['Profit'], label=f'A{nums[2]}', linewidth=.75, marker='o', markersize='1', linestyle=':', color=A2_color)
+    ax1.plot(a0['Profit'], label=f'A{nums[0]}', linewidth=.75, marker='o', markersize='1', linestyle=':', color=A0_color)
     ax1.set_ylabel('Profit', color=TEXT)
     ax1.set_title(f'{session_code} Agents {nums[0]}, {nums[1]}, {nums[2]} Optimization Parameters')
     ax1.legend(loc='upper left', bbox_to_anchor=(-0.255, 0.75))
