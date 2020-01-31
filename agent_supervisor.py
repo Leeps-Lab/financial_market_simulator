@@ -384,24 +384,23 @@ class AgentSupervisor():
         if not isDynamic:
             self.elapsed_seconds += 1
             return
-        if self.current != 'speed':
-            message = {
-                'type': 'slider',
-                'subsession_id': self.subsession_id,
-                'market_id': self.market_id,
-                'a_x': self.curr_params['a_x'],
-                'a_y': self.inventory_value,
-                'a_z': self.curr_params['a_z'],
-            }
-            message = IncomingMessage(message) 
-            event = self.agent.event_cls('agent', message) 
-            self.agent.model.user_slider_change(event)
-        else:
-            s = self.agent.model.technology_subscription
-            if self.curr_params['speed'] == 1 and not s.is_active:
-                s.activate()
-            elif self.curr_params['speed'] == 0 and s.is_active:
-                s.deactivate()
+        message = {
+            'type': 'slider',
+            'subsession_id': self.subsession_id,
+            'market_id': self.market_id,
+            'a_x': self.curr_params['a_x'],
+            'a_y': self.inventory_value,
+            'a_z': self.curr_params['a_z'],
+        }
+        message = IncomingMessage(message) 
+        event = self.agent.event_cls('agent', message) 
+        self.agent.model.user_slider_change(event)
+        
+        s = self.agent.model.technology_subscription
+        if self.curr_params['speed'] == 1 and not s.is_active:
+            s.activate()
+        elif self.curr_params['speed'] == 0 and s.is_active:
+            s.deactivate()
         self.elapsed_seconds += 1
 
     def liquidate(self):
