@@ -484,6 +484,12 @@ class AgentSupervisor():
         self.get_profits()
         self.current_log_row += f'Current profits: {self.current_profits}. '
         self.current_log_row += f'Current params: {str(self.curr_params)}. '
+        # update arrays for graphing
+        self.y_array.append(self.curr_params['a_y'])
+        self.z_array.append(self.curr_params['a_z'])
+        self.profit_array.append(self.current_profits)
+        self.speed_array.append(self.curr_params['speed'])
+        
         # if symmetric mode, store and update to maintain symmetry
         if self.r:
             self.store_profit_and_params()
@@ -497,11 +503,6 @@ class AgentSupervisor():
                 self.update_params_from_grid()
             else:
                 self.update_params()
-        # update arrays for graphing
-        self.y_array.append(self.curr_params['a_y'])
-        self.z_array.append(self.curr_params['a_z'])
-        self.profit_array.append(self.current_profits)
-        self.speed_array.append(self.curr_params['speed'])
 
         if self.elapsed_ticks % 11 == 0:
             df = pd.DataFrame(list(itertools.zip_longest(
