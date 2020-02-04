@@ -20,7 +20,7 @@ speed_color = '#b113ef'
 external_color = '#1fa8e4'
 
 def bar(a):
-    xs = [i for i, x in enumerate(a['Speed']) \
+    xs = [i - 1 for i, x in enumerate(a['Speed']) \
         if i > 0 and x == 1 and (a['Speed'][i - 1] == 0 or i == 1)]
     num = 0
     widths = []
