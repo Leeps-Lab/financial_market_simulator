@@ -394,13 +394,26 @@ class AgentSupervisor():
         }
         message = IncomingMessage(message) 
         event = self.agent.event_cls('agent', message) 
-        self.agent.model.user_slider_change(event)
-        
+        trader = self.agent.model
+        trader.user_slider_change(event)
+       
+        trader_state = trader.trader_role
+        message2 = {
+            'type': 'speed_change',
+            'subsession_id': self.subsession_id,
+            'market_id': self.market_id,
+        }
         s = self.agent.model.technology_subscription
         if self.curr_params['speed'] == 1 and not s.is_active:
-            s.activate()
+            message2['value'] = True
+            message2 = IncomingMessage(message2)
+            event2 = self.agent.event_cls('agent', message2)
+            trader_state.speed_technology_change(trader, event2)
         elif self.curr_params['speed'] == 0 and s.is_active:
-            s.deactivate()
+            message2['value'] = False
+            message2 = IncomingMessage(message2)
+            event2 = self.agent.event_cls('agent', message2)
+            trader_state.speed_technology_change(trader, event2)
         self.elapsed_seconds += 1
 
     def liquidate(self):

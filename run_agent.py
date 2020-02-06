@@ -42,22 +42,20 @@ def main(account_id):
             conf['move_interval'], conf,
             seed=options.random_seed, config_num=options.config_num)
         # Useful for testing to ensure pegged orders get executed correctly
-        if options.config_num == 1: #external
-            random_orders = [
-                ['0.2', '999995', '999991', 'B', '5', 'False'],
-                ['0.2', '999995', '1000000', 'S', '5', 'False'],
-                #['0.2', '999995', '1000000', 'S', '5', 'True'],
-                #['1.7', '999995', '999991', 'S', '5', 'True'],
-                #['2.8', '999995', '999980', 'B', '5', 'True'],
-                #['2.81', '999995', '999979', 'S', '5', 'True'],
-            ]
-        else: # focal
-            random_orders = [
-                ['0.2', '999995', '999991', 'B', '5', 'False'],
-                ['0.2', '999995', '1000000', 'S', '5', 'False'],
-                ['0.3', '999995', '999995', 'B', '5', 'True'],
-                ['0.4', '999995', '999990', 'A', '5', 'False'],
-            ]
+       # if options.config_num == 1: #external
+       #     random_orders = [
+       #         ['0.2', '950000', '910000', 'B', '15', 'False'],
+       #         ['0.2', '950000', '1000000', 'S', '15', 'False'],
+       #         ['2.4', '950000', '940000', 'B', '10', 'False'],
+       #         ['2.4', '950000', '960000', 'S', '10', 'False'],
+       #     ]
+       # else: # focal
+       #     random_orders = [
+       #         ['0.2', '950000', '910000', 'B', '10', 'False'],
+       #         ['0.2', '950000', '1000000', 'S', '10', 'False'],
+       #         ['0.3', '950000', '930000', 'B', '10', 'True'],
+       #         ['0.4', '950000', '970000', 'S', '10', 'False'],
+       #     ]
         #print(random_orders)
         event_emitters = [RandomOrderEmitter(source_data=random_orders), ]
         agent_cls = PaceMakerAgent

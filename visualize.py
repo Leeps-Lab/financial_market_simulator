@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 from matplotlib import style
 style.use('./analysis_tools/elip12.mplstyle')
 import matplotlib.pyplot as plt   
@@ -9,6 +9,8 @@ import configargparse
 from utility import get_simulation_parameters
 import settings
 from os import listdir
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.lines import Line2D
 
 TEXT = '#848484'
 plt.rcParams.update({'font.size': 6})
@@ -17,6 +19,7 @@ A1_color = '#eb860d'
 A0_color = '#e0cc05'
 inventory_color = '#60d515'
 speed_color = '#b113ef'
+gray_color = '#222222'
 external_color = '#1fa8e4'
 
 def bar(a):
@@ -37,6 +40,33 @@ def bar(a):
         widths.append(0)
     return xs, widths
 
+def heatmap(a0, session_code):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    colors = [speed_color if s == 1 else TEXT for s in a0['Speed']]
+    ax.scatter(a0['Inventory'], a0['External'], zs=a0['Profit'], c=colors)
+   
+    props = {'color': TEXT}
+    ax.set_xlabel('Inventory', **props)
+    ax.set_ylabel('External', **props)
+    ax.set_zlabel('Profit', **props)
+    custom2 = [
+        Line2D([0], [0], color=speed_color, lw=3),
+        Line2D([0], [0], color=TEXT, lw=3),
+    ]
+    ax.legend(custom2, ['Speed On', 'Speed Off'])
+    ax.xaxis.pane.fill = False
+    ax.xaxis.pane.set_edgecolor(TEXT)
+    ax.yaxis.pane.fill = False
+    ax.yaxis.pane.set_edgecolor(TEXT)
+    ax.zaxis.pane.fill = False
+    ax.zaxis.pane.set_edgecolor(TEXT)
+
+    plt.title(f'{session_code} Agent 0 profit vs parameters')
+    
+    plt.show()
+
+
 def plot(a0, a1, a2, session_code, nums):
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, sharex=True)
     
@@ -49,7 +79,7 @@ def plot(a0, a1, a2, session_code, nums):
     ax1.legend(loc='upper left', bbox_to_anchor=(-0.255, 0.75))
     #ax1.set_yscale('log')
 
-    # agent 0
+    # agent 
     ax2.plot(a0['Inventory'], zorder=3, linewidth=.5, color=inventory_color)
     ax2.plot(a0['External'], zorder=3, linewidth=.5, color=external_color)
     #ax2.fill_between(a0['Speed'], np.zeros(len(a1['Speed'])), zorder=2, drawstyle='steps-post', color=speed_color,
@@ -116,6 +146,8 @@ def plot(a0, a1, a2, session_code, nums):
     #ax4.tick_params(labelbottom=False) 
     plt.subplots_adjust(left=0.20, right=0.98, top=0.95, bottom=0.05)
     plt.savefig(f'app/data/{session_code}_agents{nums[0]}{nums[1]}{nums[2]}.png', dpi=350)
+
+    heatmap(a0, session_code)
 
 def read_csvs(a0, a1, a2):
     a0 = pd.read_csv(a0)
