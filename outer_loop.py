@@ -60,7 +60,7 @@ def bigloop(sp):
     lambdaj = [2, 2]#, 2, 5]
     lambdai = [[0.1, 0.05]]#, [0.2, 0.1], [0.5, 0.25]]
     speed = [5000]#, 10000]
-    time_in_force = [1, 1, 1, 1, 1]#, 2]
+    time_in_force = [1]#, 2]
 
     ff = len(formats)
     jj = len(lambdaj)
