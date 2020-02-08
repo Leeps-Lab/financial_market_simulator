@@ -40,7 +40,7 @@ def bar(a):
         widths.append(0)
     return xs, widths
 
-def heatmap(a0, session_code):
+def scatter3d(a0, session_code):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     colors = [speed_color if s == 1 else TEXT for s in a0['Speed']]
@@ -66,6 +66,36 @@ def heatmap(a0, session_code):
     
     plt.show()
 
+def heatmap(a0, session_code):
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4.5), tight_layout=True)
+    
+    props = {'color': TEXT}
+    # speed off
+    speed_off = a0[a0['Speed'] == 0]
+    min_profit, max_profit = speed_off['Profit'].min(), speed_off['Profit'].max()
+    normalize = lambda x: (x - min_profit) / (max_profit - min_profit)
+    normalized_profits = [normalize(x) for x in speed_off['Profit']]
+    s1 = ax1.scatter(speed_off['Inventory'], speed_off['External'], c=speed_off['Profit'],
+    cmap='plasma', s=10)
+    ax1.set_xlabel('Inventory', **props)
+    ax1.set_ylabel('External', **props)
+    ax1.set_title('Speed OFF')
+    cb = fig.colorbar(s1)
+    cb.set_label('Profit', **props)
+    
+    # speed on
+    speed_on = a0[a0['Speed'] == 1]
+    min_profit, max_profit = speed_on['Profit'].min(), speed_on['Profit'].max()
+    normalized_profits2 = [normalize(x) for x in speed_on['Profit']]
+    s = ax2.scatter(speed_on['Inventory'], speed_on['External'], c=speed_on['Profit'],
+    cmap='plasma', s=10)
+    ax2.set_xlabel('Inventory', **props)
+    ax2.set_ylabel('External', **props)
+    ax2.set_title('Speed ON')
+    cb = fig.colorbar(s)
+    cb.set_label('Profit', **props)
+
+    plt.show()
 
 def plot(a0, a1, a2, session_code, nums):
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, sharex=True)
@@ -147,7 +177,6 @@ def plot(a0, a1, a2, session_code, nums):
     plt.subplots_adjust(left=0.20, right=0.98, top=0.95, bottom=0.05)
     plt.savefig(f'app/data/{session_code}_agents{nums[0]}{nums[1]}{nums[2]}.png', dpi=350)
 
-    heatmap(a0, session_code)
 
 def read_csvs(a0, a1, a2):
     a0 = pd.read_csv(a0)
@@ -182,12 +211,21 @@ def parse_files(session_code, nums):
 def main():
     p = configargparse.getArgParser()
     p.add('session_code', nargs='+', help='8-digit alphanumeric')
+    p.add('--scatter3d', action='store_true', 
+    help='create and display (interactive mode) a 3d scatter plot for agent 0')
+    p.add('--heatmap', action='store_true',
+    help='display 2d heat maps for agent 0 for speed on/off')
     options, args = p.parse_known_args()
     nums = (0, 1, 2)
+    a0 = None
     for code in options.session_code:
         csvs = parse_files(code, nums)
         a0, a1, a2 = read_csvs(*csvs)
         plot(a0, a1, a2, code, nums)
+    if options.scatter3d is True:
+        scatter3d(a0, options.session_code)
+    if options.heatmap is True:
+        heatmap(a0, options.session_code)
 
 if __name__ == '__main__':
     main()
