@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import pickle
 from os import listdir
+from sys import argv
+
 
 ''' Description
 
@@ -71,10 +73,23 @@ def build_df(code, params, imap, count):
     df.to_csv(f'app/data/{code}##_combined.csv')
     return df
 
+def avg_profits(df):
+    print('avging profits')
+    a0 = df[df['Agent ID'] == 0]['Profit']
+    a1 = df[df['Agent ID'] == 1]['Profit']
+    a2 = df[df['Agent ID'] == 2]['Profit']
+
+    # avg across ticks
+    # write to new agent csv identical to other agent csvs
+    # then can visualize speparately
+
+
 def main():
     m = load_pickle()
     df = build_df(**m)
     print(df.head())
+    if len(argv) > 1 and argv[1] == '--avg':
+        avg_profits()
 
 if __name__ == '__main__':
     main()
