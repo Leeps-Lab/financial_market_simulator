@@ -21,3 +21,4 @@ app/data/*
 reset*
 !session_config/**
 *.out
+app/.data/*
