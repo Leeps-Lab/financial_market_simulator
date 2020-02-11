@@ -57,10 +57,10 @@ def bigloop(sp):
     num_agents = 3
     processes = []
     formats = ['CDA', 'CDA', 'CDA', 'CDA', 'CDA']
-    lambdaj = [2, 2]#, 2, 5]
+    lambdaj = [2, 2, 2, 2, 2]#, 2, 5]
     lambdai = [[0.1, 0.05]]#, [0.2, 0.1], [0.5, 0.25]]
     speed = [5000]#, 10000]
-    time_in_force = [1]#, 2]
+    time_in_force = [1, 1]#, 2]
 
     ff = len(formats)
     jj = len(lambdaj)
@@ -101,7 +101,7 @@ def bigloop(sp):
                         session_code = f'{code}{sn}'
                         processes.append(run_sim(session_code))
                         n += 1
-                        sleep(10)
+                        sleep(515)
 
     return processes
 
