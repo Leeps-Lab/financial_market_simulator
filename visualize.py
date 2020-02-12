@@ -74,13 +74,11 @@ def heatmap(a0, session_code, nums):
     
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
     props = {'color': TEXT}
-    norm = matplotlib.colors.Normalize(vmin=a0['Profit'].min(), vmax=a0['Profit'].max())
+    vmax = max(abs(a0['Profit'].min()), abs(a0['Profit'].max()))
+    norm = matplotlib.colors.Normalize(vmin=-vmax, vmax=vmax)
     
     # speed off
     speed_off = a0[a0['Speed'] == 0]
-    min_profit, max_profit = speed_off['Profit'].min(), speed_off['Profit'].max()
-    normalize = lambda x: (x - min_profit) / (max_profit - min_profit)
-    normalized_profits = [normalize(x) for x in speed_off['Profit']]
     s1 = ax1.scatter(speed_off['Inventory'], speed_off['External'], c=speed_off['Profit'],
     cmap='RdYlGn', norm=norm, s=1912.5, zorder=5, marker='s')
     ax1.set_xlabel('Inventory', **props)
@@ -91,8 +89,6 @@ def heatmap(a0, session_code, nums):
     
     # speed on
     speed_on = a0[a0['Speed'] == 1]
-    min_profit, max_profit = speed_on['Profit'].min(), speed_on['Profit'].max()
-    normalized_profits2 = [normalize(x) for x in speed_on['Profit']]
     s2 = ax2.scatter(speed_on['Inventory'], speed_on['External'], c=speed_on['Profit'],
     cmap='RdYlGn', norm=norm, s=1912.5, zorder=5, marker='s')
     ax2.set_xlabel('Inventory', **props)
