@@ -40,7 +40,7 @@ def bar(a):
         widths.append(0)
     return xs, widths
 
-def scatter3d(a0, session_code):
+def scatter3d(a0, session_code, nums):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     colors = [speed_color if s == 1 else TEXT for s in a0['Speed']]
@@ -62,39 +62,48 @@ def scatter3d(a0, session_code):
     ax.zaxis.pane.fill = False
     ax.zaxis.pane.set_edgecolor(TEXT)
 
-    plt.title(f'{session_code} Agent 0 profit vs parameters')
+    plt.title(f'{session_code} Agent {nums[0]} 3D Scatter Plot')
     
     plt.show()
 
-def heatmap(a0, session_code):
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4.5), tight_layout=True)
+def heatmap(a0, session_code, nums):
+    i = a0.shape[0] - 1
+    a0.loc[i, 'Inventory'] = 1.0
+    a0.loc[i, 'External'] = 1.0
+    a0.loc[i, 'Speed'] = 1.0
     
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
     props = {'color': TEXT}
+    norm = matplotlib.colors.Normalize(vmin=a0['Profit'].min(), vmax=a0['Profit'].max())
+    
     # speed off
     speed_off = a0[a0['Speed'] == 0]
     min_profit, max_profit = speed_off['Profit'].min(), speed_off['Profit'].max()
     normalize = lambda x: (x - min_profit) / (max_profit - min_profit)
     normalized_profits = [normalize(x) for x in speed_off['Profit']]
     s1 = ax1.scatter(speed_off['Inventory'], speed_off['External'], c=speed_off['Profit'],
-    cmap='plasma', s=10)
+    cmap='RdYlGn', norm=norm, s=1912.5, zorder=5, marker='s')
     ax1.set_xlabel('Inventory', **props)
     ax1.set_ylabel('External', **props)
     ax1.set_title('Speed OFF')
-    cb = fig.colorbar(s1)
-    cb.set_label('Profit', **props)
+    ax1.set_xticks(sorted([t for t in a0['Inventory'].dropna().unique()]))
+    ax1.set_yticks(sorted([t for t in a0['External'].dropna().unique()]))
     
     # speed on
     speed_on = a0[a0['Speed'] == 1]
     min_profit, max_profit = speed_on['Profit'].min(), speed_on['Profit'].max()
     normalized_profits2 = [normalize(x) for x in speed_on['Profit']]
-    s = ax2.scatter(speed_on['Inventory'], speed_on['External'], c=speed_on['Profit'],
-    cmap='plasma', s=10)
+    s2 = ax2.scatter(speed_on['Inventory'], speed_on['External'], c=speed_on['Profit'],
+    cmap='RdYlGn', norm=norm, s=1912.5, zorder=5, marker='s')
     ax2.set_xlabel('Inventory', **props)
-    ax2.set_ylabel('External', **props)
     ax2.set_title('Speed ON')
-    cb = fig.colorbar(s)
+    ax2.set_xticks(sorted([t for t in a0['Inventory'].dropna().unique()]))
+    ax2.set_yticks(sorted([t for t in a0['External'].dropna().unique()]))
+    cb = fig.colorbar(s2, ax=[ax1, ax2])
     cb.set_label('Profit', **props)
 
+    fig.suptitle(f'{session_code} Agent {nums[0]} Profits (Speed ON vs OFF)')
+    plt.savefig(f'app/data/{session_code}_agent{nums[0]}_heatmap.png', dpi=350)
     plt.show()
 
 def plot(a0, a1, a2, session_code, nums):
@@ -175,7 +184,7 @@ def plot(a0, a1, a2, session_code, nums):
     ax4.legend(loc='upper center', bbox_to_anchor=(-0.175, 3.15))
     #ax4.tick_params(labelbottom=False) 
     plt.subplots_adjust(left=0.20, right=0.98, top=0.95, bottom=0.05)
-    plt.savefig(f'app/data/{session_code}_agents{nums[0]}{nums[1]}{nums[2]}.png', dpi=350)
+    plt.savefig(f'app/data/{session_code}_agents{nums[0]}{nums[1]}{nums[2]}_standard.png', dpi=350)
 
 
 def read_csvs(a0, a1, a2):
@@ -215,17 +224,20 @@ def main():
     help='create and display (interactive mode) a 3d scatter plot for agent 0')
     p.add('--heatmap', action='store_true',
     help='display 2d heat maps for agent 0 for speed on/off')
+    p.add('--standard', action='store_true',
+    help='display standard line graph for profit and params')
     options, args = p.parse_known_args()
     nums = (0, 1, 2)
     a0 = None
     for code in options.session_code:
         csvs = parse_files(code, nums)
         a0, a1, a2 = read_csvs(*csvs)
-        plot(a0, a1, a2, code, nums)
-    if options.scatter3d is True:
-        scatter3d(a0, options.session_code)
-    if options.heatmap is True:
-        heatmap(a0, options.session_code)
+        if options.standard is True:
+            plot(a0, a1, a2, code, nums)
+        if options.scatter3d is True:
+            scatter3d(a0, code, nums)
+        if options.heatmap is True:
+            heatmap(a0, code, nums)
 
 if __name__ == '__main__':
     main()
