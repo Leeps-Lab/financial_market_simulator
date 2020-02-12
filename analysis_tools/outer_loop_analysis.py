@@ -97,7 +97,6 @@ def avg_profits(df, code):
         a2df.loc[tick] = a2avg
 
 
-    print(a0df)
     a0df.to_csv(f'app/data/{code}AV_agent0.csv')
     a1df.to_csv(f'app/data/{code}AV_agent1.csv')
     a2df.to_csv(f'app/data/{code}AV_agent2.csv')
