@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib
-#matplotlib.use('Agg')
 from matplotlib import style
+matplotlib.use('Agg')
 style.use('./analysis_tools/elip12.mplstyle')
 import matplotlib.pyplot as plt   
 import configargparse
@@ -66,7 +66,7 @@ def scatter3d(a0, session_code, nums):
     
     plt.show()
 
-def heatmap(a0, session_code, nums):
+def heatmap(a0, session_code, nums, show):
     i = a0.shape[0] - 1
     a0.loc[i, 'Inventory'] = 1.0
     a0.loc[i, 'External'] = 1.0
@@ -99,10 +99,12 @@ def heatmap(a0, session_code, nums):
     cb.set_label('Profit', **props)
 
     fig.suptitle(f'{session_code} Agent {nums[0]} Profits (Speed ON vs OFF)')
-    plt.savefig(f'app/data/{session_code}_agent{nums[0]}_heatmap.png', dpi=350)
-    plt.show()
+    if show:
+        plt.show()
+    else:
+        plt.savefig(f'app/data/{session_code}_agent{nums[0]}_heatmap.png', dpi=350)
 
-def plot(a0, a1, a2, session_code, nums):
+def plot(a0, a1, a2, session_code, nums, show):
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, sharex=True)
     
     # profit graph
@@ -180,8 +182,11 @@ def plot(a0, a1, a2, session_code, nums):
     ax4.legend(loc='upper center', bbox_to_anchor=(-0.175, 3.15))
     #ax4.tick_params(labelbottom=False) 
     plt.subplots_adjust(left=0.20, right=0.98, top=0.95, bottom=0.05)
-    plt.savefig(f'app/data/{session_code}_agents{nums[0]}{nums[1]}{nums[2]}_standard.png', dpi=350)
-
+    if show:
+        plt.show()
+    else:
+        matplotlib.use('Agg')
+        plt.savefig(f'app/data/{session_code}_agents{nums[0]}{nums[1]}{nums[2]}_standard.png', dpi=350)
 
 def read_csvs(a0, a1, a2):
     a0 = pd.read_csv(a0)
@@ -217,11 +222,13 @@ def main():
     p = configargparse.getArgParser()
     p.add('session_code', nargs='+', help='8-digit alphanumeric')
     p.add('--scatter3d', action='store_true', 
-    help='create and display (interactive mode) a 3d scatter plot for agent 0')
+    help='display (interactive mode) a 3d scatter plot for agent 0')
     p.add('--heatmap', action='store_true',
-    help='display 2d heat maps for agent 0 for speed on/off')
+    help='create 2d heat maps for agent 0 for speed on/off')
     p.add('--standard', action='store_true',
-    help='display standard line graph for profit and params')
+    help='create standard line graph for profit and params')
+    p.add('--show', action='store_true',
+    help='display graphs in interactive mode. not required for scatter3d.')
     options, args = p.parse_known_args()
     nums = (0, 1, 2)
     a0 = None
@@ -229,11 +236,11 @@ def main():
         csvs = parse_files(code, nums)
         a0, a1, a2 = read_csvs(*csvs)
         if options.standard is True:
-            plot(a0, a1, a2, code, nums)
+            plot(a0, a1, a2, code, nums, options.show)
         if options.scatter3d is True:
             scatter3d(a0, code, nums)
         if options.heatmap is True:
-            heatmap(a0, code, nums)
+            heatmap(a0, code, nums, options.show)
 
 if __name__ == '__main__':
     main()
