@@ -68,9 +68,9 @@ def scatter3d(a0, session_code, nums):
 
 def heatmap(a0, session_code, nums, show):
     i = a0.shape[0] - 1
-    a0.loc[i, 'Inventory'] = 1.0
-    a0.loc[i, 'External'] = 1.0
-    a0.loc[i, 'Speed'] = 1.0
+    a0.loc[i, 'Inventory'] = a0.loc[i - 1, 'Inventory']
+    a0.loc[i, 'External'] = a0.loc[i - 1, 'External']
+    a0.loc[i, 'Speed'] = a0.loc[i - 2, 'Speed']
     
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
     props = {'color': TEXT}
@@ -79,23 +79,24 @@ def heatmap(a0, session_code, nums, show):
     
     # speed off
     speed_off = a0[a0['Speed'] == 0]
+    speed_off = speed_off.loc[1:]
     s1 = ax1.scatter(speed_off['Inventory'], speed_off['External'], c=speed_off['Profit'],
     cmap='RdYlGn', norm=norm, s=1912.5, zorder=5, marker='s')
     ax1.set_xlabel('Inventory', **props)
     ax1.set_ylabel('External', **props)
     ax1.set_title('Speed OFF')
-    print(a0['Inventory'])
-    ax1.set_xticks(sorted([t for t in a0['Inventory'].dropna().unique()]))
-    ax1.set_yticks(sorted([t for t in a0['External'].dropna().unique()]))
+    ax1.set_xticks(sorted([t for t in speed_off['Inventory'].dropna().unique()]))
+    ax1.set_yticks(sorted([t for t in speed_off['External'].dropna().unique()]))
     
     # speed on
     speed_on = a0[a0['Speed'] == 1]
+    speed_on = speed_on.loc[1:]
     s2 = ax2.scatter(speed_on['Inventory'], speed_on['External'], c=speed_on['Profit'],
     cmap='RdYlGn', norm=norm, s=1912.5, zorder=5, marker='s')
     ax2.set_xlabel('Inventory', **props)
     ax2.set_title('Speed ON')
-    ax2.set_xticks(sorted([t for t in a0['Inventory'].dropna().unique()]))
-    ax2.set_yticks(sorted([t for t in a0['External'].dropna().unique()]))
+    ax2.set_xticks(sorted([t for t in speed_on['Inventory'].dropna().unique()]))
+    ax2.set_yticks(sorted([t for t in speed_on['External'].dropna().unique()]))
     cb = fig.colorbar(s2, ax=[ax1, ax2])
     cb.set_label('Profit', **props)
 
