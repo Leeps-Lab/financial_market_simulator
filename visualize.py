@@ -84,8 +84,8 @@ def heatmap(a0, session_code, nums, show):
     ax1.set_xlabel('Inventory', **props)
     ax1.set_ylabel('External', **props)
     ax1.set_title('Speed OFF')
-    ax1.set_xticks(sorted([t for t in a0['Inventory'].dropna().unique()]))
-    ax1.set_yticks(sorted([t for t in a0['External'].dropna().unique()]))
+    ax1.set_xticks(sorted([t for t in a0.loc[1:, 'Inventory'].dropna().unique()]))
+    ax1.set_yticks(sorted([t for t in a0.loc[1:, 'External'].dropna().unique()]))
     
     # speed on
     speed_on = a0[a0['Speed'] == 1]
