@@ -30,7 +30,7 @@ a_y_multiplier: 3   # a_y <-> inventory, used in exp fn
 
 speed_unit_cost: 2000 # per second
 
-random_seed: 12338
+random_seed: false #12338
 
 fundamental_values:
   #  time, fundamental value
@@ -56,7 +56,7 @@ explore_all: false
 explore_all_num_submoves: 7 # do not change this from 7
 
 grid_search: true
-ys: [0.55, 0.65, 0.75, 0.85, 0.95]
-zs: [0.45, 0.55, 0.65, 0.75, 0.85]
+ys: [0, 0.25, 0.5, 0.75, 1]
+zs: [0, 0.25, 0.5, 0.75, 1]
 speeds: [0, 1]
 
