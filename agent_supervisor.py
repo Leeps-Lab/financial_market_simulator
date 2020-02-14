@@ -503,6 +503,10 @@ class AgentSupervisor():
         self.profit_array.append(self.current_profits)
         self.speed_array.append(self.curr_params['speed'])
         
+        if self.elapsed_seconds >= self.sp['session_duration'] - \
+        (self.sp['move_interval'] / 2):
+            return
+        
         # if symmetric mode, store and update to maintain symmetry
         if self.r:
             self.store_profit_and_params()
@@ -540,8 +544,6 @@ class AgentSupervisor():
     # stores csv files at end of sim
     def at_end(self, is_dynamic):
         if is_dynamic:
-            self.get_profits()
-            self.profit_array.append(self.current_profits)
             self.print_status('FINAL')
             df = pd.DataFrame(list(itertools.zip_longest(
                 self.y_array, self.z_array, self.speed_array, self.profit_array)),
