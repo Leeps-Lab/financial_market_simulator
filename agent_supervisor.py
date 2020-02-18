@@ -486,7 +486,6 @@ class AgentSupervisor():
 
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
-        print('on tick')
         self.elapsed_ticks += 1
         self.current_log_row = ''
         # pacemaker agent resets fundamental values
