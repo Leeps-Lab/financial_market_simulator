@@ -67,11 +67,6 @@ def scatter3d(a0, session_code, nums):
     plt.show()
 
 def heatmap(a0, session_code, nums, show):
-    i = a0.shape[0] - 1
-    a0.loc[i, 'Inventory'] = a0.loc[i - 1, 'Inventory']
-    a0.loc[i, 'External'] = a0.loc[i - 1, 'External']
-    a0.loc[i, 'Speed'] = a0.loc[i - 2, 'Speed']
-    
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
     props = {'color': TEXT}
     vmax = max(abs(a0['Profit'].min()), abs(a0['Profit'].max()))
@@ -79,7 +74,6 @@ def heatmap(a0, session_code, nums, show):
     
     # speed off
     speed_off = a0[a0['Speed'] == 0]
-    speed_off = speed_off.loc[1:]
     s1 = ax1.scatter(speed_off['Inventory'], speed_off['External'], c=speed_off['Profit'],
     cmap='RdYlGn', norm=norm, s=1912.5, zorder=5, marker='s')
     ax1.set_xlabel('Inventory', **props)
@@ -90,7 +84,6 @@ def heatmap(a0, session_code, nums, show):
     
     # speed on
     speed_on = a0[a0['Speed'] == 1]
-    speed_on = speed_on.loc[1:]
     s2 = ax2.scatter(speed_on['Inventory'], speed_on['External'], c=speed_on['Profit'],
     cmap='RdYlGn', norm=norm, s=1912.5, zorder=5, marker='s')
     ax2.set_xlabel('Inventory', **props)

@@ -473,7 +473,9 @@ class AgentSupervisor():
             for z in self.sp['zs']:
                 for speed in self.sp['speeds']:
                     flatlist.append((y, z, speed))
-        return flatlist[self.elapsed_ticks]
+        if self.elapsed_ticks + 1 == len(flatlist):
+            return (0, 0, 0)
+        return flatlist[self.elapsed_ticks + 1]
 
     def reset_profits(self):
         self.agent.model.cash = 0
@@ -484,6 +486,7 @@ class AgentSupervisor():
 
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
+        print('on tick')
         self.elapsed_ticks += 1
         self.current_log_row = ''
         # pacemaker agent resets fundamental values
@@ -503,9 +506,9 @@ class AgentSupervisor():
         self.profit_array.append(self.current_profits)
         self.speed_array.append(self.curr_params['speed'])
         
-        if self.elapsed_seconds >= self.sp['session_duration'] - \
-        (self.sp['move_interval'] / 2):
-            return
+        #if self.elapsed_seconds >= self.sp['session_duration'] - \
+        #(self.sp['move_interval'] / 2):
+        #    return
         
         # if symmetric mode, store and update to maintain symmetry
         if self.r:
@@ -540,6 +543,8 @@ class AgentSupervisor():
                 f'app/data/{self.session_code}_parameters.yaml')
         if self.r:
             self.store_profit_and_params()
+        if self.sp['grid_search']:
+            self.update_params_from_grid()
 
     # stores csv files at end of sim
     def at_end(self, is_dynamic):
