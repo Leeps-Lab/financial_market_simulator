@@ -542,7 +542,7 @@ class AgentSupervisor():
                 f'app/data/{self.session_code}_parameters.yaml')
         if self.r:
             self.store_profit_and_params()
-        if self.sp['grid_search']:
+        if self.sp['grid_search'] and self.config_num == 0:
             self.update_params_from_grid()
 
     # stores csv files at end of sim
