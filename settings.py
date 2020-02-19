@@ -40,6 +40,7 @@ default_simulation_parameters = {
     'explore_all': False,
     'explore_all_num_submoves': 7,
     'grid_search': False,
+    'grid_search_symmetric': False,
     'ys': [],
     'zs': [],
     'speeds': [],
