@@ -133,13 +133,13 @@ class AgentSupervisor():
             'a_x': 0.0,
             'a_y': self.sp['init_y'],
             'a_z': self.sp['init_z'],
-            'speed': 0,
+            'speed': 1,
         }
         self.curr_params = { # current parameters
             'a_x': 0.0,
             'a_y': self.sp['init_y'],
             'a_z': self.sp['init_z'], 
-            'speed': 0,
+            'speed': 1,
         }
         self.current = 'a_y' # current parameter being adjusted
         self.current_profits = 0.0 # current profits
