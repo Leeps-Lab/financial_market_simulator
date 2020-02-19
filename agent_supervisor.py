@@ -522,6 +522,8 @@ class AgentSupervisor():
                 self.update_params_from_grid()
             else:
                 self.update_params()
+        elif self.sp['grid_search_symmetric']:
+            self.update_params_from_grid()
 
         if self.elapsed_ticks % 11 == 0:
             df = pd.DataFrame(list(itertools.zip_longest(
@@ -542,7 +544,8 @@ class AgentSupervisor():
                 f'app/data/{self.session_code}_parameters.yaml')
         if self.r:
             self.store_profit_and_params()
-        if self.sp['grid_search'] and self.config_num == 0:
+        if self.sp['grid_search'] and (self.config_num == 0 \
+            or self.sp['grid_search_symmetric']):
             self.update_params_from_grid()
 
     # stores csv files at end of sim
