@@ -30,7 +30,7 @@ def bar(a):
     for i, x in enumerate(a['Speed']):
         if i > 0 and ((a['Speed'][i - 1] == 1 \
             and (x == 0 or i == len(a['Speed']) - 1))
-            or (a['Speed'][i] == 1 and i == len(a['Speed']) - 1)):
+            or (x == 1 and i == len(a['Speed']) - 1)):
             widths.append(num)
             num = 0
         elif i > 0 and x == 1:
