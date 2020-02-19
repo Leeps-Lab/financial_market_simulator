@@ -56,6 +56,7 @@ explore_all: false
 explore_all_num_submoves: 7 # do not change this from 7
 
 grid_search: true
+grid_search_symmetric: true
 ys: [0, 0.25, 0.5, 0.75, 1]
 zs: [0, 0.25, 0.5, 0.75, 1]
 speeds: [0, 1]
