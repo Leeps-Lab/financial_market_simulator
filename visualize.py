@@ -223,8 +223,12 @@ def main():
     help='create 2d heat maps for agent 0 for speed on/off')
     p.add('--standard', action='store_true',
     help='create standard line graph for profit and params')
+    
+    # NOTE: this will only work if you remove the matplotlib.use('Agg') line and
+    # use a default backend that supports the gui
     p.add('--show', action='store_true',
     help='display graphs in interactive mode. not required for scatter3d.')
+    
     options, args = p.parse_known_args()
     nums = (0, 1, 2)
     a0 = None
