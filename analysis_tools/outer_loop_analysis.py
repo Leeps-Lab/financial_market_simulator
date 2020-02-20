@@ -81,21 +81,20 @@ def avg_profits(df, code):
     a0df = pd.DataFrame(columns=df[['Inventory', 'External', 'Speed', 'Profit']].columns)
     a1df = pd.DataFrame(columns=df[['Inventory', 'External', 'Speed', 'Profit']].columns)
     a2df = pd.DataFrame(columns=df[['Inventory', 'External', 'Speed', 'Profit']].columns)
-    
+
     # avg across ticks
     for tick in df['Tick'].unique():
         # this will get the mean across all rows. For everything except profit,
         # each row will be the same (since it is corresponding ticks.
         # short and easy way to get this
 
-        a0avg = a0[a0['Tick'] == tick].mean(axis=0)
-        a1avg = a1[a1['Tick'] == tick].mean(axis=0)
-        a2avg = a2[a2['Tick'] == tick].mean(axis=0)
+        a0avg = a0[a0['Tick'] == tick][['Inventory','External','Speed','Profit']].mean(axis=0)
+        a1avg = a1[a1['Tick'] == tick][['Inventory','External','Speed','Profit']].mean(axis=0)
+        a2avg = a2[a2['Tick'] == tick][['Inventory','External','Speed','Profit']].mean(axis=0)
 
         a0df.loc[tick] = a0avg
         a1df.loc[tick] = a1avg
         a2df.loc[tick] = a2avg
-
 
     a0df.to_csv(f'app/data/{code}AV_agent0.csv')
     a1df.to_csv(f'app/data/{code}AV_agent1.csv')
