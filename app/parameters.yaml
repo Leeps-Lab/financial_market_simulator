@@ -26,7 +26,7 @@ k_reference_price: 0.2 # discount rate (half life)
 k_signed_volume: 0.2
 
 a_x_multiplier: 5   # a_x <-> signed volume
-a_y_multiplier: 3   # a_y <-> inventory, used in exp fn
+a_y_multiplier: 4   # a_y <-> inventory, used in exp fn
 
 speed_unit_cost: 2000 # per second
 
@@ -50,7 +50,7 @@ step: 0.05  # amount y/z change per move, eg y_{t+1} = y_{t} + step
 symmetric: false # symmetric mode (agents change strat to match best every turn)
 
 num_moves: 51 # number of moves in a turn
-move_interval: 10 # number of seconds per move
+move_interval: 1 # number of seconds per move
 
 explore_all: false
 explore_all_num_submoves: 7 # do not change this from 7
