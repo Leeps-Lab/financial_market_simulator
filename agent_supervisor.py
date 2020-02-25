@@ -133,13 +133,13 @@ class AgentSupervisor():
             'a_x': 0.0,
             'a_y': self.sp['init_y'],
             'a_z': self.sp['init_z'],
-            'speed': 1,
+            'speed': 0,
         }
         self.curr_params = { # current parameters
             'a_x': 0.0,
             'a_y': self.sp['init_y'],
             'a_z': self.sp['init_z'], 
-            'speed': 1,
+            'speed': 0,
         }
         self.current = 'a_y' # current parameter being adjusted
         self.current_profits = 0.0 # current profits
@@ -231,7 +231,8 @@ class AgentSupervisor():
         x = self.curr_params['a_y']
         t = self.elapsed_seconds % self.sp['move_interval']
         tau = self.sp['move_interval']
-        return b / ( 1 + exp( 2 * tau * (1 - x) - (2 * t) ) )
+        return b * exp(-10*(1-x)*(tau / (t + 0.001) - 1))
+        #return b / ( 1 + exp( 2 * tau * (1 - x) - (2 * t) ) )
 
     # prints current profit and params
     def print_status(self, msg=''):
