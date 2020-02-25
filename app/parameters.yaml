@@ -1,45 +1,27 @@
-a_x_multiplier: 5
-a_y_multiplier: 3
-agent_state_configs:
-- [0, 1, 0, 0, 0, 0]
-- [0, 2, 0, 0, 0, 0]
-- [0, 3, 0, 0, 0, 0]
-bid_ask_offset: 20000
-exogenous_order_price_noise_mean: 0
-exogenous_order_price_noise_std: 30000
-explore_all: false
-explore_all_num_submoves: 7
-external_market_fba_interval: 1
-external_market_format: CDA
-focal_market_fba_interval: 0.5
-focal_market_format: CDA
+session_duration: 510
+initial_price: 1000000
+
 fundamental_value_noise_mean: 0
 fundamental_value_noise_std: 40000
-fundamental_values:
-- [0, 1000000]
-grid_search: true
-grid_search_symmetric: false
+read_fundamental_values_from_array: False
+
+exogenous_order_price_noise_mean: 0
+exogenous_order_price_noise_std: 30000
+bid_ask_offset: 20000
+time_in_force: 1
+
+focal_market_format: CDA
+external_market_format: CDA
+focal_market_fba_interval: 0.5
+external_market_fba_interval: 1
+
 iex_delay: 0.035
-init_speed: 0
-init_y: 0
-init_z: 0
-initial_price: 1000000
-k_reference_price: 0.2
-k_signed_volume: 0.2
-lambdaI: [0.1, 0.05]
-lambdaJ: 2
-move_interval: 10
-num_moves: 51
 peg_proportion: 0.5
-random_seed: 69969
-read_fundamental_values_from_array: false
-session_duration: 20
-speed_unit_cost: 200000
-speeds: [1, 1]
-step: 0.05
-symmetric: false
+
+lambdaJ: 2
+lambdaI: [0.1, 0.05]  # first element: focal market, second element: external market
+
 tax_rate: 0.1
-<<<<<<< HEAD
 k_reference_price: 0.2 # discount rate (half life)
 k_signed_volume: 0.2
 
@@ -75,8 +57,6 @@ explore_all_num_submoves: 7 # do not change this from 7
 
 grid_search: true
 grid_search_symmetric: false
-=======
-time_in_force: 1
->>>>>>> ce85a15ab4b67e03358317cd77954a2dfbf89a43
 ys: [0, 0.25, 0.5, 0.75, 1]
 zs: [0, 0.25, 0.5, 0.75, 1]
+speeds: [0, 1]
