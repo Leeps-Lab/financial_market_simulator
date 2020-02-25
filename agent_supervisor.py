@@ -231,8 +231,8 @@ class AgentSupervisor():
         x = self.curr_params['a_y']
         t = self.elapsed_seconds % self.sp['move_interval']
         tau = self.sp['move_interval']
-        return b * exp(-10*(1-x)*(tau / (t + 0.001) - 1))
-        #return b / ( 1 + exp( 2 * tau * (1 - x) - (2 * t) ) )
+        #return b * exp(-10*(1-x)*(tau / (t + 0.001) - 1))
+        return b / ( 1 + exp( 2 * tau * (1 - x) - (2 * t) ) )
 
     # prints current profit and params
     def print_status(self, msg=''):
@@ -446,12 +446,12 @@ class AgentSupervisor():
         }
         event = self.agent.event_cls('agent', IncomingMessage(message))
         trader_state.cancel_all_orders(trader, event)
-        while event.exchange_msgs:
-            message = event.exchange_msgs.pop()
-            if self.agent.exchange_connection is not None:
-                self.agent.exchange_connection.sendMessage(message.translate(), message.delay)
-            else:
-                self.agent.outgoing_msg.append((message.translate(), message.delay))
+        #while event.exchange_msgs:
+        #    message = event.exchange_msgs.pop()
+        #    if self.agent.exchange_connection is not None:
+        #        self.agent.exchange_connection.sendMessage(message.translate(), message.delay)
+        #    else:
+        #        self.agent.outgoing_msg.append((message.translate(), message.delay))
 
     def reset_fundamentals(self):
         random_orders = draw.elo_draw(
