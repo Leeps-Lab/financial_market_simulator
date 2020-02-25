@@ -133,13 +133,13 @@ class AgentSupervisor():
             'a_x': 0.0,
             'a_y': self.sp['init_y'],
             'a_z': self.sp['init_z'],
-            'speed': 1,
+            'speed': self.sp['init_speed'],
         }
         self.curr_params = { # current parameters
             'a_x': 0.0,
             'a_y': self.sp['init_y'],
             'a_z': self.sp['init_z'], 
-            'speed': 1,
+            'speed': self.sp['init_speed'],
         }
         self.current = 'a_y' # current parameter being adjusted
         self.current_profits = 0.0 # current profits
@@ -510,10 +510,6 @@ class AgentSupervisor():
         self.z_array.append(self.curr_params['a_z'])
         self.profit_array.append(self.current_profits)
         self.speed_array.append(self.curr_params['speed'])
-        
-        #if self.elapsed_seconds >= self.sp['session_duration'] - \
-        #(self.sp['move_interval'] / 2):
-        #    return
         
         # if symmetric mode, store and update to maintain symmetry
         if self.r:

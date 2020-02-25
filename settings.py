@@ -33,6 +33,7 @@ default_simulation_parameters = {
     'agent_state_configs': [],
     'init_y': 0.5,
     'init_z': 0.5,
+    'init_speed': 0,
     'step': 0.05,
     'symmetric': False,
     'num_moves': 8,
