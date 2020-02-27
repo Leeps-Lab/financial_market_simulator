@@ -128,7 +128,7 @@ class AgentSupervisor():
         
         # agent optimization data, changes during simulation
         self.elapsed_seconds = 0
-        self.elapsed_ticks = -1 # number of elapsed ticks 
+        self.elapsed_ticks = -2 # number of elapsed ticks 
         self.prev_params = { # params before most recent update
             'a_x': 0.0,
             'a_y': self.sp['init_y'],
@@ -503,6 +503,8 @@ class AgentSupervisor():
         #liquidate inventory and cancel all orders at end of session
         self.liquidate()
         self.cancel_outstanding_orders()
+        if self.elapsed_ticks == -1:
+            return
         self.get_profits()
         self.current_log_row += f'Current profits: {self.current_profits}. '
         self.current_log_row += f'Current params: {str(self.curr_params)}. '
