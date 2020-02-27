@@ -128,7 +128,7 @@ class AgentSupervisor():
         
         # agent optimization data, changes during simulation
         self.elapsed_seconds = 0
-        self.elapsed_ticks = -1 # number of elapsed ticks 
+        self.elapsed_ticks = -2 # number of elapsed ticks 
         self.prev_params = { # params before most recent update
             'a_x': 0.0,
             'a_y': self.sp['init_y'],
@@ -494,6 +494,8 @@ class AgentSupervisor():
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
         self.elapsed_ticks += 1
+        if self.elapsed_ticks == -1:
+            return
         self.current_log_row = ''
         # pacemaker agent resets fundamental values
         if not is_dynamic:
