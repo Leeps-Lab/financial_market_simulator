@@ -494,8 +494,6 @@ class AgentSupervisor():
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
         self.elapsed_ticks += 1
-        if self.elapsed_ticks == -1:
-            return
         self.current_log_row = ''
         # pacemaker agent resets fundamental values
         if not is_dynamic:
@@ -505,6 +503,8 @@ class AgentSupervisor():
         #liquidate inventory and cancel all orders at end of session
         self.liquidate()
         self.cancel_outstanding_orders()
+        if self.elapsed_ticks == -1:
+            return
         self.get_profits()
         self.current_log_row += f'Current profits: {self.current_profits}. '
         self.current_log_row += f'Current params: {str(self.curr_params)}. '
