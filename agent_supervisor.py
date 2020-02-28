@@ -482,7 +482,11 @@ class AgentSupervisor():
                     flatlist.append((y, z, speed))
         if self.elapsed_ticks + 1 == len(flatlist):
             return (0, 0, 0)
-        return flatlist[self.elapsed_ticks + 1]
+        if self.elapsed_ticks == -2:
+            i = 0
+        else:
+            i = self.elapsed_ticks + 1
+        return flatlist[i]
 
     def reset_profits(self):
         self.agent.model.cash = 0

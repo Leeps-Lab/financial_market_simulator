@@ -57,12 +57,12 @@ def create_imap(ff, jj, ii, ss, tt, mm):
 def bigloop(sp):
     num_agents = 3
     processes = []
-    formats = ['CDA', 'FBA', 'IEX']
-    lambdaj = [0.5, 2, 5]
-    lambdai = [[0.1, 0.05]], [0.2, 0.1], [0.5, 0.25]]
-    speed = [0, 2000, 10000, 30000]
-    time_in_force = [0.5, 1, 2]
-    inventory_multiplier = [2, 3, 4, 5]
+    formats = ['FBA']
+    lambdaj = [2, 2, 2, 2, 2, 2]
+    lambdai = [[0.1, 0.07]]#, [0.2, 0.1], [0.5, 0.25]]
+    speed = [3000]
+    time_in_force = [1, 1, 1, 1, 1]#, 2]
+    inventory_multiplier = [3]
 
     ff = len(formats)
     jj = len(lambdaj)
@@ -107,7 +107,7 @@ def bigloop(sp):
                             session_code = f'{code}{sn}'
                             processes.append(run_sim(session_code))
                             n += 1
-                            sleep(60)
+                            sleep(525)
 
     return processes
 

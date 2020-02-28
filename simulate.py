@@ -88,6 +88,7 @@ def run_elo_simulation(session_code):
     # start exchanges
     params = get_simulation_parameters()
     focal_exchange_port, external_exchange_port = get_available_ports(2)
+    print(focal_exchange_port, external_exchange_port)
     focal_exchange_proc = start_exchange(
         focal_exchange_port,
         params['focal_market_format'],
@@ -106,6 +107,7 @@ def run_elo_simulation(session_code):
 
     p = settings.ports # we overwrite this
     p1, p2, p3, p4 = get_available_ports(4)
+    print(p1, p2, p3, p4)
     p['focal_proxy_ouch_port'] = p1
     p['focal_proxy_json_port'] = p2
     p['external_proxy_ouch_port'] = p3
