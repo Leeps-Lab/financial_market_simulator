@@ -5,6 +5,7 @@ fi
 
 CODE=$1
 python3 analysis_tools/outer_loop.py --avg
+cp app/data/${CODE}00_parameters.yaml app/data/${CODE}AV_parameters.yaml
 python3 visualize.py ${CODE}AV --standard --heatmap
 mkdir app/data/.storage/$CODE
 mkdir app/data/.storage/$CODE/meta
