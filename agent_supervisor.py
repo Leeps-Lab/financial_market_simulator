@@ -232,7 +232,7 @@ class AgentSupervisor():
         t = self.elapsed_seconds % self.sp['move_interval']
         tau = self.sp['move_interval']
         #return b * exp(-10*(1-x)*(tau / (t + 0.001) - 1))
-        return b / ( 1 + exp( 2 * tau * (1 - x) - (2 * t) ) )
+        return b / ( 1 + exp( 2 * (tau + 4) * (1 - x) - (2 * (t + 2)) ) )
 
     # prints current profit and params
     def print_status(self, msg=''):
