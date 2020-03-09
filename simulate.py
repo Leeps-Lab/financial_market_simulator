@@ -103,7 +103,7 @@ def run_elo_simulation(session_code):
     )
     # sleep for a second after making the exchanges to ensure they don't buffer messages
     # when the experiment starts. not sure this is necessary, but just being safe
-    sleep(1)
+    sleep(2)
 
     p = settings.ports # we overwrite this
     p1, p2, p3, p4 = get_available_ports(4)
