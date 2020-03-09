@@ -223,7 +223,9 @@ def main():
     help='create 2d heat maps for agent 0 for speed on/off')
     p.add('--standard', action='store_true',
     help='create standard line graph for profit and params')
-    
+    p.add('--a345', action='store_true',
+    help='if there are 6 agents, visualize agents 3,4,5 rather than 0,1,2')
+
     # NOTE: this will only work if you remove the matplotlib.use('Agg') line and
     # use a default backend that supports the gui
     p.add('--show', action='store_true',
@@ -235,6 +237,8 @@ def main():
     for code in options.session_code:
         csvs = parse_files(code, nums)
         a0, a1, a2 = read_csvs(*csvs)
+        if options.a345 is True:
+            nums = (3, 4, 5)
         if options.standard is True:
             plot(a0, a1, a2, code, nums, options.show)
         if options.scatter3d is True:
