@@ -41,42 +41,46 @@ def update(sp, **kwargs):
         sp[k] = v
     return sp
 
-def create_imap(ff, jj, ii, ss, tt):
+def create_imap(ff, jj, ii, ss, tt, mm):
     imap = {}
     for f in range(ff):
         for j in range(jj):
             for i in range(ii):
                 for s in range(ss):
                     for t in range(tt):
-                        key = f*jj*ii*ss*tt + j*ii*ss*tt + i*ss*tt + s*tt + t
-                        val = (f, j, i, s, t)
-                        imap[key] = val
+                        for m in range(mm):
+                            key = f*jj*ii*ss*tt*mm + j*ii*ss*tt*mm + i*ss*tt*mm + s*tt*mm + t*mm + m
+                            val = (f, j, i, s, t, m)
+                            imap[key] = val
     return imap
 
 def bigloop(sp):
     num_agents = 3
     processes = []
     formats = ['CDA']
-    lambdaj = [2, 2, 2, 2, 2]#, 2, 5]
-    lambdai = [[0.1, 0.05]]#, [0.2, 0.1], [0.5, 0.25]]
-    speed = [2000]#, 10000]
-    time_in_force = [1, 1, 1, 1]#, 2]
+    lambdaj = [2, 2, 2, 2, 2, 2]
+    lambdai = [[0.1, 0.07]]#, [0.2, 0.1], [0.5, 0.25]]
+    speed = [3000]
+    time_in_force = [1, 1, 1, 1, 1]#, 2]
+    inventory_multiplier = [3]
 
     ff = len(formats)
     jj = len(lambdaj)
     ii = len(lambdai)
     ss = len(speed)
     tt = len(time_in_force)
+    mm = len(inventory_multiplier)
     params = {
         'Format': formats,
         'Lambda J': lambdaj,
         'Lambda I': lambdai,
         'Speed Cost': speed,
         'Time in Force': time_in_force,
+        'Inventory Multiplier': inventory_multiplier,
     }
-    count = ff * jj * ii * ss * tt
+    count = ff * jj * ii * ss * tt * mm
     code = random_chars(6)
-    imap = create_imap(ff, jj, ii, ss, tt)
+    imap = create_imap(ff, jj, ii, ss, tt, mm)
     d = dict(code=code, params=params, imap=imap, count=count)
     dump_pickle(d)
 
@@ -86,23 +90,24 @@ def bigloop(sp):
             for i in lambdai:
                 for s in speed:
                     for t in time_in_force:
-                        sp = update(sp,
-                            focal_market_format=f,
-                            lambdaJ=j,
-                            lambdaI=i,
-                            speed_unit_cost=s,
-                            time_in_force=t
-                        )
-                        write_sim_params(sp)
-                        print(f'Starting process {n}')
-                        sn = str(n)
-                        if len(sn) == 1:
-                            sn = f'0{sn}'
-                        session_code = f'{code}{sn}'
-                        processes.append(run_sim(session_code))
-                        n += 1
-                        sleep(10)
-
+                        for m in inventory_multiplier:
+                            sp = update(sp,
+                                focal_market_format=f,
+                                lambdaJ=j,
+                                lambdaI=i,
+                                speed_unit_cost=s,
+                                time_in_force=t,
+                                a_y_multiplier=m
+                            )
+                            write_sim_params(sp)
+                            print(f'Starting process {n}')
+                            sn = str(n)
+                            if len(sn) == 1:
+                                sn = f'0{sn}'
+                            session_code = f'{code}{sn}'
+                            processes.append(run_sim(session_code))
+                            n += 1
+                            sleep(525)
     return processes
 
 def smallloop(sp):
