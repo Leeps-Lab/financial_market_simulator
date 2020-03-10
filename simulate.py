@@ -31,7 +31,7 @@ def get_available_ports(num_ports):
         x = int(options.session_code[-2:])
     except ValueError as e:
         x = 0
-    x *= 10 # each simulation only needs 9 threads (for 3 dynamic agents) but
+    x *= 11 # each simulation only needs 9 threads (for 3 dynamic agents) but
     # 10 is a nice round number.
     for port in range(9000 + x, 10000):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:

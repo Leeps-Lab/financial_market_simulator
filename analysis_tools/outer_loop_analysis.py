@@ -42,7 +42,7 @@ def parse_files(session_code, nums):
                 a1 = f'app/data/{f}'
             elif f.endswith(f'agent{nums[2]}.csv'):
                 a2 = f'app/data/{f}'
-    return a0, a1, a2
+    return [a0, a1, a2]
 
 def build_df(code, params, imap, count):
     cols = ['Session Code', 'Agent ID', 'Tick']
@@ -56,9 +56,11 @@ def build_df(code, params, imap, count):
             i = f'0{i}'
         session = f'{code}{i}'
         nums = (0, 1, 2)
+        files = parse_files(session, nums)
+        nums = (3, 4, 5)
+        files += parse_files(session, nums)
         tup = imap[j]
         cparams = {k: v[tup[i]] for i, (k, v) in enumerate(params.items())}
-        files = parse_files(session, nums)
         for c, fname in enumerate(files):
             if fname == None:
                 continue
@@ -74,31 +76,24 @@ def build_df(code, params, imap, count):
     return df
 
 def avg_profits(df, code):
-    a0 = df[df['Agent ID'] == 0]
-    a1 = df[df['Agent ID'] == 1]
-    a2 = df[df['Agent ID'] == 2]
-
-    a0df = pd.DataFrame(columns=df[['Inventory', 'External', 'Speed', 'Profit']].columns)
-    a1df = pd.DataFrame(columns=df[['Inventory', 'External', 'Speed', 'Profit']].columns)
-    a2df = pd.DataFrame(columns=df[['Inventory', 'External', 'Speed', 'Profit']].columns)
+    num_agents = len(df['Agent ID'].unique())
+    agents = [df[df['Agent ID'] == i] for i in range(num_agents)] 
+    
+    # create a new empty df for each agent
+    dfs = [pd.DataFrame(columns=df[['Inventory', 'External', 'Speed', 'Profit']].columns) for _ in range(num_agents)]
 
     # avg across ticks
     for tick in df['Tick'].unique():
         # this will get the mean across all rows. For everything except profit,
         # each row will be the same (since it is corresponding ticks.
         # short and easy way to get this
+        
+        avgs = [agent_df[agent_df['Tick'] == tick][['Inventory','External','Speed','Profit']].mean(axis=0) for agent_df in agents]
 
-        a0avg = a0[a0['Tick'] == tick][['Inventory','External','Speed','Profit']].mean(axis=0)
-        a1avg = a1[a1['Tick'] == tick][['Inventory','External','Speed','Profit']].mean(axis=0)
-        a2avg = a2[a2['Tick'] == tick][['Inventory','External','Speed','Profit']].mean(axis=0)
-
-        a0df.loc[tick] = a0avg
-        a1df.loc[tick] = a1avg
-        a2df.loc[tick] = a2avg
-
-    a0df.to_csv(f'app/data/{code}AV_agent0.csv')
-    a1df.to_csv(f'app/data/{code}AV_agent1.csv')
-    a2df.to_csv(f'app/data/{code}AV_agent2.csv')
+        for i, dfi in enumerate(dfs):
+            dfi.loc[tick] = avgs[i]
+    for i, dfi in enumerate(dfs):
+        dfi.to_csv(f'app/data/{code}AV_agent{i}.csv')
 
 def main():
     m = load_pickle()

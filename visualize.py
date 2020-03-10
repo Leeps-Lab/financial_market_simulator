@@ -123,7 +123,7 @@ def plot(a0, a1, a2, session_code, nums, show):
     
     ax2.set_ylabel(f'Agent {nums[0]} (A{nums[0]})', color=A0_color)
     params = get_simulation_parameters()
-    ax2.text(-0.25, -2.6, '\n'.join([
+    ax2.text(-0.25, -2.8, '\n'.join([
         'Parameters:',
         f'- duration: {params["session_duration"]}',
         f'- fund noise $\mu$: {params["fundamental_value_noise_mean"]}',
@@ -135,6 +135,8 @@ def plot(a0, a1, a2, session_code, nums, show):
         f'- bid-ask offset: {params["bid_ask_offset"]}',
         f'- focal format: {params["focal_market_format"]}',
         f'- FBA interval: {params["focal_market_fba_interval"] if params["focal_market_format"] == "FBA" else "N/A"}',
+        f'- IEX delay: {params["iex_delay"]}',
+        f'- peg-prop: {params["peg_proportion"]}',
         f'- $\lambda$ J: {params["lambdaJ"]}',
         f'- $\lambda$ I: {params["lambdaI"]}',
         f'- tax rate: {params["tax_rate"]}',
@@ -223,7 +225,9 @@ def main():
     help='create 2d heat maps for agent 0 for speed on/off')
     p.add('--standard', action='store_true',
     help='create standard line graph for profit and params')
-    
+    p.add('--a345', action='store_true',
+    help='if there are 6 agents, visualize agents 3,4,5 rather than 0,1,2')
+
     # NOTE: this will only work if you remove the matplotlib.use('Agg') line and
     # use a default backend that supports the gui
     p.add('--show', action='store_true',
@@ -233,6 +237,8 @@ def main():
     nums = (0, 1, 2)
     a0 = None
     for code in options.session_code:
+        if options.a345 is True:
+            nums = (3, 4, 5)
         csvs = parse_files(code, nums)
         a0, a1, a2 = read_csvs(*csvs)
         if options.standard is True:
