@@ -107,7 +107,7 @@ def bigloop(sp):
                             session_code = f'{code}{sn}'
                             processes.append(run_sim(session_code))
                             n += 1
-                            sleep(35)
+                            sleep(270)
     return processes
 
 def smallloop(sp):
