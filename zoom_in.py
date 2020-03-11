@@ -18,15 +18,14 @@ def update_fine(inv, ext):
     update(sp, ys=inv, zs=ext)
     write_sim_params(sp)
 
-def update_others(initinv, initext, speed, invlist, extlist):
+def update_others(initinv, initext, speed, invlist, extlist, speedlist=None):
     sp = get_simulation_parameters()
-    update(sp, init_y=initinv, init_z=initext, init_speed=speed, ys=invlist, zs=extlist)
+    if speedlist is None:
+        update(sp, init_y=initinv, init_z=initext, init_speed=speed, ys=invlist, zs=extlist)
+    else: 
+        update(sp, init_y=initinv, init_z=initext, init_speed=speed, ys=invlist, zs=extlist, speeds=speedlist)
     write_sim_params(sp)
 
-def update_final(inv, ext, speed):
-    sp = get_simulation_parameters()
-    update(sp, init_y=inv, init_z=ext, init_speed=speed)
-    write_sim_params(sp)
 
 code = argv[1]
 mode = argv[2]
@@ -64,4 +63,7 @@ elif mode == '--update-others':
     update_others(inv, ext, speed, invlist, extlist)
 
 elif mode == '--final-update':
-    update_final(inv, ext, speed)
+    inv = [inv for _ in range(5)]
+    extlist = [ext for _ in range(5)]
+    speedlist = [speed, speed]
+    update_others(inv, ext, speed, invlist, extlist, speedlist)
