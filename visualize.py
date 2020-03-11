@@ -123,7 +123,7 @@ def plot(a0, a1, a2, session_code, nums, show):
     
     ax2.set_ylabel(f'Agent {nums[0]} (A{nums[0]})', color=A0_color)
     params = get_simulation_parameters()
-    ax2.text(-0.25, -2.8, '\n'.join([
+    ax2.text(-0.25, -2.4, '\n'.join([
         'Parameters:',
         f'- duration: {params["session_duration"]}',
         f'- fund noise $\mu$: {params["fundamental_value_noise_mean"]}',
@@ -147,6 +147,7 @@ def plot(a0, a1, a2, session_code, nums, show):
         f'- speed cost: {params["speed_unit_cost"]}',
         f'- init y: {params["init_y"]}',
         f'- init z: {params["init_z"]}',
+        f'- init speed: {params["init_speed"]}',
         f'- step: {params["step"]}',
         f'- symmetric: {params["symmetric"]}',
         f'- num moves: {params["num_moves"]}',
