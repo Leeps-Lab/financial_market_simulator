@@ -58,10 +58,10 @@ def bigloop(sp):
     num_agents = 6
     processes = []
     formats = ['FBA']
-    lambdaj = [0.5, 2]
-    lambdai = [[0.1, 0.05], [0.2, 0.1], [0.5, 0.25]]
-    speed = [500, 1000, 3000]
-    time_in_force = [.5, 1]
+    lambdaj = [2, 2, 2, 2, 2, 2] #.5
+    lambdai = [[0.1, 0.07]]#, [0.2, 0.1], [0.5, 0.25]]
+    speed = [3000]
+    time_in_force = [1, 1, 1, 1, 1]
     inventory_multiplier = [3]
 
     ff = len(formats)
