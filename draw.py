@@ -83,7 +83,7 @@ def _elo_asset_value_arr(initial_price, period_length, loc_delta, scale_delta,
 
 def elo_random_order_sequence(
         asset_value_arr, period_length, loc_noise, scale_noise, bid_ask_offset, 
-        lambdaI, time_in_force, peg_proportion, buy_prob=0.5):
+        lambdaI, time_in_force, peg_proportion, buy_prob=0.7):
     """
     draws bid/ask prices around fundamental value,
     generate input sequnce for random orders with arrival times as array
