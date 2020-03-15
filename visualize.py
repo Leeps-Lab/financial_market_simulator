@@ -11,6 +11,7 @@ import settings
 from os import listdir
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.lines import Line2D
+import re
 
 TEXT = '#848484'
 plt.rcParams.update({'font.size': 6})
@@ -21,6 +22,26 @@ inventory_color = '#60d515'
 speed_color = '#b113ef'
 gray_color = '#222222'
 external_color = '#1fa8e4'
+
+def get_stats(code):
+    with open(f'app/logs/{code}_agent0.log', 'r') as f:
+        lines = f.readlines
+    sum_profits = 0
+    sum_orders = 0
+    sum_ref = 0
+    for line in lines:
+        profit = re.match('Current profits: (-?[0-9]*\.[0-9]*).', line)
+        sum_profits += float(profit)
+        orders = re.match('Orders executed: ([0-9]+).', line)
+        sum_orders += float(orders)
+        ref = re.match('Reference price: (-?[0-9]*\.[0-9])*.', line)
+        sum_ref += float(ref)
+    n = len(lines)
+    avg_profits = sum_profits / n
+    avg_orders = sum_orders / n
+    avg_ref = sum_ref / n
+    return avg_profits, avg_orders, avg_ref
+
 
 def bar(a):
     xs = [i - 1 for i, x in enumerate(a['Speed']) \
@@ -123,6 +144,7 @@ def plot(a0, a1, a2, session_code, nums, show):
     
     ax2.set_ylabel(f'Agent {nums[0]} (A{nums[0]})', color=A0_color)
     params = get_simulation_parameters()
+    stats = get_stats(session_code)
     ax2.text(-0.25, -2.4, '\n'.join([
         'Parameters:',
         f'- duration: {params["session_duration"]}',
@@ -154,6 +176,10 @@ def plot(a0, a1, a2, session_code, nums, show):
         f'- move interval: {params["move_interval"]}',
         f'- explore all: {params["explore_all"]}',
         f'- submoves: {params["explore_all_num_submoves"]}',
+        'Stats:',
+        f'- avg profit: {stats[0]}',
+        f'- avg orders: {stats[1]}',
+        f'- avg ref price: {stats[2]}',
         ]),
         fontsize=5, transform=ax2.transAxes, horizontalalignment='left',
         verticalalignment='bottom'
