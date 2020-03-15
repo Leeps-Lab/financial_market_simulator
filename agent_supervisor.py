@@ -499,6 +499,7 @@ class AgentSupervisor():
     def on_tick(self, is_dynamic):
         self.elapsed_ticks += 1
         self.current_log_row = ''
+        self.current_log_row += f'Reference price: {str(self.agent.model.market_facts["reference_price"]}. '
         # pacemaker agent resets fundamental values
         if not is_dynamic:
             self.reset_fundamentals()
