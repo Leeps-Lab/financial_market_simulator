@@ -25,21 +25,21 @@ external_color = '#1fa8e4'
 
 def get_stats(code):
     with open(f'app/logs/{code}_agent0.log', 'r') as f:
-        lines = f.readlines
+        lines = f.readlines()
     sum_profits = 0
     sum_orders = 0
     sum_ref = 0
     for line in lines:
-        profit = re.match('Current profits: (-?[0-9]*\.[0-9]*).', line)
-        sum_profits += float(profit)
-        orders = re.match('Orders executed: ([0-9]+).', line)
-        sum_orders += float(orders)
-        ref = re.match('Reference price: (-?[0-9]*\.[0-9])*.', line)
-        sum_ref += float(ref)
+        profit = re.search('Current profits: (-?[0-9]*(\.[0-9]*)?).', line)
+        sum_profits += float(profit.groups()[0])
+        orders = re.search('Orders executed: ([0-9]+).', line)
+        sum_orders += float(orders.groups()[0])
+        ref = re.search('Reference price: (-?[0-9]*(\.[0-9]*)?).', line)
+        sum_ref += float(ref.groups()[0])
     n = len(lines)
-    avg_profits = sum_profits / n
-    avg_orders = sum_orders / n
-    avg_ref = sum_ref / n
+    avg_profits = round(sum_profits / n, 2)
+    avg_orders = round(sum_orders / n, 2)
+    avg_ref = round(sum_ref / n, 2)
     return avg_profits, avg_orders, avg_ref
 
 
@@ -157,8 +157,8 @@ def plot(a0, a1, a2, session_code, nums, show):
         f'- bid-ask offset: {params["bid_ask_offset"]}',
         f'- focal format: {params["focal_market_format"]}',
         f'- FBA interval: {params["focal_market_fba_interval"] if params["focal_market_format"] == "FBA" else "N/A"}',
-        f'- IEX delay: {params["iex_delay"]}',
-        f'- peg-prop: {params["peg_proportion"]}',
+        f'- IEX delay: {params["iex_delay"] if params["focal_market_format"] == "IEX" else "N/A"}',
+        f'- peg-prop: {params["peg_proportion"] if params["focal_market_format"] == "IEX" else "N/A"}',
         f'- $\lambda$ J: {params["lambdaJ"]}',
         f'- $\lambda$ I: {params["lambdaI"]}',
         f'- tax rate: {params["tax_rate"]}',
@@ -177,9 +177,9 @@ def plot(a0, a1, a2, session_code, nums, show):
         f'- explore all: {params["explore_all"]}',
         f'- submoves: {params["explore_all_num_submoves"]}',
         'Stats:',
-        f'- avg profit: {stats[0]}',
-        f'- avg orders: {stats[1]}',
-        f'- avg ref price: {stats[2]}',
+        f'- $\mu$ profit: {stats[0]}',
+        f'- $\mu$ orders: {stats[1]}',
+        f'- $\mu$ ref price: {stats[2]}',
         ]),
         fontsize=5, transform=ax2.transAxes, horizontalalignment='left',
         verticalalignment='bottom'

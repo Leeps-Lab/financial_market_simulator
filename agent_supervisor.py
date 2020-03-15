@@ -499,7 +499,6 @@ class AgentSupervisor():
     def on_tick(self, is_dynamic):
         self.elapsed_ticks += 1
         self.current_log_row = ''
-        self.current_log_row += f'Reference price: {str(self.agent.model.market_facts["reference_price"]}. '
         # pacemaker agent resets fundamental values
         if not is_dynamic:
             self.reset_fundamentals()
@@ -509,12 +508,14 @@ class AgentSupervisor():
         self.liquidate()
         self.cancel_outstanding_orders()
         if self.elapsed_ticks == -1:
+            self.reset_profits()
             return
         self.get_profits()
         self.current_log_row += f'Current profits: {self.current_profits}. '
         self.current_log_row += f'Current params: {str(self.curr_params)}. '
         self.current_log_row += f'Orders executed: {str(self.agent.model.orders_executed)}. '
         self.agent.model.orders_executed = 0
+        self.current_log_row += f'Reference price: {str(self.agent.model.market_facts["reference_price"])}. '
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
