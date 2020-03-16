@@ -63,7 +63,7 @@ elif mode == '--update-others':
     update_others(inv, ext, speed, invlist, extlist)
 
 elif mode == '--final-update':
-    inv = [inv for _ in range(5)]
+    invlist = [inv for _ in range(5)]
     extlist = [ext for _ in range(5)]
     speedlist = [speed, speed]
     update_others(inv, ext, speed, invlist, extlist, speedlist)
