@@ -23,25 +23,11 @@ speed_color = '#b113ef'
 gray_color = '#222222'
 external_color = '#1fa8e4'
 
-def get_stats(code):
-    with open(f'app/logs/{code}_agent0.log', 'r') as f:
-        lines = f.readlines()
-    sum_profits = 0
-    sum_orders = 0
-    sum_ref = 0
-    for line in lines:
-        profit = re.search('Current profits: (-?[0-9]*(\.[0-9]*)?).', line)
-        sum_profits += float(profit.groups()[0])
-        orders = re.search('Orders executed: ([0-9]+).', line)
-        sum_orders += float(orders.groups()[0])
-        ref = re.search('Reference price: (-?[0-9]*(\.[0-9]*)?).', line)
-        sum_ref += float(ref.groups()[0])
-    n = len(lines)
-    avg_profits = round(sum_profits / n, 2)
-    avg_orders = round(sum_orders / n, 2)
-    avg_ref = round(sum_ref / n, 2)
-    return avg_profits, avg_orders, avg_ref
-
+def get_stats(df):
+    avg_profit = df['Profit'].mean()
+    avg_orders = df['Orders Executed'].mean()
+    avg_ref = df['Reference Price'].mean()
+    return avg_profit, avg_orders, avg_ref
 
 def bar(a):
     xs = [i - 1 for i, x in enumerate(a['Speed']) \
@@ -144,7 +130,7 @@ def plot(a0, a1, a2, session_code, nums, show):
     
     ax2.set_ylabel(f'Agent {nums[0]} (A{nums[0]})', color=A0_color)
     params = get_simulation_parameters()
-    stats = get_stats(session_code)
+    stats = get_stats(a0)
     ax2.text(-0.25, -2.4, '\n'.join([
         'Parameters:',
         f'- duration: {params["session_duration"]}',

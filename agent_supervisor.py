@@ -148,6 +148,8 @@ class AgentSupervisor():
         self.z_array = []
         self.profit_array = []
         self.speed_array = []
+        self.orders_array = []
+        self.ref_array = []
         self.event_log = f'app/logs/{self.session_code}_agent{self.config_num}.log'
         self.current_log_row = ''
 
@@ -513,9 +515,9 @@ class AgentSupervisor():
         self.get_profits()
         self.current_log_row += f'Current profits: {self.current_profits}. '
         self.current_log_row += f'Current params: {str(self.curr_params)}. '
-        self.current_log_row += f'Orders executed: {str(self.agent.model.orders_executed)}. '
+        self.orders_array.append(self.agent.model.orders_executed)
         self.agent.model.orders_executed = 0
-        self.current_log_row += f'Reference price: {str(self.agent.model.market_facts["reference_price"])}. '
+        self.ref_array.append(self.agent.model.market_facts['reference_price'])
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
@@ -540,8 +542,8 @@ class AgentSupervisor():
 
         if self.elapsed_ticks % 11 == 0:
             df = pd.DataFrame(list(itertools.zip_longest(
-                self.y_array, self.z_array, self.speed_array, self.profit_array)),
-                columns=['Inventory', 'External', 'Speed', 'Profit'])
+                self.y_array, self.z_array, self.speed_array, self.profit_array, self.orders_array, self.ref_array)),
+                columns=['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price'])
             df.to_csv(f'app/data/{self.session_code}_agent{self.config_num}.csv')
         
         with open(self.event_log, 'a+') as f:
@@ -566,7 +568,7 @@ class AgentSupervisor():
         if is_dynamic:
             self.print_status('FINAL')
             df = pd.DataFrame(list(itertools.zip_longest(
-                self.y_array, self.z_array, self.speed_array, self.profit_array)),
-                columns=['Inventory', 'External', 'Speed', 'Profit'])
+                self.y_array, self.z_array, self.speed_array, self.profit_array, self.orders_array, self.ref_array)),
+                columns=['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price'])
             df.to_csv(f'app/data/{self.session_code}_agent{self.config_num}.csv')
 
