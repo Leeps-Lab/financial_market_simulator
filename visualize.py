@@ -24,9 +24,9 @@ gray_color = '#222222'
 external_color = '#1fa8e4'
 
 def get_stats(df):
-    avg_profit = df['Profit'].mean()
-    avg_orders = df['Orders Executed'].mean()
-    avg_ref = df['Reference Price'].mean()
+    avg_profit = round(df['Profit'].mean(), 2)
+    avg_orders = round(df['Orders Executed'].mean(), 2)
+    avg_ref = round(df['Reference Price'].mean(), 2)
     return avg_profit, avg_orders, avg_ref
 
 def bar(a):
@@ -190,7 +190,7 @@ def plot(a0, a1, a2, session_code, nums, show):
     ax4.bar(xs, np.ones(len(xs)), width=widths, align='edge', color=speed_color, zorder=2,
         alpha=0.25, label='Speed')
     ax4.set_ylabel(f'Agent {nums[2]} (A{nums[2]})', color=A2_color)
-    ax4.legend(loc='upper center', bbox_to_anchor=(-0.175, 3.15))
+    ax4.legend(loc='upper center', bbox_to_anchor=(-0.175, 3.5))
     #ax4.tick_params(labelbottom=False) 
     plt.subplots_adjust(left=0.20, right=0.98, top=0.95, bottom=0.05)
     if show:
