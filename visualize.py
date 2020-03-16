@@ -144,7 +144,7 @@ def plot(a0, a1, a2, session_code, nums, show):
     
     ax2.set_ylabel(f'Agent {nums[0]} (A{nums[0]})', color=A0_color)
     params = get_simulation_parameters()
-    stats = get_stats(session_code)
+#    stats = get_stats(session_code)
     ax2.text(-0.25, -2.4, '\n'.join([
         'Parameters:',
         f'- duration: {params["session_duration"]}',
@@ -176,10 +176,10 @@ def plot(a0, a1, a2, session_code, nums, show):
         f'- move interval: {params["move_interval"]}',
         f'- explore all: {params["explore_all"]}',
         f'- submoves: {params["explore_all_num_submoves"]}',
-        'Stats:',
-        f'- $\mu$ profit: {stats[0]}',
-        f'- $\mu$ orders: {stats[1]}',
-        f'- $\mu$ ref price: {stats[2]}',
+ #       'Stats:',
+ #       f'- $\mu$ profit: {stats[0]}',
+ #       f'- $\mu$ orders: {stats[1]}',
+ #       f'- $\mu$ ref price: {stats[2]}',
         ]),
         fontsize=5, transform=ax2.transAxes, horizontalalignment='left',
         verticalalignment='bottom'
