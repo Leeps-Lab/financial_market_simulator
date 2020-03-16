@@ -48,7 +48,7 @@ def build_df(code, params, imap, count):
     cols = ['Session Code', 'Agent ID', 'Tick']
     param_cols = list(params.keys())
     cols.extend(param_cols)
-    cols.extend(['Inventory', 'External', 'Speed', 'Profit'])
+    cols.extend(['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price'])
     df = pd.DataFrame(columns=cols)
     for j in range(count):
         i = str(j)
@@ -80,7 +80,7 @@ def avg_profits(df, code):
     agents = [df[df['Agent ID'] == i] for i in range(num_agents)] 
     
     # create a new empty df for each agent
-    dfs = [pd.DataFrame(columns=df[['Inventory', 'External', 'Speed', 'Profit']].columns) for _ in range(num_agents)]
+    dfs = [pd.DataFrame(columns=df[['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price']].columns) for _ in range(num_agents)]
 
     # avg across ticks
     for tick in df['Tick'].unique():
@@ -88,7 +88,7 @@ def avg_profits(df, code):
         # each row will be the same (since it is corresponding ticks.
         # short and easy way to get this
         
-        avgs = [agent_df[agent_df['Tick'] == tick][['Inventory','External','Speed','Profit']].mean(axis=0) for agent_df in agents]
+        avgs = [agent_df[agent_df['Tick'] == tick][['Inventory','External','Speed','Profit', 'Orders Executed', 'Reference Price']].mean(axis=0) for agent_df in agents]
 
         for i, dfi in enumerate(dfs):
             dfi.loc[tick] = avgs[i]
