@@ -10,8 +10,8 @@ from utility import (
 import atexit
 import numpy as np
 
-def dump_pickle(d):
-    with open('app/data/sim_meta.pickle', 'wb') as f:
+def dump_pickle(d, code):
+    with open(f'app/data/{code}_sim_meta.pickle', 'wb') as f:
         pickle.dump(d, f)
 
 def run_sim(code=None):
@@ -57,11 +57,11 @@ def create_imap(ff, jj, ii, ss, tt, mm):
 def bigloop(sp):
     num_agents = 6
     processes = []
-    formats = ['CDA']
-    lambdaj = [2, 2, 2, 2, 2, 2] #.5
-    lambdai = [[0.1, 0.07]]#, [0.2, 0.1], [0.5, 0.25]]
-    speed = [3000]
-    time_in_force = [1, 1, 1, 1, 1]
+    formats = ['IEX']#, 'FBA', 'IEX']
+    lambdaj = [.5, 2] #.5
+    lambdai = [[0.1, 0.07], [0.5, 0.25]]
+    speed = [500, 1000, 3000]
+    time_in_force = [0.5, 1]
     inventory_multiplier = [3]
 
     ff = len(formats)
@@ -82,7 +82,7 @@ def bigloop(sp):
     code = random_chars(6)
     imap = create_imap(ff, jj, ii, ss, tt, mm)
     d = dict(code=code, params=params, imap=imap, count=count)
-    dump_pickle(d)
+    dump_pickle(d, code)
 
     n = 0
     for f in formats:

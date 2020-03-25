@@ -95,6 +95,26 @@ def avg_profits(df, code):
     for i, dfi in enumerate(dfs):
         dfi.to_csv(f'app/data/{code}AV_agent{i}.csv')
 
+def avg_profits_alt(df, code):
+    num_agents = len(df['Agent ID'].unique())
+    agents = [df[df['Agent ID'] == i] for i in range(num_agents)] 
+    
+    # create a new empty df for each agent
+    dfs = [pd.DataFrame(columns=df[['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price']].columns) for _ in range(num_agents)]
+
+    # avg across ticks
+    for tick in df['Tick'].unique():
+        # this will get the mean across all rows. For everything except profit,
+        # each row will be the same (since it is corresponding ticks.
+        # short and easy way to get this
+        
+        avgs = [agent_df[agent_df['Tick'] == tick][['Inventory','External','Speed','Profit', 'Orders Executed', 'Reference Price']].mean(axis=0) for agent_df in agents]
+
+        for i, dfi in enumerate(dfs):
+            dfi.loc[tick] = avgs[i]
+    for i, dfi in enumerate(dfs):
+        dfi.to_csv(f'app/data/{code}AV_agent{i}.csv')
+
 def main():
     m = load_pickle()
     df = build_df(**m)
