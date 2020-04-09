@@ -496,23 +496,23 @@ class AgentSupervisor():
         self.agent.model.tax_paid = 0
         self.current_profits = 0
 
-    def update_repeat_metrics(self, avg=False):
+    def update_repeat_metrics(self, avg=False): 
+        self.running_profits += self.current_profits
+        self.running_orders_executed += self.agent.model.orders_executed
+        self.running_ref_price += self.agent.model.market_facts['reference_price']
         if avg == False:
-            self.running_profits += self.current_profits
-            self.running_orders_executed += self.agent.model.orders_executed)
-            self.running_ref_price += self.agent.model.market_facts['reference_price']
             rp = None
             ro = None
             rr = None
         else:
             rp = self.running_profits / self.sp['num_repeats']
             ro = self.running_orders_executed / self.sp['num_repeats']
-            rr = self.running_ref_price /= self.sp['num_repeats']
+            rr = self.running_ref_price / self.sp['num_repeats']
             self.running_profits = 0
             self.running_orders_executed = 0
             self.running_ref_price = 0
         self.agent.model.orders_executed = 0
-        return rp, ro, rr
+        return round(rp, 2), round(ro, 2), round(rr, 2)
 
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
@@ -524,10 +524,11 @@ class AgentSupervisor():
         #liquidate inventory and cancel all orders at end of session
         self.liquidate()
         self.cancel_outstanding_orders()
-        if self.elapsed_seconds < 0:
+        if self.elapsed_seconds <= 0:
             self.reset_profits()
             return
-        if self.elapsed_seconds % (self.sp['num_repeats'] * self.sp['move_interval']) != 0:
+        if self.elapsed_seconds % (
+                self.sp['num_repeats'] * self.sp['move_interval']) != 0:
             # get profits and other metrics
             self.get_profits()
             self.update_repeat_metrics(avg=False)
