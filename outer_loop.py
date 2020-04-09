@@ -9,6 +9,8 @@ from utility import (
     get_simulation_parameters, copy_params_to_logs)
 import atexit
 import numpy as np
+from itertools import product
+from functools import reduce
 
 def dump_pickle(d):
     with open(f'app/data/sim_meta.pickle', 'wb') as f:
@@ -41,35 +43,26 @@ def update(sp, **kwargs):
         sp[k] = v
     return sp
 
-def create_imap(ff, jj, ii, ss, tt, mm):
-    imap = {}
-    for f in range(ff):
-        for j in range(jj):
-            for i in range(ii):
-                for s in range(ss):
-                    for t in range(tt):
-                        for m in range(mm):
-                            key = f*jj*ii*ss*tt*mm + j*ii*ss*tt*mm + i*ss*tt*mm + s*tt*mm + t*mm + m
-                            val = (f, j, i, s, t, m)
-                            imap[key] = val
+def create_imap(args):
+    imap = []
+    for arg in args:
+        imap.append(list(range(arg)))
+    imap = product(*imap)
     return imap
 
 def bigloop(sp):
     num_agents = 6
     processes = []
-    formats = ['FBA']#, 'FBA', 'IEX']
-    lambdaj = [.5] #.5
-    lambdai = [[0.1, 0.07], [0.5, 0.25]]
+    formats = ['FBA']
+    lambdaj = [.5]
+    lambdai = [(0.1, 0.07), (0.5, 0.25)]
     speed = [500, 1000, 3000]
     time_in_force = [1]
     inventory_multiplier = [3]
 
-    ff = len(formats)
-    jj = len(lambdaj)
-    ii = len(lambdai)
-    ss = len(speed)
-    tt = len(time_in_force)
-    mm = len(inventory_multiplier)
+    paramslist = [formats, lambdaj, lambdai, speed, time_in_force, inventory_multiplier]
+    paramslens = [len(p) for o in paramslist]
+
     params = {
         'Format': formats,
         'Lambda J': lambdaj,
@@ -78,36 +71,30 @@ def bigloop(sp):
         'Time in Force': time_in_force,
         'Inventory Multiplier': inventory_multiplier,
     }
-    count = ff * jj * ii * ss * tt * mm
+    count = reduce(lambda x,y: x*y, paramslens)
     code = random_chars(6)
-    imap = create_imap(ff, jj, ii, ss, tt, mm)
+    imap = create_imap(paramslens)
     d = dict(code=code, params=params, imap=imap, count=count)
     dump_pickle(d)
 
-    n = 0
-    for f in formats:
-        for j in lambdaj:
-            for i in lambdai:
-                for s in speed:
-                    for t in time_in_force:
-                        for m in inventory_multiplier:
-                            sp = update(sp,
-                                focal_market_format=f,
-                                lambdaJ=j,
-                                lambdaI=i,
-                                speed_unit_cost=s,
-                                time_in_force=t,
-                                a_y_multiplier=m
-                            )
-                            write_sim_params(sp)
-                            print(f'Starting process {n}')
-                            sn = str(n)
-                            if len(sn) == 1:
-                                sn = f'0{sn}'
-                            session_code = f'{code}{sn}'
-                            processes.append(run_sim(session_code))
-                            n += 1
-                            sleep(270)
+    paramsproduct = product(*paramslist)
+    for index, f, j, i, s, t, m in enumerate(paramsproduct):
+        sp = update(sp,
+            focal_market_format=f,
+            lambdaJ=j,
+            lambdaI=i,
+            speed_unit_cost=s,
+            time_in_force=t,
+            a_y_multiplier=m
+        )
+        write_sim_params(sp)
+        print(f'Starting process {n}')
+        sn = str(index)
+        if len(sn) == 1:
+            sn = f'0{sn}'
+        session_code = f'{code}{sn}'
+        processes.append(run_sim(session_code))
+        sleep(90)
     return processes
 
 def smallloop(sp):

@@ -45,6 +45,7 @@ default_simulation_parameters = {
     'ys': [],
     'zs': [],
     'speeds': [],
+    'num_repeats': 1,
 }
 
 logs_dir = './app/logs/'
