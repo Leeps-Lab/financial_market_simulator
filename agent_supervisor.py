@@ -127,8 +127,8 @@ class AgentSupervisor():
         self.prev_random_orders = None
         
         # agent optimization data, changes during simulation
-        self.elapsed_seconds = 0
-        self.elapsed_ticks = -2 # number of elapsed ticks 
+        self.elapsed_seconds = -10
+        self.elapsed_ticks = -1 # number of elapsed ticks 
         self.prev_params = { # params before most recent update
             'a_x': 0.0,
             'a_y': self.sp['init_y'],
@@ -152,6 +152,9 @@ class AgentSupervisor():
         self.ref_array = []
         self.event_log = f'app/logs/{self.session_code}_agent{self.config_num}.log'
         self.current_log_row = ''
+        self.running_profits = 0
+        self.running_orders_executed = 0
+        self.running_ref_price = 0
 
     # compares cur and prev given tolerance
     @staticmethod
@@ -482,13 +485,9 @@ class AgentSupervisor():
             for z in self.sp['zs']:
                 for speed in self.sp['speeds']:
                     flatlist.append((y, z, speed))
-        if self.elapsed_ticks + 1 == len(flatlist):
-            return (0, 0, 0)
-        if self.elapsed_ticks == -2:
-            i = 0
-        else:
-            i = self.elapsed_ticks + 1
-        return flatlist[i]
+        if self.elapsed_ticks < 0:
+            return flatlist[0]
+        return flatlist[self.elapsed_ticks]
 
     def reset_profits(self):
         self.agent.model.cash = 0
@@ -497,10 +496,26 @@ class AgentSupervisor():
         self.agent.model.tax_paid = 0
         self.current_profits = 0
 
+    def update_repeat_metrics(self, avg=False):
+        if avg == False:
+            self.running_profits += self.current_profits
+            self.running_orders_executed += self.agent.model.orders_executed)
+            self.running_ref_price += self.agent.model.market_facts['reference_price']
+            rp = None
+            ro = None
+            rr = None
+        else:
+            rp = self.running_profits / self.sp['num_repeats']
+            ro = self.running_orders_executed / self.sp['num_repeats']
+            rr = self.running_ref_price /= self.sp['num_repeats']
+            self.running_profits = 0
+            self.running_orders_executed = 0
+            self.running_ref_price = 0
+        self.agent.model.orders_executed = 0
+        return rp, ro, rr
+
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
-        self.elapsed_ticks += 1
-        self.current_log_row = ''
         # pacemaker agent resets fundamental values
         if not is_dynamic:
             self.reset_fundamentals()
@@ -509,19 +524,28 @@ class AgentSupervisor():
         #liquidate inventory and cancel all orders at end of session
         self.liquidate()
         self.cancel_outstanding_orders()
-        if self.elapsed_ticks == -1:
+        if self.elapsed_seconds < 0:
             self.reset_profits()
             return
+        if self.elapsed_seconds % (self.sp['num_repeats'] * self.sp['move_interval']) != 0:
+            # get profits and other metrics
+            self.get_profits()
+            self.update_repeat_metrics(avg=False)
+            self.reset_profits()
+            return
+
+        self.elapsed_ticks += 1
+        self.current_log_row = ''
         self.get_profits()
-        self.current_log_row += f'Current profits: {self.current_profits}. '
+        rp, ro, rr = self.update_repeat_metrics(avg=True)
+        self.current_log_row += f'Current profits: {rp}. '
         self.current_log_row += f'Current params: {str(self.curr_params)}. '
-        self.orders_array.append(self.agent.model.orders_executed)
-        self.agent.model.orders_executed = 0
-        self.ref_array.append(self.agent.model.market_facts['reference_price'])
+        self.orders_array.append(ro)
+        self.ref_array.append(rr)
         # update arrays for graphing
         self.y_array.append(self.curr_params['a_y'])
         self.z_array.append(self.curr_params['a_z'])
-        self.profit_array.append(self.current_profits)
+        self.profit_array.append(rp)
         self.speed_array.append(self.curr_params['speed'])
         
         # if symmetric mode, store and update to maintain symmetry
