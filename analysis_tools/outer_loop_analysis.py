@@ -95,6 +95,11 @@ def avg_profits(df, code):
     for i, dfi in enumerate(dfs):
         dfi.to_csv(f'app/data/{code}AV_agent{i}.csv')
 
+
+# there wil lbe a different sim meta for each run.
+"""
+need a script that reads all sim metas fo
+"""
 def avg_profits_alt(df, code):
     num_agents = len(df['Agent ID'].unique())
     agents = [df[df['Agent ID'] == i] for i in range(num_agents)] 
