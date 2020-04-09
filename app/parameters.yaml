@@ -7,7 +7,7 @@ read_fundamental_values_from_array: False
 
 exogenous_order_price_noise_mean: 0
 exogenous_order_price_noise_std: 30000
-bid_ask_offset: 20000 #20000
+bid_ask_offset: 20000 
 time_in_force: 1
 
 focal_market_format: CDA
