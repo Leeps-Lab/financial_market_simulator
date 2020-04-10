@@ -56,7 +56,7 @@ def bigloop(sp):
     formats = ['FBA']
     lambdaj = [.5]
     lambdai = [(0.1, 0.07), (0.5, 0.25)]
-    speed = [500, 1000, 3000]
+    speed = [500] #, 1000, 3000]
     time_in_force = [1]
     inventory_multiplier = [3]
 
