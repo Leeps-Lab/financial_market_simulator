@@ -11,6 +11,9 @@ import atexit
 import numpy as np
 from itertools import product
 from functools import reduce
+import argparse
+from os.path import join
+import zoom_in
 
 def dump_pickle(d):
     with open(f'app/data/sim_meta.pickle', 'wb') as f:
@@ -50,7 +53,11 @@ def create_imap(args):
     imap = product(*imap)
     return imap
 
-def bigloop(sp):
+def bigloop(sp, args=None):
+    if args:
+        if args.code:
+            datadir = join('app', 'data', '.storage', args.code, 'raw')
+        
     num_agents = 6
     processes = []
     formats = ['FBA']
@@ -78,20 +85,34 @@ def bigloop(sp):
     dump_pickle(d)
 
     paramsproduct = product(*paramslist)
-    for index, f, j, i, s, t, m in enumerate(paramsproduct):
+    for index, f, j, i, s, t, m in enumerate(paramsproduct): 
+        
+        sn = str(index)
+        if len(sn) == 1:
+            sn = f'0{sn}'
+        retdict = {}
+        if args and args.code and args.zoom_method:
+            fname = f'{args.code}{sn}_agent0.csv'
+            fname = join(datadir, fname)
+            inv, ext, speed = zoom_in.parse_csv(fname)
+            if args.zoom_method == 'fine':
+                retdict = zoom_in.do_fine(inv, ext)
+            elif args.zoom_method == 'update_others':
+                retdict = zoom_in.do_others(inv, ext, speed)
+            elif args.zoom_method == 'final_update':
+                retrict = zoom_in.do_final(inv, ext, speed)
+        
         sp = update(sp,
             focal_market_format=f,
             lambdaJ=j,
             lambdaI=i,
             speed_unit_cost=s,
             time_in_force=t,
-            a_y_multiplier=m
+            a_y_multiplier=m,
+            **retdict
         )
         write_sim_params(sp)
         print(f'Starting process {n}')
-        sn = str(index)
-        if len(sn) == 1:
-            sn = f'0{sn}'
         session_code = f'{code}{sn}'
         processes.append(run_sim(session_code))
         sleep(90)
@@ -119,13 +140,16 @@ def smallloop(sp):
 
 def main():
     sp = get_simulation_parameters()
-    method = 'big'
-    if len(argv) > 1 and argv[1] == '--small':
-        method = 'small'
-    if method == 'big':
-        processes = bigloop(sp)
+    parser = argparse.ArgumentParser(description='Outer Loop')
+    parser.add_argument('--method', type=str, action='store', default='big')
+    parser.add_argument('--zoom_method', action='store', type=str)
+    parser.add_argument('--session_code', action='store', type=str)
+    args = parser.parse_args()
+
+    if args.method == 'big':
+        processes = bigloop(sp, args=args)
     else:
-        processes = smallloop(sp)
+        processes = smallloop(sp, args=args)
     
     n = 1
     for p in processes:
