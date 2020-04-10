@@ -39,11 +39,11 @@ def do_others(inv, ext, speed):
         'init_z': ext,
         'init_speed': speed,
         'ys': invlist,
-        'zs': speedlist
+        'zs': speedlist,
     }
     return retdict
 
-def do_final(inv, ext, speed)
+def do_final(inv, ext, speed):
     sp = get_simulation_parameters()
     invlist = [inv]
     extlist = [ext]
@@ -56,9 +56,9 @@ def do_final(inv, ext, speed)
         'init_speed': speed,
         'ys': invlist,
         'zs': extlist,
-        'speeds': speedlist
+        'speeds': speedlist,
         'num_repeats': num_repeats,
-        'session_duration': session_duration
+        'session_duration': session_duration,
     }
     return retdict
 

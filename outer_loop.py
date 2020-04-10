@@ -68,7 +68,7 @@ def bigloop(sp, args=None):
     inventory_multiplier = [3]
 
     paramslist = [formats, lambdaj, lambdai, speed, time_in_force, inventory_multiplier]
-    paramslens = [len(p) for o in paramslist]
+    paramslens = [len(p) for p in paramslist]
 
     params = {
         'Format': formats,
@@ -115,7 +115,7 @@ def bigloop(sp, args=None):
         print(f'Starting process {n}')
         session_code = f'{code}{sn}'
         processes.append(run_sim(session_code))
-        sleep(90)
+        sleep(10)
     return processes
 
 def smallloop(sp):
@@ -134,7 +134,7 @@ def smallloop(sp):
             print(f'Starting process {n}')
             n += 1
             processes.append(run_sim())
-            sleep(10)
+            sleep(20)
     return processes
     
 
@@ -143,7 +143,7 @@ def main():
     parser = argparse.ArgumentParser(description='Outer Loop')
     parser.add_argument('--method', type=str, action='store', default='big')
     parser.add_argument('--zoom_method', action='store', type=str)
-    parser.add_argument('--session_code', action='store', type=str)
+    parser.add_argument('--code', action='store', type=str)
     args = parser.parse_args()
 
     if args.method == 'big':
