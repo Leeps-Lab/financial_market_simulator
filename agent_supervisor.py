@@ -512,7 +512,8 @@ class AgentSupervisor():
             self.running_orders_executed = 0
             self.running_ref_price = 0
         self.agent.model.orders_executed = 0
-        return round(rp, 2), round(ro, 2), round(rr, 2)
+        roundif = lambda x: round(x, 2) if x is not None else None
+        return roundif(rp), roundif(ro), roundif(rr)
 
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
