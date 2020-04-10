@@ -62,7 +62,7 @@ def bigloop(sp, args=None):
     processes = []
     formats = ['FBA']
     lambdaj = [.5]
-    lambdai = [(0.1, 0.07), (0.5, 0.25)]
+    lambdai = [[0.1, 0.07], [0.5, 0.25]]
     speed = [500] #, 1000, 3000]
     time_in_force = [1]
     inventory_multiplier = [3]
@@ -85,7 +85,7 @@ def bigloop(sp, args=None):
     dump_pickle(d)
 
     paramsproduct = product(*paramslist)
-    for index, f, j, i, s, t, m in enumerate(paramsproduct): 
+    for index, (f, j, i, s, t, m) in enumerate(paramsproduct): 
         
         sn = str(index)
         if len(sn) == 1:
@@ -112,7 +112,7 @@ def bigloop(sp, args=None):
             **retdict
         )
         write_sim_params(sp)
-        print(f'Starting process {n}')
+        print(f'Starting process {index}')
         session_code = f'{code}{sn}'
         processes.append(run_sim(session_code))
         sleep(10)
