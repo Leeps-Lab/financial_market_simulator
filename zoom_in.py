@@ -4,45 +4,15 @@ from utility import get_simulation_parameters
 import yaml
 import settings
 
-def write_sim_params(sp):
-    with open(settings.custom_config_path, 'w') as f:
-        yaml.dump(sp, f);    
+def parse_csv(fname):
+    df = pd.read_csv(fname)
+    df = df[df['Profit'] == df['Profit'].max()]
+    inv = round(float(df['Inventory'].values[0]), 2)
+    ext = round(float(df['External'].values[0]), 2)
+    speed = round(float(df['Speed'].values[0]), 2)
+    return inv, ext, speed
 
-def update(sp, **kwargs):
-    for k, v in kwargs.items():
-        sp[k] = v
-    return sp
-
-def update_fine(inv, ext):
-    sp = get_simulation_parameters()
-    update(sp, ys=inv, zs=ext)
-    write_sim_params(sp)
-
-def update_others(initinv, initext, speed, invlist, extlist, speedlist=None):
-    sp = get_simulation_parameters()
-    if speedlist is None:
-        update(sp, init_y=initinv, init_z=initext, init_speed=speed, ys=invlist, zs=extlist)
-    else: 
-        update(sp, init_y=initinv, init_z=initext, init_speed=speed, ys=invlist, zs=extlist, speeds=speedlist)
-    write_sim_params(sp)
-
-
-code = argv[1]
-mode = argv[2]
-
-datadir = f'app/data/.storage/{code}'
-fname = f'{datadir}/processed/{code}AV_agent0.csv'
-
-df = pd.read_csv(fname)
-df = df[df['Profit'] == df['Profit'].max()]
-inv = round(float(df['Inventory'].values[0]), 2)
-ext = round(float(df['External'].values[0]), 2)
-speed = round(float(df['Speed'].values[0]), 2)
-print(inv)
-print(ext)
-print(speed)
-
-if mode == '--fine':
+def do_fine(inv, ext):
     if inv == 0:
         invlist = [0.0, 0.06, 0.12, 0.18, 0.24]
     elif inv == 1:
@@ -55,15 +25,40 @@ if mode == '--fine':
         extlist = [0.76, 0.82, 0.88, 0.94, 1.0]
     else:
         extlist = [ext - 0.24, ext - 0.12, ext, ext + 0.12, ext + 0.24]
-    update_fine(invlist, extlist)
+    retdict = {
+        'ys': invlist,
+        'zs': extlist,
+    }
+    return retdict
 
-elif mode == '--update-others':
+def do_others(inv, ext, speed):
     invlist = [0, 0.25, 0.5, 0.75, 1]
     extlist = [0, 0.25, 0.5, 0.75, 1]
-    update_others(inv, ext, speed, invlist, extlist)
+    retdict = {
+        'init_y': inv,
+        'init_z': ext,
+        'init_speed': speed,
+        'ys': invlist,
+        'zs': speedlist
+    }
+    return retdict
 
-elif mode == '--final-update':
-    invlist = [inv for _ in range(5)]
-    extlist = [ext for _ in range(5)]
-    speedlist = [speed, speed]
-    update_others(inv, ext, speed, invlist, extlist, speedlist)
+def do_final(inv, ext, speed)
+    sp = get_simulation_parameters()
+    invlist = [inv]
+    extlist = [ext]
+    speedlist = [speed]
+    num_repeats = 50
+    session_duration = sp['move_interval'] * 50 + 10
+    retdict = {
+        'init_y': inv,
+        'init_z': ext,
+        'init_speed': speed,
+        'ys': invlist,
+        'zs': extlist,
+        'speeds': speedlist
+        'num_repeats': num_repeats,
+        'session_duration': session_duration
+    }
+    return retdict
+
