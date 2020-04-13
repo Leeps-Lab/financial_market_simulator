@@ -50,7 +50,7 @@ def create_imap(args):
     imap = []
     for arg in args:
         imap.append(list(range(arg)))
-    imap = product(*imap)
+    imap = list(product(*imap))
     return imap
 
 def bigloop(sp, args=None):
@@ -60,10 +60,10 @@ def bigloop(sp, args=None):
         
     num_agents = 6
     processes = []
-    formats = ['FBA']
-    lambdaj = [.5]
+    formats = ['CDA']
+    lambdaj = [.5, 2]
     lambdai = [[0.1, 0.07], [0.5, 0.25]]
-    speed = [500] #, 1000, 3000]
+    speed = [500, 1000, 3000]
     time_in_force = [1]
     inventory_multiplier = [3]
 
@@ -100,7 +100,7 @@ def bigloop(sp, args=None):
             elif args.zoom_method == 'update_others':
                 retdict = zoom_in.do_others(inv, ext, speed)
             elif args.zoom_method == 'final_update':
-                retrict = zoom_in.do_final(inv, ext, speed)
+                retdict = zoom_in.do_final(inv, ext, speed)
         
         sp = update(sp,
             focal_market_format=f,
@@ -115,7 +115,10 @@ def bigloop(sp, args=None):
         print(f'Starting process {index}')
         session_code = f'{code}{sn}'
         processes.append(run_sim(session_code))
-        sleep(10)
+        if args and args.zoom_method == 'final_update':
+            sleep(270)
+        else:
+            sleep(2560)
     return processes
 
 def smallloop(sp):

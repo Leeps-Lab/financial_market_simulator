@@ -534,6 +534,11 @@ class AgentSupervisor():
             self.get_profits()
             self.update_repeat_metrics(avg=False)
             self.reset_profits()
+            # write to csv every tick
+            df = pd.DataFrame(list(itertools.zip_longest(
+                self.y_array, self.z_array, self.speed_array, self.profit_array, self.orders_array, self.ref_array)),
+                columns=['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price'])
+            df.to_csv(f'app/data/{self.session_code}_agent{self.config_num}.csv')
             return
 
         self.elapsed_ticks += 1
@@ -566,7 +571,7 @@ class AgentSupervisor():
         elif self.sp['grid_search_symmetric']:
             self.update_params_from_grid()
 
-        if self.elapsed_ticks % 11 == 0:
+        if self.elapsed_ticks % 1 == 0:
             df = pd.DataFrame(list(itertools.zip_longest(
                 self.y_array, self.z_array, self.speed_array, self.profit_array, self.orders_array, self.ref_array)),
                 columns=['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price'])

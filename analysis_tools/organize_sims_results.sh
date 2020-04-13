@@ -1,10 +1,9 @@
 if [[ $# -ne 1 ]]; then
-    echo "usage: ./analysis_tools/avg_sims.sh ######"
+    echo "usage: ./analysis_tools/organize_sim_results.sh ######"
     exit 1
 fi
 
 CODE=$1
-python3 analysis_tools/outer_loop_analysis.py
 mkdir app/data/.storage/$CODE
 mkdir app/data/.storage/$CODE/meta
 mkdir app/data/.storage/$CODE/raw

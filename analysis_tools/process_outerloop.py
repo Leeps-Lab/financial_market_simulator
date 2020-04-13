@@ -45,6 +45,8 @@ df_best_ol = pd.DataFrame(columns=df.columns)
 for i, combo in enumerate(param_values):
     dfslice = df[df['Agent ID'] == 0]
     dfslice = dfwhere(dfslice, params, combo)
+    if len(dfslice) == 0:
+        continue
     mean = dfslice.iloc[0].copy()
     mean[numeric_cols] = dfslice[numeric_cols].mean(axis=0)
     df_avg_ol.loc[i] = mean
