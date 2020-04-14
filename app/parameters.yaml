@@ -1,4 +1,4 @@
-session_duration: 30
+session_duration: 2565
 initial_price: 1000000
 
 fundamental_value_noise_mean: 0
@@ -61,8 +61,8 @@ explore_all_num_submoves: 7 # do not change this from 7
 
 grid_search: true
 grid_search_symmetric: false
-ys: [0]
-zs: [0, 1]        #[0, 0.25, 0.5, 0.75, 1]
-speeds: [0]
-num_repeats: 1
+ys: [0, 0.25, 0.5, 0.75, 1]
+zs: [0, 0.25, 0.5, 0.75, 1]
+speeds: [0, 1]
+num_repeats: 5
 

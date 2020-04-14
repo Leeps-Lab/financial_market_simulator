@@ -118,7 +118,7 @@ def bigloop(sp, args=None):
         if args and args.zoom_method == 'final_update':
             sleep(270)
         else:
-            sleep(2560)
+            sleep(1280)
     return processes
 
 def smallloop(sp):

@@ -15,6 +15,7 @@ from contextlib import closing
 import socket
 from time import sleep
 import atexit
+import random
 
 log = logging.getLogger(__name__)
 
@@ -27,13 +28,9 @@ options, args = p.parse_known_args()
 # gets a list of `num_ports` of available ports between 9000 and 10000
 def get_available_ports(num_ports):
     ports = []
-    try:
-        x = int(options.session_code[-2:])
-    except ValueError as e:
-        x = 0
-    x *= 11 # each simulation only needs 9 threads (for 3 dynamic agents) but
-    # 10 is a nice round number.
-    for port in range(9000 + x, 10000):
+    ports_to_try = list(range(9000, 10000))
+    random.shuffle(ports_to_try)
+    for port in ports_to_try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             res = sock.connect_ex(('localhost', port))
             if res != 0:
