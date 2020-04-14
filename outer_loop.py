@@ -60,7 +60,7 @@ def bigloop(sp, args=None):
         
     num_agents = 6
     processes = []
-    formats = ['CDA']
+    formats = ['FBA']
     lambdaj = [.5, 2]
     lambdai = [[0.1, 0.07], [0.5, 0.25]]
     speed = [500, 1000, 3000]
