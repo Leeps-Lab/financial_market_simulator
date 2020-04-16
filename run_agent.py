@@ -5,7 +5,8 @@ import settings
 from discrete_event_emitter import *
 from agents.pacemaker_agent import PaceMakerAgent
 from agents.dynamic_agent import DynamicAgent 
-from agent_supervisor import AgentSupervisor
+from agent_supervisors.grid_search_agent_supervisor import GridSearchAgentSupervisor
+from agent_supervisors.dynamic_agent_supervisor import DynamicAgentSupervisor
 from protocols.ouch_trade_client_protocol import OUCHClientFactory
 from protocols.json_line_protocol import JSONLineClientFactory
 from utility import (
@@ -91,17 +92,16 @@ def main(account_id):
     ############################################################################
     # This is code for optimizing agents' slider params during simulations.
     # If you want to run simulations normally, MAKE SURE THIS CODE DOES NOT RUN
-    supervisor = AgentSupervisor(options.session_code, options.config_num, agent)
+    if conf['grid_search']:
+        supervisor = GridSearchAgentSupervisor(options.session_code, options.config_num, agent)
+    else:
+        supervisor = DynamicAgentSupervisor(options.session_code, options.config_num, agent)
     supervisor.at_start(isinstance(agent, DynamicAgent))
-    looper = task.LoopingCall(supervisor.on_tick, isinstance(agent, DynamicAgent)) 
-    looper.clock = reactor
-    looper.start(conf['move_interval'], now=False)
-    d.addCallback(lambda _ : looper.stop())
     d.addCallback(lambda _ : supervisor.at_end(isinstance(agent, DynamicAgent)))
-    looper2 = task.LoopingCall(supervisor.send_message, isinstance(agent, DynamicAgent))
-    looper2.clock = reactor
-    looper2.start(1.0, now=True)
-    d.addCallback(lambda _ : looper2.stop())
+    looper = task.LoopingCall(supervisor.send_message, isinstance(agent, DynamicAgent))
+    looper.clock = reactor
+    looper.start(1.0, now=True)
+    d.addCallback(lambda _ : looper.stop())
     ############################################################################
     
     reactor.run()

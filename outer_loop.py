@@ -60,7 +60,7 @@ def bigloop(sp, args=None):
         
     num_agents = 6
     processes = []
-    formats = ['FBA']
+    formats = ['CDA']
     lambdaj = [.5, 2]
     lambdai = [[0.1, 0.07], [0.5, 0.25]]
     speed = [500, 1000, 3000]
@@ -115,9 +115,7 @@ def bigloop(sp, args=None):
         print(f'Starting process {index}')
         session_code = f'{code}{sn}'
         processes.append(run_sim(session_code))
-        if args and args.zoom_method == 'final_update':
-            sleep(270)
-        else:
+        if not args or args.zoom_method != 'final_update':
             sleep(1280)
     return processes
 
