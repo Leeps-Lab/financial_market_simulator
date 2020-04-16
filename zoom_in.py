@@ -50,8 +50,8 @@ def do_final(inv, ext, speed):
     invlist = [inv]
     extlist = [ext]
     speedlist = [speed]
-    num_repeats = 50
-    session_duration = sp['move_interval'] * 51 + 1
+    num_repeats = 10
+    session_duration = sp['move_interval'] * (num_repeats) + 10
     retdict = {
         'init_y': inv,
         'init_z': ext,

@@ -64,7 +64,7 @@ def build_df(code, params, imap, count):
         for c, fname in enumerate(files):
             if fname == None:
                 continue
-            agent_df = pd.read_csv(fname, index_col=0)
+            agent_df = pd.read_csv(fname)
             for k, v in cparams.items():
                 agent_df[k] = np.full(agent_df.shape[0], str(v))
             agent_df['Session Code'] = np.full(agent_df.shape[0], session)
