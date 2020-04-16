@@ -1,6 +1,6 @@
-from agent_supervisor import AgentSupervisor
+from .agent_supervisor import AgentSupervisor
 
-class DynamicAgentSupervisor(AgentSupervisor):
+class GridSearchAgentSupervisor(AgentSupervisor):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

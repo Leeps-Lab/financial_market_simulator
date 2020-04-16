@@ -105,7 +105,7 @@ def run_elo_simulation(session_code):
 
     p = settings.ports # we overwrite this
     p1, p2, p3, p4 = get_available_ports(4)
-    print('proxy ports': p1, p2, p3, p4)
+    print('proxy ports:', p1, p2, p3, p4)
     p['focal_proxy_ouch_port'] = p1
     p['focal_proxy_json_port'] = p2
     p['external_proxy_ouch_port'] = p3

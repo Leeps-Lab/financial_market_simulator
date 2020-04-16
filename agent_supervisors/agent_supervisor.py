@@ -228,23 +228,6 @@ class AgentSupervisor():
             f'{ref} per share for {cash}' +\
             f', including {tax_paid} tax. '
 
-    def cancel_outstanding_orders(self):
-        trader = self.agent.model
-        trader_state = trader.trader_role
-        message = {
-            'type': 'C',
-            'subsession_id': self.subsession_id,
-            'market_id': self.market_id,
-        }
-        event = self.agent.event_cls('agent', IncomingMessage(message))
-        trader_state.cancel_all_orders(trader, event)
-        #while event.exchange_msgs:
-        #    message = event.exchange_msgs.pop()
-        #    if self.agent.exchange_connection is not None:
-        #        self.agent.exchange_connection.sendMessage(message.translate(), message.delay)
-        #    else:
-        #        self.agent.outgoing_msg.append((message.translate(), message.delay))
-
     def reset_fundamentals(self):
         random_orders = draw.elo_draw(
             self.sp['move_interval'], self.sp,
@@ -305,6 +288,8 @@ class AgentSupervisor():
             s = ','.join(columns) + '\n'
         else:
             i = self.elapsed_ticks - 1
+            print(self.y_array)
+            print(i)
             assert(i == len(self.y_array) - 1)
             slist = [self.y_array[i], self.z_array[i],
                     self.speed_array[i], self.profit_array[i],
