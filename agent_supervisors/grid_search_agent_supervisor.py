@@ -34,7 +34,6 @@ class GridSearchAgentSupervisor(AgentSupervisor):
         self.liquidate()
         
         print('elapsed_seconds', self.elapsed_seconds)
-
         if self.elapsed_seconds <= 0:
             self.reset_profits()
             return
@@ -59,6 +58,8 @@ class GridSearchAgentSupervisor(AgentSupervisor):
         # update data and log for this tick
         self.update_arrays(rp, ro, rr)
         self.update_log_row(rp)
+
+        print('size of y array:', len(self.y_array))
 
         # if this agent's turn, update its parameters
         if self.my_turn:

@@ -155,7 +155,8 @@ class AgentSupervisor():
         if self.sp['explore_all']:
             mvs *= self.sp['explore_all_num_submoves']
         m = int(self.elapsed_ticks / mvs) % self.num_agents
-        if m == self.config_num:
+        if m == self.config_num \
+                and self.elapsed_seconds < self.sp['session_duration'] - 10:
             return True
         else:
             return False
@@ -173,12 +174,12 @@ class AgentSupervisor():
     
 
     # send message to DynamicAgent model to update params
-    def send_message(self, isDynamic):
+    def send_message(self, is_dynamic):
         self.elapsed_seconds += 1
-        if not isDynamic:
-            return
         if self.elapsed_seconds % self.sp['move_interval'] == 0:
-            self.on_tick()
+            self.on_tick(is_dynamic)
+        if not is_dynamic:
+            return
         message = {
             'type': 'slider',
             'subsession_id': self.subsession_id,
@@ -312,5 +313,4 @@ class AgentSupervisor():
     def at_end(self, is_dynamic):
         if is_dynamic:
             self.print_status('FINAL')
-        self.log_data()
 
