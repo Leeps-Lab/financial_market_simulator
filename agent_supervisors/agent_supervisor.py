@@ -109,7 +109,7 @@ class AgentSupervisor():
         
         # agent optimization data, changes during simulation
         self.elapsed_seconds = -10
-        self.elapsed_ticks = -1 # number of elapsed ticks 
+        self.elapsed_ticks = 0 # number of elapsed ticks 
         self.curr_params = { # current parameters
             'a_x': 0.0,
             'a_y': self.sp['init_y'],
@@ -174,9 +174,11 @@ class AgentSupervisor():
 
     # send message to DynamicAgent model to update params
     def send_message(self, isDynamic):
+        self.elapsed_seconds += 1
         if not isDynamic:
-            self.elapsed_seconds += 1
             return
+        if self.elapsed_seconds % self.sp['move_interval'] == 0:
+            self.on_tick()
         message = {
             'type': 'slider',
             'subsession_id': self.subsession_id,
@@ -207,7 +209,6 @@ class AgentSupervisor():
             message2 = IncomingMessage(message2)
             event2 = self.agent.event_cls('agent', message2)
             trader_state.speed_technology_change(trader, event2)
-        self.elapsed_seconds += 1
 
     def liquidate(self):
         model = self.agent.model
@@ -281,21 +282,13 @@ class AgentSupervisor():
         self.current_log_row += f'Current params: {str(self.curr_params)}. '
 
     def log_data(self):
-        if self.elapsed_ticks < 0:
-            return
-        if self.elapsed_ticks == 0: 
-            columns = ['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price']
-            s = ','.join(columns) + '\n'
-        else:
-            i = self.elapsed_ticks - 1
-            print(self.y_array)
-            print(i)
-            assert(i == len(self.y_array) - 1)
-            slist = [self.y_array[i], self.z_array[i],
-                    self.speed_array[i], self.profit_array[i],
-                    self.orders_array[i], self.ref_array[i]]
-            s = ','.join(slist) + '\n'
-        with open(f'app/data/{self.session_code}_agent{self.config_num}.csv', 'a+') as f:
+        i = self.elapsed_ticks - 1
+        slist = [self.y_array[i], self.z_array[i],
+                self.speed_array[i], self.profit_array[i],
+                self.orders_array[i], self.ref_array[i]]
+        slist = [str(round(e, 2)) for e in slist]
+        s = ','.join(slist) + '\n'
+        with open(f'app/data/{self.session_code}_agent{self.config_num}.csv', 'a') as f:
             f.write(s)
         
     def write_logfile(self): 
@@ -310,6 +303,10 @@ class AgentSupervisor():
         if self.config_num == 0:
             copyfile('app/parameters.yaml',
                 f'app/data/{self.session_code}_parameters.yaml')
+        columns = ['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price']
+        s = ','.join(columns) + '\n'
+        with open(f'app/data/{self.session_code}_agent{self.config_num}.csv', 'w') as f:
+            f.write(s)
 
     # stores csv files at end of sim
     def at_end(self, is_dynamic):
