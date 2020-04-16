@@ -60,10 +60,10 @@ def bigloop(sp, args=None):
         
     num_agents = 6
     processes = []
-    formats = ['CDA']
+    formats = ['IEX']
     lambdaj = [.5, 2]
-    lambdai = [[0.1, 0.07], [0.5, 0.25]]
-    speed = [500, 1000, 3000]
+    lambdai = [[0.1, 0.07]]#, [0.5, 0.25]]
+    speed = [500]#, 1000, 3000]
     time_in_force = [1]
     inventory_multiplier = [3]
 
@@ -116,7 +116,9 @@ def bigloop(sp, args=None):
         session_code = f'{code}{sn}'
         processes.append(run_sim(session_code))
         if not args or args.zoom_method != 'final_update':
-            sleep(640)
+            sleep(150)
+        elif args and args.zoom_method == 'final_update':
+            sleep(150)
     return processes
 
 def smallloop(sp):
