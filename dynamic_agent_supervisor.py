@@ -1,4 +1,6 @@
 from agent_supervisor import AgentSupervisor
+import redis
+import random
 
 class DynamicAgentSupervisor(AgentSupervisor):
     def __init__(self, *args, **kwargs):
@@ -211,13 +213,13 @@ class DynamicAgentSupervisor(AgentSupervisor):
         if not (self.sp['explore_all'] and self.my_turn):
             return None
         return self.elapsed_ticks % self.sp['explore_all_num_submoves']
-    # entry point into the instance, called every tick
+
+# entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
         # pacemaker agent resets fundamental values
         if not is_dynamic:
             self.reset_fundamentals()
             return
-        #print('code', self.session_code, 'agent', self.config_num, 'elapsed_seconds', self.elapsed_seconds, 'elapsed_ticks', self.elapsed_ticks)
         #liquidate inventory and cancel all orders at end of session
         self.liquidate()
         if self.elapsed_seconds <= 0:
@@ -235,15 +237,9 @@ class DynamicAgentSupervisor(AgentSupervisor):
         self.current_log_row = ''
         self.get_profits()
         rp, ro, rr = self.update_repeat_metrics(avg=True)
-        self.current_log_row += f'Current profits: {rp}. '
-        self.current_log_row += f'Current params: {str(self.curr_params)}. '
-        self.orders_array.append(ro)
-        self.ref_array.append(rr)
-        # update arrays for graphing
-        self.y_array.append(self.curr_params['a_y'])
-        self.z_array.append(self.curr_params['a_z'])
-        self.profit_array.append(rp)
-        self.speed_array.append(self.curr_params['speed'])
+        # update data and log for this tick
+        self.update_arrays(rp, ro, rr)
+        self.update_log_row(rp)
         
         # if symmetric mode, store and update to maintain symmetry
         if self.r:
@@ -254,27 +250,18 @@ class DynamicAgentSupervisor(AgentSupervisor):
         if self.my_turn and self.sp['explore_all']:
             self.update_params_explore_all()
         elif self.my_turn:
-            if self.sp['grid_search']:
-                self.update_params_from_grid()
-            else:
                 self.update_params()
-        elif self.sp['grid_search_symmetric']:
-            self.update_params_from_grid()
-
-        if self.elapsed_ticks % 1 == 0:
-            df = pd.DataFrame(list(itertools.zip_longest(
-                self.y_array, self.z_array, self.speed_array, self.profit_array, self.orders_array, self.ref_array)),
-                columns=['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price'])
-            df.to_csv(f'app/data/{self.session_code}_agent{self.config_num}.csv')
         
-        with open(self.event_log, 'a+') as f:
-            f.write(self.current_log_row + '\n')
-
-        self.previous_profits = self.current_profits
-        if self.sp['grid_search']:
-            self.reset_profits()
+        # write data to files each tick
+        self.log_data()
+        self.write_logfile()
+        
+        # reset profits
+        self.reset_profits()
+    
     # initializes agent params at start of sim
     def at_start(self, is_dynamic):
         super().at_start(is_dynamic)
         if self.r:
             self.store_profit_and_params()
+

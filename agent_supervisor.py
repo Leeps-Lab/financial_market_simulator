@@ -1,15 +1,4 @@
-from math import exp, ceil
-import random
-import time
-import itertools
-import redis
-import numpy as np
-import pandas as pd
-import matplotlib
-matplotlib.use('Agg')
-from matplotlib import style
-style.use('./analysis_tools/elip12.mplstyle')
-import matplotlib.pyplot as plt   
+from math import exp
 from high_frequency_trading.hft.incoming_message import IncomingMessage
 from utility import get_interactive_agent_count, get_simulation_parameters
 import draw
@@ -135,6 +124,9 @@ class AgentSupervisor():
         self.orders_array = []
         self.ref_array = []
         self.event_log = f'app/logs/{self.session_code}_agent{self.config_num}.log'
+        self.running_profits = 0
+        self.running_orders_executed = 0
+        self.running_ref_price = 0
         self.current_log_row = ''
 
     
@@ -274,6 +266,57 @@ class AgentSupervisor():
         self.agent.model.tax_paid = 0
         self.current_profits = 0
 
+    def update_repeat_metrics(self, avg=False): 
+        self.running_profits += self.current_profits
+        self.running_orders_executed += self.agent.model.orders_executed
+        self.running_ref_price += self.agent.model.market_facts['reference_price']
+        if avg == False:
+            rp = None
+            ro = None
+            rr = None
+        else:
+            rp = self.running_profits / self.sp['num_repeats']
+            ro = self.running_orders_executed / self.sp['num_repeats']
+            rr = self.running_ref_price / self.sp['num_repeats']
+            self.running_profits = 0
+            self.running_orders_executed = 0
+            self.running_ref_price = 0
+        self.agent.model.orders_executed = 0
+        roundif = lambda x: round(x, 2) if x is not None else None
+        return roundif(rp), roundif(ro), roundif(rr)
+    
+    def update_arrays(self, profit, orders, ref):
+        self.profit_array.append(profit)
+        self.orders_array.append(orders)
+        self.ref_array.append(ref)
+        self.y_array.append(self.curr_params['a_y'])
+        self.z_array.append(self.curr_params['a_z'])
+        self.speed_array.append(self.curr_params['speed'])
+   
+    def update_log_row(self, profit): 
+        self.current_log_row += f'Current profits: {profit}. '
+        self.current_log_row += f'Current params: {str(self.curr_params)}. '
+
+    def log_data(self):
+        if self.elapsed_ticks < 0:
+            return
+        if self.elapsed_ticks == 0: 
+            columns = ['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price']
+            s = ','.join(columns) + '\n'
+        else:
+            i = self.elapsed_ticks - 1
+            assert(i == len(self.y_array) - 1)
+            slist = [self.y_array[i], self.z_array[i],
+                    self.speed_array[i], self.profit_array[i],
+                    self.orders_array[i], self.ref_array[i]]
+            s = ','.join(slist) + '\n'
+        with open(f'app/data/{self.session_code}_agent{self.config_num}.csv', 'a+') as f:
+            f.write(s)
+        
+    def write_logfile(self): 
+        with open(self.event_log, 'a+') as f:
+            f.write(self.current_log_row + '\n')
+
     def on_tick(self):
         raise NotImplementedError()
 
@@ -287,8 +330,5 @@ class AgentSupervisor():
     def at_end(self, is_dynamic):
         if is_dynamic:
             self.print_status('FINAL')
-            df = pd.DataFrame(list(itertools.zip_longest(
-                self.y_array, self.z_array, self.speed_array, self.profit_array, self.orders_array, self.ref_array)),
-                columns=['Inventory', 'External', 'Speed', 'Profit', 'Orders Executed', 'Reference Price'])
-            df.to_csv(f'app/data/{self.session_code}_agent{self.config_num}.csv')
+        self.log_data()
 
