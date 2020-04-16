@@ -1,4 +1,4 @@
-from agent_supervisor import AgentSupervisor
+from .agent_supervisor import AgentSupervisor
 import redis
 import random
 
