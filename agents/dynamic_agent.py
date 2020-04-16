@@ -57,7 +57,9 @@ class DynamicAgent(BaseMarketAgent):
                 redirect_msg.data['exchange_port'] = 0
                 redirect_msg.data['delay'] = 0.0
                 if redirect_msg.data['e_best_bid'] == None:
-                    redirect_msg.data['e_best_bid'] = 0
+                    redirect_msg.data['e_best_bid'] = 0 
+                if redirect_msg.data['e_best_offer'] == None:
+                    redirect_msg.data['e_best_offer'] = 2147483647
                 if self.exchange_connection is not None:
                     self.exchange_connection.sendMessage(redirect_msg.translate(), redirect_msg.delay)
                 else:

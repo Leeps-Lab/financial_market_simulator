@@ -116,7 +116,7 @@ def bigloop(sp, args=None):
         session_code = f'{code}{sn}'
         processes.append(run_sim(session_code))
         if not args or args.zoom_method != 'final_update':
-            sleep(1280)
+            sleep(640)
     return processes
 
 def smallloop(sp):
