@@ -7,6 +7,8 @@ import settings
 def parse_csv(fname):
     df = pd.read_csv(fname)
     df = df[df['Profit'] == df['Profit'].max()]
+    if len(df) == 0:
+        return 0, 0, 0
     inv = round(float(df['Inventory'].values[0]), 2)
     ext = round(float(df['External'].values[0]), 2)
     speed = round(float(df['Speed'].values[0]), 2)
