@@ -27,6 +27,9 @@ class BaseMarketAgent:
         self._exchange_connection = None
         self.event_emitters = event_emitters
         self.outgoing_msg = deque()
+        self.market_format = None
+        if 'market_format' in kwargs:
+            self.market_format = kwargs['market_format']
 
     @property
     def exchange_connection(self):

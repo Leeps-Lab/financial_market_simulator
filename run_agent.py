@@ -36,8 +36,8 @@ def at_end():
 def main(account_id):
     agent_type = options.agent_type
     session_duration = options.session_duration
-    agent_parameters = {}
     conf = get_simulation_parameters()
+    agent_parameters = {'market_format': conf['focal_market_format']}
     if agent_type == 'rabbit':
         random_orders = draw.elo_draw(
             conf['move_interval'], conf,
