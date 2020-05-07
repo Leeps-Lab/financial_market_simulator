@@ -296,6 +296,23 @@ class AgentSupervisor():
         with open(self.event_log, 'a+') as f:
             f.write(self.current_log_row + '\n')
 
+    def cancel_outstanding_orders(self):
+        trader = self.agent.model
+        trader_state = trader.trader_role
+        message = {
+            'type': 'C',
+            'subsession_id': self.subsession_id,
+            'market_id': self.market_id,
+        }
+        event = self.agent.event_cls('agent', IncomingMessage(message))
+        trader_state.cancel_all_orders(trader, event)
+        #while event.exchange_msgs:
+        #    message = event.exchange_msgs.pop()
+        #    if self.agent.exchange_connection is not None:
+        #        self.agent.exchange_connection.sendMessage(message.translate(), message.delay)
+        #    else:
+        #        self.agent.outgoing_msg.append((message.translate(), message.delay))
+    
     def on_tick(self):
         raise NotImplementedError()
 
