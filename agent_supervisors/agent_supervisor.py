@@ -309,8 +309,6 @@ class AgentSupervisor():
         event = self.agent.event_cls('agent', IncomingMessage(message))
         trader_state.cancel_all_orders(trader, event)
         while event.exchange_msgs:
-            msg = event.exchange_msgs.pop()
-            msg.shares = 0
             msg.delay = 0
             print(msg)
             print(msg.translate())
@@ -338,7 +336,6 @@ class AgentSupervisor():
         trader_role.state_change(trader, event)
         trader.state_change(event)
         
-
     def on_tick(self):
         raise NotImplementedError()
 
