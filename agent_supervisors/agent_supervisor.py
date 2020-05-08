@@ -171,7 +171,25 @@ class AgentSupervisor():
         self.current_profits = m.net_worth
         self.current_log_row += f'Invoiced {invoice} for speed tech. '
         
-    
+    def update_speed(self):
+        trader = self.agent.model
+        trader_state = trader.trader_role
+        message = {
+            'type': 'speed_change',
+            'subsession_id': self.subsession_id,
+            'market_id': self.market_id,
+        }
+        s = self.agent.model.technology_subscription
+        if self.curr_params['speed'] == 1 and not s.is_active:
+            message['value'] = True
+            message = IncomingMessage(message)
+            event = self.agent.event_cls('agent', message)
+            trader_state.speed_technology_change(trader, event)
+        elif self.curr_params['speed'] == 0 and s.is_active:
+            message['value'] = False
+            message = IncomingMessage(message2)
+            event = self.agent.event_cls('agent', message)
+            trader_state.speed_technology_change(trader, event)
 
     # send message to DynamicAgent model to update params
     def send_message(self, is_dynamic):
@@ -192,24 +210,8 @@ class AgentSupervisor():
         event = self.agent.event_cls('agent', message) 
         trader = self.agent.model
         trader.user_slider_change(event)
+        self.update_speed()
        
-        trader_state = trader.trader_role
-        message2 = {
-            'type': 'speed_change',
-            'subsession_id': self.subsession_id,
-            'market_id': self.market_id,
-        }
-        s = self.agent.model.technology_subscription
-        if self.curr_params['speed'] == 1 and not s.is_active:
-            message2['value'] = True
-            message2 = IncomingMessage(message2)
-            event2 = self.agent.event_cls('agent', message2)
-            trader_state.speed_technology_change(trader, event2)
-        elif self.curr_params['speed'] == 0 and s.is_active:
-            message2['value'] = False
-            message2 = IncomingMessage(message2)
-            event2 = self.agent.event_cls('agent', message2)
-            trader_state.speed_technology_change(trader, event2)
 
     def liquidate(self):
         model = self.agent.model
@@ -300,19 +302,43 @@ class AgentSupervisor():
         trader = self.agent.model
         trader_state = trader.trader_role
         message = {
-            'type': 'C',
-            'subsession_id': self.subsession_id,
-            'market_id': self.market_id,
+            'type': 'X',
+            'subsession_id': 0,
+            'market_id': 0,
         }
         event = self.agent.event_cls('agent', IncomingMessage(message))
         trader_state.cancel_all_orders(trader, event)
-        #while event.exchange_msgs:
-        #    message = event.exchange_msgs.pop()
-        #    if self.agent.exchange_connection is not None:
-        #        self.agent.exchange_connection.sendMessage(message.translate(), message.delay)
-        #    else:
-        #        self.agent.outgoing_msg.append((message.translate(), message.delay))
-    
+        while event.exchange_msgs:
+            msg = event.exchange_msgs.pop()
+            msg.shares = 0
+            msg.delay = 0
+            print(msg)
+            print(msg.translate())
+            if self.agent.exchange_connection is not None:
+                self.agent.exchange_connection.sendMessage(msg.translate(), msg.delay)
+            else:
+                self.agent.outgoing_msg.append((msg.translate(), msg.delay))
+  
+    def reset_state(self):
+        self.change_state('out')
+        self.change_state('automated')
+        self.update_speed()
+
+    def change_state(self, new_state):
+        message = {
+            'type': 'role_change',
+            'subsession_id': self.subsession_id,
+            'market_id': self.market_id,
+            'state': new_state,
+        }
+        message = IncomingMessage(message) 
+        event = self.agent.event_cls('agent', message) 
+        trader = self.agent.model
+        trader_role = trader.trader_role
+        trader_role.state_change(trader, event)
+        trader.state_change(event)
+        
+
     def on_tick(self):
         raise NotImplementedError()
 

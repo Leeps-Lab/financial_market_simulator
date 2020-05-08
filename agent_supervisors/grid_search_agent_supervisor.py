@@ -32,8 +32,9 @@ class GridSearchAgentSupervisor(AgentSupervisor):
         
         #liquidate inventory and cancel all orders at end of session
         self.liquidate()
-#        self.cancel_outstanding_orders()
-        
+        #self.cancel_outstanding_orders()
+        #self.reset_state()
+
         #print('elapsed_seconds', self.elapsed_seconds)
         if self.elapsed_seconds <= 0:
             self.reset_profits()
