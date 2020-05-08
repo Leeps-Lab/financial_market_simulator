@@ -25,7 +25,7 @@ def run_sim(code=None):
             executable,
             'simulate.py',
             '--session_code',
-            code,
+            code, 
         ]
     else:
         cmd = [
