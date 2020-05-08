@@ -309,9 +309,9 @@ class AgentSupervisor():
         event = self.agent.event_cls('agent', IncomingMessage(message))
         trader_state.cancel_all_orders(trader, event)
         while event.exchange_msgs:
-            msg.delay = 0
-            print(msg)
-            print(msg.translate())
+            msg = event.exchange_msgs.pop()
+            msg.data['shares'] = 0
+            msg.data['delay'] = 0
             if self.agent.exchange_connection is not None:
                 self.agent.exchange_connection.sendMessage(msg.translate(), msg.delay)
             else:

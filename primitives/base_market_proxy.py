@@ -33,7 +33,6 @@ class BaseMarketProxy:
 
     @db.freeze_state()     
     def handle_OUCH(self, message: IncomingOuchMessage, original_msg: bytes, direction: int):
-        #print('proxy', message)
         # outbound message
         if direction is 1:
             # assume public messages will be broadcasted over
