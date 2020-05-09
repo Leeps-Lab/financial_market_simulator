@@ -187,7 +187,7 @@ class AgentSupervisor():
             trader_state.speed_technology_change(trader, event)
         elif self.curr_params['speed'] == 0 and s.is_active:
             message['value'] = False
-            message = IncomingMessage(message2)
+            message = IncomingMessage(message)
             event = self.agent.event_cls('agent', message)
             trader_state.speed_technology_change(trader, event)
 
