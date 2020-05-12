@@ -1,5 +1,6 @@
 from math import exp
 from high_frequency_trading.hft.incoming_message import IncomingMessage
+from high_frequency_trading.hft.exchange_message import ResetMessage
 from utility import get_interactive_agent_count, get_simulation_parameters
 import draw
 from discrete_event_emitter import RandomOrderEmitter
@@ -232,6 +233,19 @@ class AgentSupervisor():
             f'{ref} per share for {cash}' +\
             f', including {tax_paid} tax. '
 
+    
+    # only gets called by pacemaker agent
+    def reset_exchange(self): 
+        msg = ResetMessage.create(
+            'reset_exchange', exchange_host='', 
+            exchange_port=0, delay=0, 
+            event_code='S', timestamp=0, subsession_id=0)
+        if self.agent.exchange_connection is not None:
+            self.agent.exchange_connection.sendMessage(msg.translate(), msg.delay)
+        else:
+            self.agent.outgoing_msg.append((msg.translate(), msg.delay))
+    
+
     def reset_fundamentals(self):
         random_orders = draw.elo_draw(
             self.sp['move_interval'], self.sp,
@@ -300,22 +314,23 @@ class AgentSupervisor():
 
     def cancel_outstanding_orders(self):
         trader = self.agent.model
-        trader_state = trader.trader_role
-        message = {
-            'type': 'X',
-            'subsession_id': 0,
-            'market_id': 0,
-        }
-        event = self.agent.event_cls('agent', IncomingMessage(message))
-        trader_state.cancel_all_orders(trader, event)
-        while event.exchange_msgs:
-            msg = event.exchange_msgs.pop()
-            msg.data['shares'] = 0
-            msg.data['delay'] = 0
-            if self.agent.exchange_connection is not None:
-                self.agent.exchange_connection.sendMessage(msg.translate(), msg.delay)
-            else:
-                self.agent.outgoing_msg.append((msg.translate(), msg.delay))
+        trader.reset_orderstore()
+        #trader_state = trader.trader_role
+        #message = {
+        #    'type': 'X',
+        #    'subsession_id': 0,
+        #    'market_id': 0,
+        #}
+        #event = self.agent.event_cls('agent', IncomingMessage(message))
+        #trader_state.cancel_all_orders(trader, event)
+        #while event.exchange_msgs:
+        #    msg = event.exchange_msgs.pop()
+        #    msg.data['shares'] = 0
+        #    msg.data['delay'] = 0
+        #    if self.agent.exchange_connection is not None:
+        #        self.agent.exchange_connection.sendMessage(msg.translate(), msg.delay)
+        #    else:
+        #        self.agent.outgoing_msg.append((msg.translate(), msg.delay))
   
     def reset_state(self):
         self.change_state('out')

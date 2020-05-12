@@ -163,9 +163,14 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
 
 
 if __name__ == '__main__':
-    d = elo_draw(20, utility.get_simulation_parameters())
-    for r in d:
-        print(r)
+    d = elo_draw(180, utility.get_simulation_parameters(), config_num=0)
+    import pandas as pd
+    df = pd.DataFrame(d, columns=['arrival_time', 'fundamental_value', 'price', 'buy_sell_indicator', 'time_in_force', 'pegged_state'])
+    df['market_id_in_subsession'] = 0
+    df = df[['arrival_time', 'market_id_in_subsession', 'price', 'buy_sell_indicator', 'time_in_force']]
+    df.to_csv('investor_arrivals_focal.csv')
+    #for r in d:
+    #    print(r)
 
 
      
