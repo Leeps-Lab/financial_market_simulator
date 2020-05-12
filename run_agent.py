@@ -111,8 +111,8 @@ if __name__ == '__main__':
     account_id = generate_account_id()
     log.basicConfig(
         level=log.ERROR, 
-        filename=settings.logs_dir + 'session_%s_trader_%s.log' % (
-        options.session_code, account_id),
+        #filename=settings.logs_dir + 'session_%s_trader_%s.log' % (
+        #options.session_code, account_id),
         format = "[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s",
         datefmt = '%H:%M:%S')
     if options.random_seed:
