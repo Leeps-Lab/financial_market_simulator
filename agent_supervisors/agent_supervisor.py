@@ -238,7 +238,7 @@ class AgentSupervisor():
     def reset_exchange(self): 
         msg = ResetMessage.create(
             'reset_exchange', exchange_host='', 
-            exchange_port=0, delay=0, 
+            exchange_port=0, delay=0.1, 
             event_code='S', timestamp=0, subsession_id=0)
         if self.agent.exchange_connection is not None:
             self.agent.exchange_connection.sendMessage(msg.translate(), msg.delay)
