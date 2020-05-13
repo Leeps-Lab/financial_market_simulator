@@ -20,18 +20,21 @@ class GridSearchAgentSupervisor(AgentSupervisor):
         if self.elapsed_ticks < 0:
             return flatlist[0]
         return flatlist[self.elapsed_ticks]
-    
+
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
-        # pacemaker agent resets fundamental values
+        # pacemaker agent resets its own fundamental values
+        # and its exchange
         if not is_dynamic:
             self.reset_fundamentals()
+            self.reset_exchange()
             return
         
         #print('code', self.session_code, 'agent', self.config_num, 'elapsed_seconds', self.elapsed_seconds, 'elapsed_ticks', self.elapsed_ticks)
         
         #liquidate inventory and cancel all orders at end of session
         self.liquidate()
+        self.cancel_outstanding_orders()
         
         #print('elapsed_seconds', self.elapsed_seconds)
         if self.elapsed_seconds <= 0:

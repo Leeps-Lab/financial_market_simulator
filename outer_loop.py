@@ -25,7 +25,7 @@ def run_sim(code=None):
             executable,
             'simulate.py',
             '--session_code',
-            code,
+            code, 
         ]
     else:
         cmd = [
@@ -60,7 +60,7 @@ def bigloop(sp, args=None):
         
     num_agents = 6
     processes = []
-    formats = ['FBA']
+    formats = ['CDA']
     lambdaj = [.5]#, 2]
     lambdai = [[0.1, 0.07]]#, [0.5, 0.25]]
     speed = [500, 1000]#, 3000]

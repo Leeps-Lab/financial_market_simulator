@@ -1,5 +1,6 @@
 from math import exp
 from high_frequency_trading.hft.incoming_message import IncomingMessage
+from high_frequency_trading.hft.exchange_message import ResetMessage
 from utility import get_interactive_agent_count, get_simulation_parameters
 import draw
 from discrete_event_emitter import RandomOrderEmitter
@@ -171,7 +172,25 @@ class AgentSupervisor():
         self.current_profits = m.net_worth
         self.current_log_row += f'Invoiced {invoice} for speed tech. '
         
-    
+    def update_speed(self):
+        trader = self.agent.model
+        trader_state = trader.trader_role
+        message = {
+            'type': 'speed_change',
+            'subsession_id': self.subsession_id,
+            'market_id': self.market_id,
+        }
+        s = self.agent.model.technology_subscription
+        if self.curr_params['speed'] == 1 and not s.is_active:
+            message['value'] = True
+            message = IncomingMessage(message)
+            event = self.agent.event_cls('agent', message)
+            trader_state.speed_technology_change(trader, event)
+        elif self.curr_params['speed'] == 0 and s.is_active:
+            message['value'] = False
+            message = IncomingMessage(message)
+            event = self.agent.event_cls('agent', message)
+            trader_state.speed_technology_change(trader, event)
 
     # send message to DynamicAgent model to update params
     def send_message(self, is_dynamic):
@@ -192,24 +211,8 @@ class AgentSupervisor():
         event = self.agent.event_cls('agent', message) 
         trader = self.agent.model
         trader.user_slider_change(event)
+        self.update_speed()
        
-        trader_state = trader.trader_role
-        message2 = {
-            'type': 'speed_change',
-            'subsession_id': self.subsession_id,
-            'market_id': self.market_id,
-        }
-        s = self.agent.model.technology_subscription
-        if self.curr_params['speed'] == 1 and not s.is_active:
-            message2['value'] = True
-            message2 = IncomingMessage(message2)
-            event2 = self.agent.event_cls('agent', message2)
-            trader_state.speed_technology_change(trader, event2)
-        elif self.curr_params['speed'] == 0 and s.is_active:
-            message2['value'] = False
-            message2 = IncomingMessage(message2)
-            event2 = self.agent.event_cls('agent', message2)
-            trader_state.speed_technology_change(trader, event2)
 
     def liquidate(self):
         model = self.agent.model
@@ -229,6 +232,19 @@ class AgentSupervisor():
         self.current_log_row += f'Liquidated {size} shares at ' +\
             f'{ref} per share for {cash}' +\
             f', including {tax_paid} tax. '
+
+    
+    # only gets called by pacemaker agent
+    def reset_exchange(self): 
+        msg = ResetMessage.create(
+            'reset_exchange', exchange_host='', 
+            exchange_port=0, delay=0.1, 
+            event_code='S', timestamp=0, subsession_id=0)
+        if self.agent.exchange_connection is not None:
+            self.agent.exchange_connection.sendMessage(msg.translate(), msg.delay)
+        else:
+            self.agent.outgoing_msg.append((msg.translate(), msg.delay))
+    
 
     def reset_fundamentals(self):
         random_orders = draw.elo_draw(
@@ -296,6 +312,45 @@ class AgentSupervisor():
         with open(self.event_log, 'a+') as f:
             f.write(self.current_log_row + '\n')
 
+    def cancel_outstanding_orders(self):
+        trader = self.agent.model
+        trader.reset_orderstore()
+        #trader_state = trader.trader_role
+        #message = {
+        #    'type': 'X',
+        #    'subsession_id': 0,
+        #    'market_id': 0,
+        #}
+        #event = self.agent.event_cls('agent', IncomingMessage(message))
+        #trader_state.cancel_all_orders(trader, event)
+        #while event.exchange_msgs:
+        #    msg = event.exchange_msgs.pop()
+        #    msg.data['shares'] = 0
+        #    msg.data['delay'] = 0
+        #    if self.agent.exchange_connection is not None:
+        #        self.agent.exchange_connection.sendMessage(msg.translate(), msg.delay)
+        #    else:
+        #        self.agent.outgoing_msg.append((msg.translate(), msg.delay))
+  
+    def reset_state(self):
+        self.change_state('out')
+        self.change_state('automated')
+        self.update_speed()
+
+    def change_state(self, new_state):
+        message = {
+            'type': 'role_change',
+            'subsession_id': self.subsession_id,
+            'market_id': self.market_id,
+            'state': new_state,
+        }
+        message = IncomingMessage(message) 
+        event = self.agent.event_cls('agent', message) 
+        trader = self.agent.model
+        trader_role = trader.trader_role
+        trader_role.state_change(trader, event)
+        trader.state_change(event)
+        
     def on_tick(self):
         raise NotImplementedError()
 

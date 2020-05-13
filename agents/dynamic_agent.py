@@ -50,12 +50,13 @@ class DynamicAgent(BaseMarketAgent):
         if (type_code == 'focal' and msg_type in self.handled_focal_market_events) or (
             type_code == 'external' and msg_type in self.handled_external_market_events):
             msg = IncomingMessage(clean_message)
-            if msg_type == 'external_feed_change' and self.config_num == 0:
+            if self.market_format == 'IEX' and msg_type == 'external_feed_change' and self.config_num == 0:
                 redirect_msg = ExternalFeedChangeMessage(deepcopy(clean_message))
                 redirect_msg.data['type'] = 'external_feed'
                 redirect_msg.data['exchange_host'] = 0
                 redirect_msg.data['exchange_port'] = 0
                 redirect_msg.data['delay'] = 0.0
+                print(redirect_msg.data)
                 if redirect_msg.data['e_best_bid'] == None:
                     redirect_msg.data['e_best_bid'] = 0 
                 if redirect_msg.data['e_best_offer'] == None:

@@ -19,6 +19,8 @@ class ProxyOuchServerProtocol(OUCH):
         'U': 47,
         'L': 17,
         'K': 9,
+        'X': 19, #eli
+        'H': 10, #eli
     }
     message_cls = ouch_messages.OuchClientMessages
 
@@ -83,6 +85,8 @@ class ProxyOuchClient(OUCH):
         'Z': 49,
         'L': 17,
         'K': 9,
+        'X': 20, #eli
+        'H': 10, #eli
     }
     message_cls = ouch_messages.OuchServerMessages
 
