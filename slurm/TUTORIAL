@@ -1,0 +1,78 @@
+COPY INSTALL SCRIPT
+cp /hb/scratch/epandolf/install.sh .
+
+INSTALL EVERYTHING
+./install.sh
+- this will take some time and should not show any errors
+
+EDIT OUTER LOOP PARAMETERS
+This is a little confusing, sorry. The outer loop edits the parameters in parameters.yaml.
+These are the following parameters that you need to edit in the outer loop.
+`vim outer_loop.py`
+use the arrow keys to navigate
+scroll down to bigloop(), line 57. Edit the lines below that for what you need.
+- formats
+- lamda J
+- lambda I
+- speed
+- time in force
+- inventory multiplier
+NOTE: THE TOTAL NUMBER OF SIMULATIONS RUN IS THE PRODUCT OF THE LENGTH OF ALL THOSE LISTS
+This means, to run an inner loop with CDA, change format to CDA, and leave everything
+else as it is. You will notice the lambdaI list has 6 things in it, and the time in force
+list has 5. Everything else has 1.
+This means there will be 1 * 1 * 6 * 1 * 5 * 1 = 30 simulations run.
+For help editing this file, see the following section about editing the parameters file.
+
+All other parameters get set in parameters.yaml.
+
+EDIT PARAMETERS FILE:
+`vim app/parameters.yaml`
+
+'i' to enter insert mode
+
+use arrow keys to navigate
+
+change whatever parameters you need to
+
+<escape> to exit insert mode
+
+':wq' to save and exit
+
+if you mess anything up and get stuck, press <escape> like 5 times then press ':q!'
+this will quit without saving anything and you can start over with 'vim app/par...
+
+RUN SIMULATIONS
+`cd ~` to nagivate to your home directory
+`./simulations.sh`
+This will queue a job. You will get an email when the job starts and ends.
+With 6 agents and 30 simulations of 50 rounds each, this will take about 9 hours.
+
+GET DATA
+`cd financial_market_simulator/app/data/.storage`
+`ls -lht`
+this will show the folders in most recently created to least recently created order
+find the 4 most recently created folders. They will be the top 4.
+
+open a new tab (not in hb)
+for each folder (named a 6-character code I refer to as CODE
+scp klopezva@hb.ucsc.edu:~/financial_market_simulator/app/data/.storage/CODE/processed .
+cd processed
+open *.png
+
+This will copy a folder called processed to your local machine, and then you go into it and open the png files.
+Then you can drag and drop them into the google doc.
+
+You need to do this separately for each of the 4 most recent ones.
+Note that the most recent one will have 2 pngs called {CODE}AV, standing for average,
+and 2 called {CODE}fn, standing for final. The final one is a single simulation run at the end,
+where all agents share the best strategy found.
+
+The order should go
+4th most recent
+3rd most recent
+2nd most recent
+most recent AV
+most recent fn
+
+
