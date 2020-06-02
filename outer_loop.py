@@ -64,10 +64,18 @@ def bigloop(sp, args=None):
     lambdaj = [.5]#, 2]
     lambdai = [[0.1, 0.07]]#, [0.5, 0.25]]
     speed = [500, 1000]#, 3000]
-    time_in_force = [1]
-    inventory_multiplier = [3]
+    #time_in_force = [1]
+    #inventory_multiplier = [3]
+    agent_state_configs = [[
+        [0, 1, 0, 0, 0, 0],
+        [0, 2, 0, 0, 0.25, 0.25],
+        [0, 3, 0, 0, 0.25, 0.25],
+        [0, 4, 0, 0, 0.25, 0.25],
+        [0, 5, 0, 0, 0.25, 0.75],
+        [0, 6, 0, 0, 0.25, 0.75],
+    ]]
 
-    paramslist = [formats, lambdaj, lambdai, speed, time_in_force, inventory_multiplier]
+    paramslist = [formats, lambdaj, lambdai, speed] #time_in_force, inventory_multiplier]
     paramslens = [len(p) for p in paramslist]
 
     params = {
@@ -75,8 +83,8 @@ def bigloop(sp, args=None):
         'Lambda J': lambdaj,
         'Lambda I': lambdai,
         'Speed Cost': speed,
-        'Time in Force': time_in_force,
-        'Inventory Multiplier': inventory_multiplier,
+        #'Time in Force': time_in_force,
+        #'Inventory Multiplier': inventory_multiplier,
     }
     count = reduce(lambda x,y: x*y, paramslens)
     code = random_chars(6)
@@ -85,12 +93,12 @@ def bigloop(sp, args=None):
     dump_pickle(d)
 
     paramsproduct = product(*paramslist)
-    for index, (f, j, i, s, t, m) in enumerate(paramsproduct): 
+    for index, (f, j, i, s) in enumerate(paramsproduct): 
         
         sn = str(index)
         if len(sn) == 1:
             sn = f'0{sn}'
-        retdict = {}
+        retdict = {'agent_state_configs': agent_state_configs}
         if args and args.code and args.zoom_method:
             fname = f'{args.code}{sn}_agent0.csv'
             fname = join(datadir, fname)
@@ -107,8 +115,8 @@ def bigloop(sp, args=None):
             lambdaJ=j,
             lambdaI=i,
             speed_unit_cost=s,
-            time_in_force=t,
-            a_y_multiplier=m,
+            #time_in_force=t,
+            #a_y_multiplier=m,
             **retdict
         )
         write_sim_params(sp)
