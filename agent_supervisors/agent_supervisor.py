@@ -113,9 +113,9 @@ class AgentSupervisor():
         self.elapsed_ticks = 0 # number of elapsed ticks 
         self.curr_params = { # current parameters
             'a_x': 0.0,
-            'a_y': self.sp['init_y'],
-            'a_z': self.sp['init_z'], 
-            'speed': self.sp['init_speed'],
+            'a_y': self.sp['init_y'] or self.sp['agent_state_configs'][self.config_num][4],
+            'a_z': self.sp['init_z'] or self.sp['agent_state_configs'][self.config_num][5],
+            'speed': self.sp['init_speed'] or self.sp['agent_state_configs'][self.config_num][2],
         }
         self.current_profits = 0.0 # current profits
         self.y_array = [] # appended to each tick, used for creating graphs

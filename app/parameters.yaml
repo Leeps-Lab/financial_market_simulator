@@ -8,7 +8,7 @@ read_fundamental_values_from_array: False
 exogenous_order_price_noise_mean: 0
 exogenous_order_price_noise_std: 30000
 bid_ask_offset: 20000 
-time_in_force: 1
+time_in_force: 5
 
 focal_market_format: CDA
 external_market_format: CDA
@@ -19,7 +19,7 @@ iex_delay: 0.035
 peg_proportion: 0.5
 
 lambdaJ: 2
-lambdaI: [.1, .07]  # first element: focal market, second element: external market
+lambdaI: [0.1, .05]  # first element: focal market, second element: external market
 
 tax_rate: 0.1
 k_reference_price: 0.2 # discount rate (half life)
@@ -28,7 +28,7 @@ k_signed_volume: 0.2
 a_x_multiplier: 5   # a_x <-> signed volume
 a_y_multiplier: 3   # a_y <-> inventory, used in exp fn
 
-speed_unit_cost: 1000 # per second
+speed_unit_cost: 100 # per second
 
 random_seed: false #12338
 
@@ -37,18 +37,18 @@ fundamental_values:
   - [0, 1000000]
 
 agent_state_configs:
-  #  arrival_time, agent_num, speed, a_x, a_y, w
+  #  arrival_time, agent_num, speed, a_x, inventory, external
   - [0,            1,         0,     0,   0, 0]
-  - [0,            2,         0,     0,   0, 0]
-  - [0,            3,         0,     0,   0, 0]
-  - [0,            4,         0,     0,   0, 0]
-  - [0,            5,         0,     0,   0, 0]
-  - [0,            6,         0,     0,   0, 0]
+  - [0,            2,         0,     0,   0.25, 0.25]
+  - [0,            3,         0,     0,   0.25, 0.25]
+  - [0,            4,         0,     0,   0.25, 0.25]
+  - [0,            5,         0,     1,   0.25, 0.75]
+  - [0,            6,         0,     1,   0.25, 0.75]
  
 # parameters for optimization, used by agent_supervisor
-init_y: 0.25  # inital value of Inventory
-init_z: 0.75  # initial value of External
-init_speed: 1
+init_y: false  # inital value of Inventory, will override agent state configs values
+init_z: false  # initial value of External, will override agent staet configs values
+init_speed: false # initial value of speed, will override agent state configs values
 step: 0.05  # amount y/z change per move, eg y_{t+1} = y_{t} + step 
 
 symmetric: false # symmetric mode (agents change strat to match best every turn)
