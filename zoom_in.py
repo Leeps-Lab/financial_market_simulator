@@ -64,3 +64,47 @@ def do_final(inv, ext, speed):
     }
     return retdict
 
+def add_sniper(sniper_ext, mm_ext, sniper_speed=1, mm_speed=0):
+    sp = get_simulation_parameters()
+    agents = sp['agent_state_configs']
+    for i in range(len(agents)):
+        if agents[i][5] == mm_ext:
+            agents[i][5] = sniper_ext
+            agents[i][2] = sniper_speed
+            break
+    retdict = dict(agent_state_configs=agents)
+    return retdict
+
+def add_mm(sniper_ext, mm_ext, sniper_speed=1, mm_speed=0):
+    sp = get_simulation_parameters()
+    agents = sp['agent_state_configs']
+    for i in range(len(agents)):
+        if agents[i][5] == sniper_ext:
+            agents[i][5] = mm_ext
+            agents[i][2] = mm_speed
+            break
+    retdict = dict(agent_state_configs=agents)
+    return retdict
+
+def update_strat(old_ext, old_speed, new_ext, new_speed, agents=None)
+    if agents == None:
+        sp = get_simulation_parameters()
+        agents = sp['agent_state_configs']
+    for i in range(len(agents)):
+        if agents[i][5] == old_ext and agents[i][2] == old_speed:
+            agents[i][5] = new_ext
+            agents[i][2] = new_speed
+    retdict = dict(agent_state_configs=agents)
+    return retdict
+
+def add_sniper_and_update(current_strats, ext, speed)
+    retdict = add_sniper(*current_strats)
+    agents = retdict['agent_state_configs']
+    retdict = update_strat(current_strats[0], current_strats[1], ext, speed, agents)
+    return retdict
+
+def add_mm_and_update(current_strats, ext, speed)
+    retdict = add_sniper(*current_strats)
+    agents = retdict['agent_state_configs']
+    retdict = update_strat(current_strats[2], current_strats[3], ext, speed, agents)
+    return retdict

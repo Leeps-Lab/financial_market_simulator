@@ -53,6 +53,35 @@ def create_imap(args):
     imap = list(product(*imap))
     return imap
 
+def get_current_strats():
+    sp = get_simulation_parameters()
+    agents = sp['agent_state_configs']
+    raise NotImplementedError
+
+def determine_strat(ext, speed, current_strat):
+    current_sniper_ext = current_strat[0]
+    current_sniper_speed = current_strat[1]
+    current_mm_ext = current_strat[2]
+    current_mm_speed = current_strat[3]
+
+    # assume sniper ext is biggern than mm ext
+    mean_ext = (current_sniper_ext + current_mm_ext) / 2
+    if ext > mean_ext and speed = 1:
+        strat = 'sniper'
+    elif ext < mean_ext and speed = 0:
+        strat = 'market maker'
+    elif ext < mean_ext and speed = 1:
+        if ext < 0.5:
+            strat = 'market maker'
+        else:
+            strat = 'sniper'
+    elif ext > mean_ext and speed = 0:
+        if ext < 0.5:
+            strat = 'market maker'
+        else:
+            strat = 'sniper'
+    return strat
+
 def bigloop(sp, args=None):
     if args:
         if args.code:
@@ -71,8 +100,8 @@ def bigloop(sp, args=None):
         [0, 2, 0, 0, 0.25, 0.25],
         [0, 3, 0, 0, 0.25, 0.25],
         [0, 4, 0, 0, 0.25, 0.25],
-        [0, 5, 0, 0, 0.25, 0.75],
-        [0, 6, 0, 0, 0.25, 0.75],
+        [0, 5, 1, 0, 0.25, 0.75],
+        [0, 6, 1, 0, 0.25, 0.75],
     ]]
 
     paramslist = [formats, lambdaj, lambdai, speed] #time_in_force, inventory_multiplier]
@@ -109,6 +138,14 @@ def bigloop(sp, args=None):
                 retdict = zoom_in.do_others(inv, ext, speed)
             elif args.zoom_method == 'final_update':
                 retdict = zoom_in.do_final(inv, ext, speed)
+            elif args.zoom_method == 'update_other_strats':
+                current_strats = get_current_strats()
+                my_strat = determine_strat(ext, speed, current_strats)
+                if my_strat == 'sniper':
+                    retdict = zoom_in.add_sniper_and_update(current_strats, ext, speed)
+                elif my_strat == 'market maker':
+                    retdict = zoom_in.add_mm_and_update(current_strats, ext, speed)
+                 
         
         sp = update(sp,
             focal_market_format=f,
