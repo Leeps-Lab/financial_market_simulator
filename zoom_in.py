@@ -86,7 +86,7 @@ def add_mm(sniper_ext, mm_ext, sniper_speed=1, mm_speed=0):
     retdict = dict(agent_state_configs=agents)
     return retdict
 
-def update_strat(old_ext, old_speed, new_ext, new_speed, agents=None)
+def update_strat(old_ext, old_speed, new_ext, new_speed, agents=None):
     if agents == None:
         sp = get_simulation_parameters()
         agents = sp['agent_state_configs']
@@ -97,13 +97,13 @@ def update_strat(old_ext, old_speed, new_ext, new_speed, agents=None)
     retdict = dict(agent_state_configs=agents)
     return retdict
 
-def add_sniper_and_update(current_strats, ext, speed)
+def add_sniper_and_update(current_strats, ext, speed):
     retdict = add_sniper(*current_strats)
     agents = retdict['agent_state_configs']
     retdict = update_strat(current_strats[0], current_strats[1], ext, speed, agents)
     return retdict
 
-def add_mm_and_update(current_strats, ext, speed)
+def add_mm_and_update(current_strats, ext, speed):
     retdict = add_sniper(*current_strats)
     agents = retdict['agent_state_configs']
     retdict = update_strat(current_strats[2], current_strats[3], ext, speed, agents)

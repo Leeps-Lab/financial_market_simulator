@@ -77,16 +77,16 @@ def determine_strat(ext, speed, current_strat):
 
     # assume sniper ext is biggern than mm ext
     mean_ext = (current_sniper_ext + current_mm_ext) / 2
-    if ext > mean_ext and speed = 1:
+    if ext > mean_ext and speed == 1:
         strat = 'sniper'
-    elif ext < mean_ext and speed = 0:
+    elif ext < mean_ext and speed == 0:
         strat = 'market maker'
-    elif ext < mean_ext and speed = 1:
+    elif ext < mean_ext and speed == 1:
         if ext < 0.5:
             strat = 'market maker'
         else:
             strat = 'sniper'
-    elif ext > mean_ext and speed = 0:
+    elif ext > mean_ext and speed == 0:
         if ext < 0.5:
             strat = 'market maker'
         else:
