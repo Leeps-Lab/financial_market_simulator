@@ -53,10 +53,21 @@ def create_imap(args):
     imap = list(product(*imap))
     return imap
 
-def get_current_strats():
+def get_current_strats(current_inv, current_ext, current_speed):
     sp = get_simulation_parameters()
-    agents = sp['agent_state_configs']
-    raise NotImplementedError
+    agents = sp['agent_state_configs'] # get current agent states
+    agents = [(a[2], a[4], a[5]) for a in agents] # convert to tuples with speed, inv, ext
+    agents = set(agents) # turn into set
+    current_params = (current_speed, current_inv, current_ext)
+    if current_params in agents: # this should always be true
+        agents.remove(current_params)
+    if agents[0][1] > agents[1][1]: # sniper is whichever has higher external
+        sniper = agents[0]
+        mm = agents[1]
+    else:
+        sniper = agents[1]
+        mm = agents[0]
+    return (sniper[1], sniper[2], mm[1], mm[2])
 
 def determine_strat(ext, speed, current_strat):
     current_sniper_ext = current_strat[0]
@@ -139,12 +150,15 @@ def bigloop(sp, args=None):
             elif args.zoom_method == 'final_update':
                 retdict = zoom_in.do_final(inv, ext, speed)
             elif args.zoom_method == 'update_other_strats':
-                current_strats = get_current_strats()
+                current_strats = get_current_strats(inv, ext, speed)
+                print(current_strats)
                 my_strat = determine_strat(ext, speed, current_strats)
+                print(my_strat)
                 if my_strat == 'sniper':
                     retdict = zoom_in.add_sniper_and_update(current_strats, ext, speed)
                 elif my_strat == 'market maker':
                     retdict = zoom_in.add_mm_and_update(current_strats, ext, speed)
+                print(retdict)
                  
         
         sp = update(sp,
