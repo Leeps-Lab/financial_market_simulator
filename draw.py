@@ -168,7 +168,7 @@ if __name__ == '__main__':
     df = pd.DataFrame(d, columns=['arrival_time', 'fundamental_value', 'price', 'buy_sell_indicator', 'time_in_force', 'pegged_state'])
     df['market_id_in_subsession'] = 0
     df = df[['arrival_time', 'market_id_in_subsession', 'price', 'buy_sell_indicator', 'time_in_force']]
-    df.to_csv('investor_arrivals_focal.csv')
+    df.to_csv('investor_arrivals_focal.csv', index=False)
     #for r in d:
     #    print(r)
 
