@@ -161,7 +161,7 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
                             row in random_orders)))
     return random_orders
 
-
+'''
 if __name__ == '__main__':
     d = elo_draw(180, utility.get_simulation_parameters(), config_num=0)
     import pandas as pd
@@ -171,6 +171,6 @@ if __name__ == '__main__':
     df.to_csv('investor_arrivals_focal.csv', index=False)
     #for r in d:
     #    print(r)
-
+'''
 
      
