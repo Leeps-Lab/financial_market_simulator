@@ -22,7 +22,7 @@ external_arrivals_file_name_base = 'investor_external'
 external_feed_file_name_base = 'external_feed'
 
 #Email to receive notification that script is done
-receiver_email = 'kvargha@ucsc.edu'
+receiver_email = ''
 
 #Grab current time and create folder with time stamp
 now = datetime.now()
