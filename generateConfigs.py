@@ -22,7 +22,7 @@ external_arrivals_file_name_base = 'investor_external'
 external_feed_file_name_base = 'external_feed'
 
 #Email to receive notification that script is done
-receiver_email = ''
+receiver_email = 'kvargha@ucsc.edu'
 
 #Grab current time and create folder with time stamp
 now = datetime.now()
@@ -50,7 +50,7 @@ for i in range(conf['num_periods']):
 
     df = pd.DataFrame(d, columns=['arrival_time', 'fundamental_value', 'price', 'buy_sell_indicator', 'time_in_force', 'pegged_state'])
     df['market_id_in_subsession'] = 0
-    df = df[['arrival_time', 'market_id_in_subsession', 'price', 'buy_sell_indicator', 'time_in_force']]
+    df = df[['arrival_time', 'market_id_in_subsession', 'price', 'buy_sell_indicator', 'time_in_force', 'fundamental_value']]
     df.to_csv(investor_arrivals_file_name, index=False)
 
     #Move investors arrival file to session_config folder
@@ -62,7 +62,7 @@ for i in range(conf['num_periods']):
 
     df = pd.DataFrame(d, columns=['arrival_time', 'fundamental_value', 'price', 'buy_sell_indicator', 'time_in_force', 'pegged_state'])
     df['market_id_in_subsession'] = 0
-    df = df[['arrival_time', 'market_id_in_subsession', 'price', 'buy_sell_indicator', 'time_in_force']]
+    df = df[['arrival_time', 'market_id_in_subsession', 'price', 'buy_sell_indicator', 'time_in_force', 'fundamental_value']]
     df.to_csv(external_arrivals_file_name, index=False)
 
     #Move investors arrival file to session_config folder
@@ -83,6 +83,7 @@ for i in range(conf['num_periods']):
     os.rename(os.getcwd() + '/' + external_feed_file_name, current_dir +  external_feed_file_name)
     print('Successfully generated external feed file ' + str(i + 1)+ '\n')
 
+'''
 
 #Send email to notify person the script has finished
 message = """\
@@ -94,4 +95,4 @@ context = ssl.create_default_context()
 with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
     server.login('leepsnotifier@gmail.com', 'Throwaway')
     server.sendmail('leepsnotifier@gmail.com', receiver_email, message)
-    
+'''

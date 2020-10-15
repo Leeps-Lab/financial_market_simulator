@@ -2,7 +2,7 @@ session_duration: 15010 # We need to figure out what this is
 initial_price: 1000000
 
 #New params
-period_length: 240
+period_length: 50
 num_periods: 1
 suffix: Normal
 #Look into latency for speed on/off and parameterize
