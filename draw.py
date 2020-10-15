@@ -3,6 +3,8 @@ from high_frequency_trading.hft.equations import price_grid
 import utility
 import logging
 import settings
+import random
+from datetime import datetime
 
 log = logging.getLogger(__name__)
 
@@ -113,8 +115,7 @@ def elo_random_order_sequence(
             orders_tif, orders_pegged_or_lit))
     return stacked
 
-def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
-        config_num=0):
+def elo_draw(conf: dict, seed, config_num=0):
     """
     generates random order sequence as specified in ELO market research plan
     first draws fundamental value series or read from a csv file
@@ -123,26 +124,25 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
     if conf['read_fundamental_values_from_array']:
         fundamental_values = conf['fundamental_values'].copy()
         fundamental_values.insert(0, [0, conf['initial_price']])
- #       print(fundamental_values)
         fundamental_values = np.array(fundamental_values)
     else:
         with ContextSeed(seed):
             fundamental_values = _elo_asset_value_arr(
                 conf['initial_price'], 
-                period_length, 
+                conf['period_length'], 
                 conf['fundamental_value_noise_mean'], 
                 conf['fundamental_value_noise_std'], 
                 conf['lambdaJ'])
             log.info('drew fundamental value sequence, initial price %s'
                      '%s jumps per second.' % (
                         conf['initial_price'],
-                        round(len(fundamental_values) / period_length, 2)))
+                        round(len(fundamental_values) / conf['period_length'], 2)))
     
     log.info('fundamental values: %s' % (', '.join('{0}:{1}'.format(t, v) 
                                             for t, v in fundamental_values)))
     random_orders = elo_random_order_sequence(
         fundamental_values, 
-        period_length, 
+        conf['period_length'], 
         conf['exogenous_order_price_noise_mean'], 
         conf['exogenous_order_price_noise_std'], 
         conf['bid_ask_offset'],
@@ -154,8 +154,8 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
     log.info(
         '%s random orders generated. period length: %s, per second: %s.' % (
             random_orders.shape[0], 
-            period_length, 
-            round(random_orders.shape[0] / period_length, 2)))
+            conf['period_length'], 
+            round(random_orders.shape[0] / conf['period_length'], 2)))
     log.info('random orders (format: [fundamental price]:[order price]:[order direction]:[time in force]:[midpoint peg]): %s' % (
                 ', '.join('{0}:{1}:{2}:{3}:{4}'.format(row[1], row[2], row[3], row[4], row[5]) for 
                             row in random_orders)))

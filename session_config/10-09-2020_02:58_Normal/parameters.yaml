@@ -2,13 +2,13 @@ session_duration: 15010 # We need to figure out what this is
 initial_price: 1000000
 
 #New params
-period_length: 50
+period_length: 50 
 num_periods: 1
 suffix: Normal
 #Look into latency for speed on/off and parameterize
 
 fundamental_value_noise_mean: 0
-fundamental_value_noise_std: 1
+fundamental_value_noise_std: 40000
 read_fundamental_values_from_array: False
 
 exogenous_order_price_noise_mean: 0
@@ -25,7 +25,7 @@ iex_delay: 0
 peg_proportion: 0.5
 
 lambdaJ: 0.1
-lambdaI: [0.1, 0.05]  # first element: focal market, second element: external market
+lambdaI: [0.1, 0.1]  # first element: focal market, second element: external market
 
 tax_rate: 0.1
 k_reference_price: 0.2 # discount rate (half life)
