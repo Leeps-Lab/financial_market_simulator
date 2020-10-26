@@ -1,0 +1,109 @@
+session_duration: 15010 # We need to figure out what this is
+initial_price: 1000000
+
+#TODO:Keep track of prices in external market
+#Look into latency for speed on/off and parameterize
+
+
+#-----------------------------------------------------------------------------------------------------------  
+
+#Parameters for experiment config
+parameters:
+  default-role: 'out'
+  include-manual-role: true
+  include-signed-volume-widgets: false
+  initial-endowment: 100
+  session-duration: 240
+  technology-unit-cost: 0.01  # $/s
+  k-reference-price: 0.7
+  k-signed-volume: 0.5
+  tax-rate: 0.1
+
+session:
+  session-name: ELO_Development_Session_15_rounds_3traders_240_sec_sv_on #Add flag for automatic naming
+  display-name: HFT - ELO - CDA - 15 Trade Sessions of 240 seconds - 3 traders - Frequent Order Flow 
+  environment: elo
+  num-rounds: 15
+  currency: EUR
+  exchange-rate: 1.5
+  participation-fee: 4
+
+
+#-----------------------------------------------------------------------------------------------------------  
+
+#Parameters for exogenous events
+period_length: 240 #Delete this too
+num_periods: 1 #Use num-rounds from line 26
+suffix: 'Stress2.1'
+
+fundamental_value_noise_mean: 0
+fundamental_value_noise_std: 40000 
+read_fundamental_values_from_array: False
+
+exogenous_order_price_noise_mean: 0
+exogenous_order_price_noise_std: 30000
+bid_ask_offset: 20000 
+time_in_force: 5
+
+focal_market_format: CDA
+external_market_format: CDA    #Placeholder if we want to add other market formats
+focal_market_fba_interval: 2
+external_market_fba_interval: 2
+
+iex_delay: 0
+peg_proportion: 0.5
+
+lambdaJ: 0.1          # .1 jumps/second
+lambdaI: [0.5, 0.3571]  # first element: focal market, second element: external market, average .1 seconds between arrivals for focal market
+
+#Remove these 3
+tax_rate: 0.1
+k_reference_price: 0.7 # discount rate (half life)
+k_signed_volume: 0.5
+
+a_x_multiplier: 5   # a_x <-> signed volume
+a_y_multiplier: 3   # a_y <-> inventory, used in exp fn
+
+#Delete this and use  line 17 * 10,000
+speed_unit_cost: 100 # per second
+
+random_seed: false #12338
+
+fundamental_values:
+  #  time, initial fundamental value
+  - [0, 1000000]
+
+
+#-----------------------------------------------------------------------------------------------------------  
+
+#Simulation parameters
+
+agent_state_configs:
+  #  arrival_time, agent_num, speed, a_x, a_y, w (LOOK INTO a_x, a_y, w)
+  - [0,            1,         0,     0,   0, 0]
+  - [0,            2,         0,     0,   0, 0]
+  - [0,            3,         0,     0,   0, 0]
+  - [0,            4,         0,     0,   0, 0]
+  - [0,            5,         0,     0,   0, 0]
+  - [0,            6,         0,     0,   0, 0]
+ 
+# parameters for optimization, used by agent_supervisor
+init_y: 0.25  # inital value of Inventory
+init_z: 0.75  # initial value of External
+init_speed: 1
+step: 0.05  # amount y/z change per move, eg y_{t+1} = y_{t} + step 
+
+symmetric: false # symmetric mode (agents change strat to match best every turn)
+
+num_moves: 51 # number of moves in a turn
+move_interval: 10 # number of seconds per move
+
+explore_all: false
+explore_all_num_submoves: 7 # do not change this from 7
+
+grid_search: true
+grid_search_symmetric: false
+ys: [0, 0.25, 0.5, 0.75, 1]
+zs: [0, 0.25, 0.5, 0.75, 1]
+speeds: [0, 1]
+num_repeats: 30

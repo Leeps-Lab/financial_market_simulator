@@ -48,7 +48,9 @@ default_simulation_parameters = {
     'num_repeats': 1,
     'num_periods': 1,
     'suffix': 'Normal',
-    'period_length': 180
+    'period_length': 180,
+    'parameters': {},
+    'session': {}
 }
 
 logs_dir = './app/logs/'

@@ -150,6 +150,12 @@ def elo_draw(conf: dict, seed, config_num=0):
         conf['time_in_force'],
         conf['peg_proportion'])
     random_orders = np.swapaxes(random_orders, 0, 1)
+
+    '''
+    for vals in fundamental_values:
+        np.append(random_orders, [vals[0], vals[1], vals[1], 'B', conf['time_in_force'], conf['time_in_force'], 'False'])
+    '''
+    
 #    print(random_orders[:20])
     log.info(
         '%s random orders generated. period length: %s, per second: %s.' % (
@@ -159,7 +165,7 @@ def elo_draw(conf: dict, seed, config_num=0):
     log.info('random orders (format: [fundamental price]:[order price]:[order direction]:[time in force]:[midpoint peg]): %s' % (
                 ', '.join('{0}:{1}:{2}:{3}:{4}'.format(row[1], row[2], row[3], row[4], row[5]) for 
                             row in random_orders)))
-    return random_orders
+    return random_orders, fundamental_values
 
 '''
 if __name__ == '__main__':
