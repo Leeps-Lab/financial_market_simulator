@@ -1,0 +1,60 @@
+demo:
+  number-of-participants: 3
+exogenous-events:
+- investor-arrivals:
+  - investor_focal_T1_10-26-2020_05-01_Threads.csv
+  - investor_focal_T2_10-26-2020_05-01_Threads.csv
+  - investor_focal_T3_10-26-2020_05-01_Threads.csv
+  - investor_focal_T4_10-26-2020_05-01_Threads.csv
+  - investor_focal_T5_10-26-2020_05-01_Threads.csv
+  - investor_focal_T6_10-26-2020_05-01_Threads.csv
+  - investor_focal_T7_10-26-2020_05-01_Threads.csv
+  - investor_focal_T8_10-26-2020_05-01_Threads.csv
+  - investor_focal_T9_10-26-2020_05-01_Threads.csv
+  - investor_focal_T10_10-26-2020_05-01_Threads.csv
+  - investor_focal_T11_10-26-2020_05-01_Threads.csv
+  - investor_focal_T12_10-26-2020_05-01_Threads.csv
+  - investor_focal_T13_10-26-2020_05-01_Threads.csv
+  - investor_focal_T14_10-26-2020_05-01_Threads.csv
+  - investor_focal_T15_10-26-2020_05-01_Threads.csv
+- external-feed:
+  - external_feed_T1_10-26-2020_05-01_Threads.csv
+  - external_feed_T2_10-26-2020_05-01_Threads.csv
+  - external_feed_T3_10-26-2020_05-01_Threads.csv
+  - external_feed_T4_10-26-2020_05-01_Threads.csv
+  - external_feed_T5_10-26-2020_05-01_Threads.csv
+  - external_feed_T6_10-26-2020_05-01_Threads.csv
+  - external_feed_T7_10-26-2020_05-01_Threads.csv
+  - external_feed_T8_10-26-2020_05-01_Threads.csv
+  - external_feed_T9_10-26-2020_05-01_Threads.csv
+  - external_feed_T10_10-26-2020_05-01_Threads.csv
+  - external_feed_T11_10-26-2020_05-01_Threads.csv
+  - external_feed_T12_10-26-2020_05-01_Threads.csv
+  - external_feed_T13_10-26-2020_05-01_Threads.csv
+  - external_feed_T14_10-26-2020_05-01_Threads.csv
+  - external_feed_T15_10-26-2020_05-01_Threads.csv
+group:
+  number-of-groups: 1
+  players-per-group: 3
+market:
+  auction-format: CDA
+  matching-engine-host: 127.0.0.1
+parameters:
+  default-role: out
+  include-manual-role: true
+  include-signed-volume-widgets: false
+  initial-endowment: 100
+  k-reference-price: 0.7
+  k-signed-volume: 0.5
+  session-duration: 240
+  tax-rate: 0.1
+  technology-unit-cost: 0.01
+session:
+  currency: EUR
+  display-name: HFT - ELO - CDA - 15 Trade Sessions of 240 seconds - 3 traders - Frequent
+    Order Flow
+  environment: elo
+  exchange-rate: 1.5
+  num-rounds: 15
+  participation-fee: 4
+  session-name: ELO_Development_Session_15_rounds_3traders_240_sec_sv_on

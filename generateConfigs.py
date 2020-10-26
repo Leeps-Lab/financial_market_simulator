@@ -10,6 +10,10 @@ from shutil import copyfile
 import smtplib, ssl
 import csv, operator
 import yaml
+from multiprocessing import Process
+
+#Silence warnings for pandas
+pd.options.mode.chained_assignment = None
 
 #This script will generate the investors arrivals and external feed configurations.
 #Set the desired parameters in parameters.yaml found in app/parameters.yaml
@@ -26,11 +30,7 @@ external_feed_file_name_base = 'external_feed'
 trade_file_name_base = 'trade_file'
 
 #Parameters for config file for experiment
-#yamlFileName = 'CDA_1groups_3players_3rounds_150_sec.yaml'
 yamlFileName = 'CDA_1groups_3playersGroup_15_rounds_240secs_pilotConfigs.yaml'
-
-
-
 
 #Email to receive notification that script is done
 receiver_email = 'kvargha@ucsc.edu'
@@ -47,16 +47,11 @@ os.mkdir(current_dir)
 plotsDir = current_dir + 'plots/'
 os.mkdir(plotsDir)
 
-
 #Copy parameters file into folder
 copyfile(os.getcwd() + '/app/parameters.yaml', current_dir + 'parameters.yaml')
 
-investorsArrivalsDict = {'investor-arrivals' : []}
-externalFeedDict = {'external-feed' : []}
-
-#Create number config files depending on num_periods parameter
-for i in range(conf['num_periods']):
-    file_num = '_T' + str(i + 1) + '_'
+def generateConfigs(period, seed):
+    file_num = '_T' + str(period + 1) + '_'
 
     #File name for each period
     investor_arrivals_file_name = investor_arrivals_file_name_base + file_num + dt_string + '_' + conf['suffix'] + '.csv' 
@@ -64,13 +59,9 @@ for i in range(conf['num_periods']):
     external_feed_file_name = external_feed_file_name_base + file_num + dt_string + '_' + conf['suffix'] +'.csv'
     trade_file_name = trade_file_name_base + file_num + dt_string + '_' + conf['suffix'] +'.csv'
 
-    #Append file names to dictionary
-    investorsArrivalsDict['investor-arrivals'].append(investor_arrivals_file_name)
-    externalFeedDict['external-feed'].append(external_feed_file_name)
-
     #Create investors arrival file
-    seed = np.random.randint(0, high=2 ** 8)
-    print('Generating investors arrival files ' + str(i + 1))
+    #seed = np.random.randint(0, high=2 ** 8)
+    print('Generating investors arrival files ' + str(period + 1))
     d, fundamental_values = elo_draw(conf, seed, config_num=0)
 
     df = pd.DataFrame(d, columns=['arrival_time', 'fundamental_value', 'price', 'buy_sell_indicator', 'time_in_force', 'pegged_state'])
@@ -80,7 +71,7 @@ for i in range(conf['num_periods']):
 
     #Move investors arrival file to session_config folder
     os.rename(os.getcwd() + '/' + investor_arrivals_file_name, current_dir + investor_arrivals_file_name)
-    print('Successfully created investors arrivals file ' + str(i + 1))
+    print('Successfully created investors arrivals file ' + str(period + 1))
 
     #Generate investor arrivals plots
     plotDF = df[['arrival_time', 'buy_sell_indicator']]
@@ -156,7 +147,7 @@ for i in range(conf['num_periods']):
 
     #Move external arrivals file to session_config folder
     os.rename(os.getcwd() + '/' + external_arrivals_file_name, current_dir + external_arrivals_file_name)
-    print('Successfully created external arrivals file ' + str(i + 1))
+    print('Successfully created external arrivals file ' + str(period + 1))
 
     #Generate external investor arrivals plots
     plotDF = df[['arrival_time', 'buy_sell_indicator']]
@@ -225,7 +216,7 @@ for i in range(conf['num_periods']):
 
     
     #Create external feed file to session_config folder
-    print('Generating external feed file ' + str(i + 1))
+    print('Generating external feed file ' + str(period + 1))
     main(current_dir + external_arrivals_file_name, external_feed_file_name, trade_file_name)
 
     #Move trade file to config folder
@@ -245,8 +236,6 @@ for i in range(conf['num_periods']):
 
 
     #Generate plot
-    #plt.hlines(y = dataframe['e_best_bid'].astype(float), xmin = dataframe['arrival_time'].astype(float), xmax = dataframe['arrival_time'].astype(float) + 5, color = 'red', label = 'Best Bid', linewidth = 1, alpha=0.6)
-    #plt.hlines(y = bestAsk.astype(float), xmin = bestAskArrivalTime.astype(float), xmax = bestAskArrivalTime.astype(float) + 5, color = 'deepskyblue', label = 'Best Offer', linewidth = 1, alpha=0.6)
     plt.plot(dataframe['arrival_time'].astype(float), dataframe['e_best_bid'].astype(float), color = 'red', label = 'Best Bid', linewidth = 1, alpha=0.6)
     plt.plot(bestAskArrivalTime.astype(float), bestAsk.astype(float), color = 'deepskyblue', label = 'Best Offer', linewidth = 1, alpha=0.6)
     
@@ -283,29 +272,53 @@ for i in range(conf['num_periods']):
 
     #Move external feed file to config folder
     os.rename(os.getcwd() + '/' + external_feed_file_name, current_dir +  external_feed_file_name)
-    print('Successfully generated external feed file ' + str(i + 1)+ '\n')
+    print('Successfully generated external feed file ' + str(period + 1)+ '\n')
 
 
-#Add investors arrivals file and external feed file names to config for experiment
 
-#Copy parameters file into folder
-copyfile(os.getcwd() + '/app/' + 'experimentConfig.yaml', current_dir + yamlFileName)
+if __name__ == "__main__":
 
-#Combine file name dictionaries
-exogenousEvents = {'exogenous-events' : [investorsArrivalsDict, externalFeedDict]}
-parameters = {'parameters': conf['parameters']}
-session = {'session': conf['session']}
+    #Parallelize config generation
+    for period in range(conf['num_periods']):
+        process = Process(target = generateConfigs, args = (period, np.random.randint(0, high=2 ** 8)))
+        process.start()
+
+    #Add investors arrivals file and external feed file names to config for experiment
+
+    #Copy parameters file into folder
+    copyfile(os.getcwd() + '/app/' + 'experimentConfig.yaml', current_dir + yamlFileName)
+
+    #Dictionaries to store file names to be exported to config file
+    investorsArrivalsDict = {'investor-arrivals' : []}
+    externalFeedDict = {'external-feed' : []}\
+    
+    #Populate dictionaries
+    for period in range(conf['num_periods']):
+        #File names
+        file_num = '_T' + str(period + 1) + '_'
+        investor_arrivals_file_name = investor_arrivals_file_name_base + file_num + dt_string + '_' + conf['suffix'] + '.csv' 
+        external_feed_file_name = external_feed_file_name_base + file_num + dt_string + '_' + conf['suffix'] +'.csv'
+
+        #Append file names to dictionary
+        investorsArrivalsDict['investor-arrivals'].append(investor_arrivals_file_name)
+        externalFeedDict['external-feed'].append(external_feed_file_name)
 
 
-#Update config file names 
-with open(current_dir + yamlFileName, 'r') as inputFile:
-    cur_yaml = yaml.load(inputFile)
-    cur_yaml.update(exogenousEvents)
-    cur_yaml.update(parameters)
-    cur_yaml.update(session)
+    #Combine file name dictionaries
+    exogenousEvents = {'exogenous-events' : [investorsArrivalsDict, externalFeedDict]}
+    parameters = {'parameters': conf['parameters']}
+    session = {'session': conf['session']}
 
-with open(current_dir + yamlFileName, 'w') as outputFile:
-    yaml.safe_dump(cur_yaml, outputFile, default_flow_style=False)
+
+    #Update config file names 
+    with open(current_dir + yamlFileName, 'r') as inputFile:
+        cur_yaml = yaml.load(inputFile)
+        cur_yaml.update(exogenousEvents)
+        cur_yaml.update(parameters)
+        cur_yaml.update(session)
+
+    with open(current_dir + yamlFileName, 'w') as outputFile:
+        yaml.safe_dump(cur_yaml, outputFile, default_flow_style=False)
 
 
 
