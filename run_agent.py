@@ -5,6 +5,7 @@ import settings
 from discrete_event_emitter import *
 from agents.pacemaker_agent import PaceMakerAgent
 from agents.dynamic_agent import DynamicAgent 
+from agent_supervisor import AgentSupervisor
 from protocols.ouch_trade_client_protocol import OUCHClientFactory
 from protocols.json_line_protocol import JSONLineClientFactory
 from utility import (
@@ -27,7 +28,9 @@ p.add('--config_num', default=0, type=int, help='The configuration number, \
        index in the list of discrete event configurations')
 p.add('--random_seed', type=int)
 options, args = p.parse_known_args()
-        
+
+def at_end():
+    pass
         
 def main(account_id):
     agent_type = options.agent_type
@@ -36,8 +39,24 @@ def main(account_id):
     conf = get_simulation_parameters()
     if agent_type == 'rabbit':
         random_orders = draw.elo_draw(
-            session_duration, conf,
+            conf['move_interval'], conf,
             seed=options.random_seed, config_num=options.config_num)
+        # Useful for testing to ensure pegged orders get executed correctly
+       # if options.config_num == 1: #external
+       #     random_orders = [
+       #         ['0.2', '950000', '910000', 'B', '15', 'False'],
+       #         ['0.2', '950000', '1000000', 'S', '15', 'False'],
+       #         ['2.4', '950000', '940000', 'B', '10', 'False'],
+       #         ['2.4', '950000', '960000', 'S', '10', 'False'],
+       #     ]
+       # else: # focal
+       #     random_orders = [
+       #         ['0.2', '950000', '910000', 'B', '10', 'False'],
+       #         ['0.2', '950000', '1000000', 'S', '10', 'False'],
+       #         ['0.3', '950000', '930000', 'B', '10', 'True'],
+       #         ['0.4', '950000', '970000', 'S', '10', 'False'],
+       #     ]
+        #print(random_orders)
         event_emitters = [RandomOrderEmitter(source_data=random_orders), ]
         agent_cls = PaceMakerAgent
 
@@ -50,7 +69,7 @@ def main(account_id):
  
     agent = agent_cls(options.session_code, options.exchange_host, 
         options.exchange_ouch_port, event_emitters=event_emitters, 
-        account_id=account_id, **agent_parameters)
+        account_id=account_id, config_num=options.config_num, **agent_parameters)
 
     reactor.connectTCP(options.exchange_host, options.exchange_ouch_port,
         OUCHClientFactory(agent))
@@ -68,16 +87,33 @@ def main(account_id):
 
     d = task.deferLater(reactor, session_duration, agent.close_session)
     d.addCallback(lambda _ : reactor.stop())
+    
+    ############################################################################
+    # This is code for optimizing agents' slider params during simulations.
+    # If you want to run simulations normally, MAKE SURE THIS CODE DOES NOT RUN
+    supervisor = AgentSupervisor(options.session_code, options.config_num, agent)
+    supervisor.at_start(isinstance(agent, DynamicAgent))
+    looper = task.LoopingCall(supervisor.on_tick, isinstance(agent, DynamicAgent)) 
+    looper.clock = reactor
+    looper.start(conf['move_interval'], now=False)
+    d.addCallback(lambda _ : looper.stop())
+    d.addCallback(lambda _ : supervisor.at_end(isinstance(agent, DynamicAgent)))
+    looper2 = task.LoopingCall(supervisor.send_message, isinstance(agent, DynamicAgent))
+    looper2.clock = reactor
+    looper2.start(1.0, now=True)
+    d.addCallback(lambda _ : looper2.stop())
+    ############################################################################
+    
     reactor.run()
+
 
 if __name__ == '__main__':
     account_id = generate_account_id()
     log.basicConfig(
-        level=log.DEBUG if options.debug else log.INFO, 
+        level=log.CRITICAL, 
         filename=settings.logs_dir + 'session_%s_trader_%s.log' % (
         options.session_code, account_id),
-        format = "[%(asctime)s.%(msecs)03d] %(levelname)s \
-            [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+        format = "[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s",
         datefmt = '%H:%M:%S')
     if options.random_seed:
         log.debug('%s agent started using random seed %d', options.agent_type, options.random_seed)

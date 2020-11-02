@@ -5,7 +5,7 @@ from discrete_event_emitter import RandomOrderEmitter
 import draw
 from db import db
 import logging
-
+import copy
 log = logging.getLogger(__name__)
 
 # this is a passive agent
@@ -49,6 +49,15 @@ class PaceMakerAgent(BaseMarketAgent):
         while event.exchange_msgs:
             message = event.exchange_msgs.pop()
             if self.exchange_connection is not None:
+#                print('placing order:', order_data)
                 self.exchange_connection.sendMessage(message.translate(), message.delay)
             else:
                 self.outgoing_msg.append((message.translate(), message.delay))
+        #od = copy.deepcopy(order_data)
+        #del od['type']
+        #del od['subsession_id']
+        #del od['market_id']
+        #del od['player_id']
+        #del od['event_source']
+        #print(str(order_data))
+

@@ -78,12 +78,12 @@ def _elo_asset_value_arr(initial_price, period_length, loc_delta, scale_delta,
     f_prices = np.random.normal(
         size=num_f_price_changes, loc=loc_delta, 
         scale=scale_delta).cumsum() + initial_price
-    return np.vstack((f_price_change_times, f_prices)).round(3)
-    
+    ret = np.vstack((f_price_change_times, f_prices)).round(3)
+    return np.swapaxes(ret, 0, 1)
 
 def elo_random_order_sequence(
         asset_value_arr, period_length, loc_noise, scale_noise, bid_ask_offset, 
-        lambdaI, time_in_force, buy_prob=0.5):
+        lambdaI, time_in_force, peg_proportion, buy_prob=0.5):
     """
     draws bid/ask prices around fundamental value,
     generate input sequnce for random orders with arrival times as array
@@ -106,9 +106,11 @@ def elo_random_order_sequence(
     orders_tif = np.full(orders_size, time_in_force).astype(int)
     convert_to_string = np.vectorize(lambda x: 'B' if x is 0 else 'S')
     order_directions = convert_to_string(order_directions)
+    orders_pegged_or_lit = np.random.binomial(1, peg_proportion, orders_size)
+    orders_pegged_or_lit = orders_pegged_or_lit.astype(bool)
     stacked = np.vstack((
         order_times, asset_value_asof, gridded_order_prices, order_directions, 
-            orders_tif))
+            orders_tif, orders_pegged_or_lit))
     return stacked
 
 def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
@@ -121,7 +123,7 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
     if conf['read_fundamental_values_from_array']:
         fundamental_values = conf['fundamental_values'].copy()
         fundamental_values.insert(0, [0, conf['initial_price']])
-        print(fundamental_values)
+ #       print(fundamental_values)
         fundamental_values = np.array(fundamental_values)
     else:
         with ContextSeed(seed):
@@ -135,6 +137,7 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
                      '%s jumps per second.' % (
                         conf['initial_price'],
                         round(len(fundamental_values) / period_length, 2)))
+    
     log.info('fundamental values: %s' % (', '.join('{0}:{1}'.format(t, v) 
                                             for t, v in fundamental_values)))
     random_orders = elo_random_order_sequence(
@@ -144,15 +147,17 @@ def elo_draw(period_length, conf: dict, seed=np.random.randint(0, high=2 ** 8),
         conf['exogenous_order_price_noise_std'], 
         conf['bid_ask_offset'],
         conf['lambdaI'][config_num],    # so rabbits differ in arrival rate..
-        conf['time_in_force'])
+        conf['time_in_force'],
+        conf['peg_proportion'])
     random_orders = np.swapaxes(random_orders, 0, 1)
+#    print(random_orders[:20])
     log.info(
         '%s random orders generated. period length: %s, per second: %s.' % (
             random_orders.shape[0], 
             period_length, 
             round(random_orders.shape[0] / period_length, 2)))
-    log.info('random orders (format: [fundamental price]:[order price]:[order direction]:[time in force]): %s' % (
-                ', '.join('{0}:{1}:{2}:{3}'.format(row[1], row[2], row[3], row[4]) for 
+    log.info('random orders (format: [fundamental price]:[order price]:[order direction]:[time in force]:[midpoint peg]): %s' % (
+                ', '.join('{0}:{1}:{2}:{3}:{4}'.format(row[1], row[2], row[3], row[4], row[5]) for 
                             row in random_orders)))
     return random_orders
 

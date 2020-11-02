@@ -2,10 +2,12 @@ from primitives.base_market_agent import BaseMarketAgent
 from db import db
 from high_frequency_trading.hft.trader import ELOTrader
 from high_frequency_trading.hft.incoming_message import IncomingMessage
+from high_frequency_trading.hft.exchange_message import ExternalFeedChangeMessage
 import utility
 import string
 from random import choice
 import logging
+from copy import deepcopy
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ def generate_account_id(size=4):
 class DynamicAgent(BaseMarketAgent):
     trader_model_cls = ELOTrader
     typecode = 'elo_interactive_agent'
-    handled_ouch_events = ('C', 'U', 'E', 'A')
+    handled_ouch_events = ('C', 'U', 'E', 'A', 'L')
     handled_external_market_events = ('external_feed_change', )
     handled_focal_market_events = ('post_batch', 'bbo_change', 'signed_volume_change', 'reference_price_change')
 
@@ -31,6 +33,7 @@ class DynamicAgent(BaseMarketAgent):
         self.model = self.trader_model_cls(
             self.session_id, 0, self.id, self.id, 'automated', '', 0, 
             firm=self.account_id, **kwargs)
+        self.config_num = kwargs.get('config_num', 1)
         # the agent expects an external feed message
         # with fields e_best_bid e_best_offer e_signed_volume
         # so I need a hack as market proxies always send those 
@@ -47,6 +50,16 @@ class DynamicAgent(BaseMarketAgent):
         if (type_code == 'focal' and msg_type in self.handled_focal_market_events) or (
             type_code == 'external' and msg_type in self.handled_external_market_events):
             msg = IncomingMessage(clean_message)
+            if msg_type == 'external_feed_change' and self.config_num == 0:
+                redirect_msg = ExternalFeedChangeMessage(deepcopy(clean_message))
+                redirect_msg.data['type'] = 'external_feed'
+                redirect_msg.data['exchange_host'] = 0
+                redirect_msg.data['exchange_port'] = 0
+                redirect_msg.data['delay'] = 0.0
+                if self.exchange_connection is not None:
+                    self.exchange_connection.sendMessage(redirect_msg.translate(), redirect_msg.delay)
+                else:
+                    self.outgoing_msg.append((redirect_msg.translate(), redirect_msg.delay))
             log.info('agent %s:%s --> handling json message %s:%s' % (
                 self.account_id, self.typecode, type_code, msg))
             event = self.event_cls(type_code, msg)

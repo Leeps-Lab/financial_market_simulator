@@ -1,0 +1,29 @@
+# author: Eli Pandolfo
+# github.com/elip12
+# standard foreground color: 848484
+# This style is free and available for anyone to use or modify
+# d = {'green': '#60d515', 'red': '#d22b10', 'blue': '#38d8dc', 'yellow': '#e0cc05',
+#    'orange': '#eb860d', 'magenta': '#b113ef'}
+
+lines.linewidth: 1
+
+axes.facecolor: 252525
+axes.edgecolor: 252525
+axes.grid: true
+axes.prop_cycle: cycler('color', {'60d515', 'd22b10', '1fa8e4', 'e0cc05', 'eb860d', 'b113ef'})
+grid.linestyle: --
+grid.linewidth: .5
+grid.color: 444444
+
+figure.facecolor: 1c1c1c
+figure.edgecolor: 1c1c1c
+savefig.facecolor: 1c1c1c
+savefig.edgecolor: 1c1c1c
+
+xtick.color: 848484
+ytick.color: 848484
+
+legend.facecolor: 1c1c1c
+legend.edgecolor: 848484
+
+text.color: 848484

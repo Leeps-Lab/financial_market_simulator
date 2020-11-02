@@ -27,8 +27,14 @@ options, args = p.parse_known_args()
 # gets a list of `num_ports` of available ports between 9000 and 10000
 def get_available_ports(num_ports):
     ports = []
-    for port in range(9000, 10000):
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+    try:
+        x = int(options.session_code[-2:])
+    except ValueError as e:
+        x = 0
+    x *= 11 # each simulation only needs 9 threads (for 3 dynamic agents) but
+    # 10 is a nice round number.
+    for port in range(9000 + x, 10000):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             res = sock.connect_ex(('localhost', port))
             if res != 0:
                 ports.append(port)
@@ -36,7 +42,7 @@ def get_available_ports(num_ports):
                     return ports
     raise RuntimeError('no available ports')
 
-def start_exchange(port, exchange_format, fba_interval):
+def start_exchange(port, exchange_format, fba_interval, iex_delay):
     cmd = [
         sys.executable,
         'exchange_server/run_exchange_server.py',
@@ -47,6 +53,11 @@ def start_exchange(port, exchange_format, fba_interval):
     if exchange_format.lower() == 'fba':
         cmd.extend([
             '--interval', str(fba_interval),
+        ])
+    # delay in seconds. defaults to 350us, or 0.035s
+    if exchange_format.lower() == 'iex':
+        cmd.extend([
+            '--delay', str(iex_delay),
         ])
     if options.debug:
         cmd.append('--debug')
@@ -65,7 +76,7 @@ def run_elo_simulation(session_code):
     one for markets, one for agents
     """
     logging.basicConfig(
-        level=logging.DEBUG if options.debug else logging.INFO,
+        level=logging.CRITICAL,
         filename=settings.logs_dir + 'session_%s_manager.log' % (session_code),
         format="[%(asctime)s.%(msecs)03d] %(levelname)s \
         [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
@@ -77,21 +88,31 @@ def run_elo_simulation(session_code):
     # start exchanges
     params = get_simulation_parameters()
     focal_exchange_port, external_exchange_port = get_available_ports(2)
+    print(focal_exchange_port, external_exchange_port)
     focal_exchange_proc = start_exchange(
         focal_exchange_port,
         params['focal_market_format'],
-        params['focal_market_fba_interval']
+        params['focal_market_fba_interval'],
+        params['iex_delay'],
     )
     external_exchange_proc = start_exchange(
         external_exchange_port,
         params['external_market_format'],
-        params['external_market_fba_interval']
+        params['external_market_fba_interval'],
+        params['iex_delay'],
     )
     # sleep for a second after making the exchanges to ensure they don't buffer messages
     # when the experiment starts. not sure this is necessary, but just being safe
-    sleep(1)
+    sleep(2)
 
-    p = settings.ports
+    p = settings.ports # we overwrite this
+    p1, p2, p3, p4 = get_available_ports(4)
+    print(p1, p2, p3, p4)
+    p['focal_proxy_ouch_port'] = p1
+    p['focal_proxy_json_port'] = p2
+    p['external_proxy_ouch_port'] = p3
+    p['external_proxy_json_port'] = p4
+
     session_dur = params['session_duration']
     if params['random_seed']:
         random_seed = int(params['random_seed'])
