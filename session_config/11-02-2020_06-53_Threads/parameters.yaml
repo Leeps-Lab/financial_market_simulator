@@ -20,11 +20,10 @@ parameters:
   tax-rate: 0.1
 
 session:
-  session-auto-name: true
-  session-name: ELO_Development_Session_15_rounds_3traders_240_sec_sv_on 
+  session-name: ELO_Development_Session_15_rounds_3traders_240_sec_sv_on #Add flag for automatic naming
   display-name: HFT - ELO - CDA - 15 Trade Sessions of 240 seconds - 3 traders - Frequent Order Flow 
   environment: elo
-  num-rounds: 2
+  num-rounds: 15
   currency: EUR
   exchange-rate: 1.5
   participation-fee: 4
@@ -33,7 +32,9 @@ session:
 #-----------------------------------------------------------------------------------------------------------  
 
 #Parameters for exogenous events
-suffix: 'Refractor'
+period_length: 240 #Delete this too
+num_periods: 15 #Use num-rounds from line 26
+suffix: 'Threads'
 
 fundamental_value_noise_mean: 0
 fundamental_value_noise_std: 80000 

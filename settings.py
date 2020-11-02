@@ -46,9 +46,7 @@ default_simulation_parameters = {
     'zs': [],
     'speeds': [],
     'num_repeats': 1,
-    'num_periods': 1,
     'suffix': 'Normal',
-    'period_length': 180,
     'parameters': {},
     'session': {}
 }

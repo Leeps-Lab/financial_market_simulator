@@ -129,20 +129,20 @@ def elo_draw(conf: dict, seed, config_num=0):
         with ContextSeed(seed):
             fundamental_values = _elo_asset_value_arr(
                 conf['initial_price'], 
-                conf['period_length'], 
+                conf['parameters']['session-duration'], 
                 conf['fundamental_value_noise_mean'], 
                 conf['fundamental_value_noise_std'], 
                 conf['lambdaJ'])
             log.info('drew fundamental value sequence, initial price %s'
                      '%s jumps per second.' % (
                         conf['initial_price'],
-                        round(len(fundamental_values) / conf['period_length'], 2)))
+                        round(len(fundamental_values) / conf['parameters']['session-duration'], 2)))
     
     log.info('fundamental values: %s' % (', '.join('{0}:{1}'.format(t, v) 
                                             for t, v in fundamental_values)))
     random_orders = elo_random_order_sequence(
         fundamental_values, 
-        conf['period_length'], 
+        conf['parameters']['session-duration'], 
         conf['exogenous_order_price_noise_mean'], 
         conf['exogenous_order_price_noise_std'], 
         conf['bid_ask_offset'],
@@ -160,8 +160,8 @@ def elo_draw(conf: dict, seed, config_num=0):
     log.info(
         '%s random orders generated. period length: %s, per second: %s.' % (
             random_orders.shape[0], 
-            conf['period_length'], 
-            round(random_orders.shape[0] / conf['period_length'], 2)))
+            conf['parameters']['session-duration'], 
+            round(random_orders.shape[0] / conf['parameters']['session-duration'], 2)))
     log.info('random orders (format: [fundamental price]:[order price]:[order direction]:[time in force]:[midpoint peg]): %s' % (
                 ', '.join('{0}:{1}:{2}:{3}:{4}'.format(row[1], row[2], row[3], row[4], row[5]) for 
                             row in random_orders)))
