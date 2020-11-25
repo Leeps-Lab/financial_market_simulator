@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import utility
 from draw import elo_draw
 from high_frequency_trading.session_config.createExternalFeedFromExternalInvestors import main
+from generateInvestorPlot import mainPlot
 from datetime import datetime
 from shutil import copyfile
 import smtplib, ssl
@@ -28,6 +29,7 @@ investor_arrivals_file_name_base = 'investor_focal'
 external_arrivals_file_name_base = 'investor_external'
 external_feed_file_name_base = 'external_feed'
 trade_file_name_base = 'trade_file'
+investor_plot_name_base = 'InvestorPlot'
 
 #Email to receive notification that script is done
 receiver_email = 'kvargha@ucsc.edu'
@@ -36,7 +38,7 @@ receiver_email = 'kvargha@ucsc.edu'
 now = datetime.now()
 
 # dd-mm-YY_H:M
-dt_string = now.strftime('%m-%d-%Y_%H-%M')
+dt_string = now.strftime('%m-%d-%Y_%H-%M-%S')
 current_dir = os.getcwd() + '/session_config/' + dt_string + '_'  + conf['suffix'] + '/'
 os.mkdir(current_dir)
 
@@ -55,6 +57,7 @@ def generateConfigs(period, seed):
     external_arrivals_file_name = external_arrivals_file_name_base + file_num + dt_string + '_' + conf['suffix'] + '.csv' 
     external_feed_file_name = external_feed_file_name_base + file_num + dt_string + '_' + conf['suffix'] +'.csv'
     trade_file_name = trade_file_name_base + file_num + dt_string + '_' + conf['suffix'] +'.csv'
+    investor_plot_name = investor_plot_name_base + file_num + dt_string + '_' + conf['suffix']
 
     #Create investors arrival file
     print('Generating investors arrival files ' + str(period + 1))
@@ -136,6 +139,11 @@ def generateConfigs(period, seed):
 
     #Move trade file to config folder
     os.rename(os.getcwd() + '/' + trade_file_name, current_dir +  trade_file_name)
+
+    #Generate plot for investors
+    mainPlot(current_dir + external_arrivals_file_name, external_feed_file_name, 'External_' + investor_plot_name)
+    #Move to config folder
+    os.rename(os.getcwd() + '/' + 'External_' + investor_plot_name + '.png', plotsDir +  'External_' + investor_plot_name + '.png')
 
     #Replace any N/A values
     dataframe = pd.read_csv(external_feed_file_name)
