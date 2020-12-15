@@ -1,0 +1,33 @@
+demo:
+  number-of-participants: 3
+exogenous-events:
+- investor-arrivals:
+  - investor_focal_T1_11-25-2020_00-50-13_Refractor.csv
+- external-feed:
+  - external_feed_T1_11-25-2020_00-50-13_Refractor.csv
+group:
+  number-of-groups: 1
+  players-per-group: 3
+market:
+  auction-format: CDA
+  matching-engine-host: 127.0.0.1
+parameters:
+  default-role: out
+  include-manual-role: true
+  include-signed-volume-widgets: false
+  initial-endowment: 100
+  k-reference-price: 0.7
+  k-signed-volume: 0.5
+  session-duration: 240
+  tax-rate: 0.1
+  technology-unit-cost: 0.01
+session:
+  currency: EUR
+  display-name: 'HFT - ELO - CDA - 1 Trade Sessions of 240 seconds - 3 traders - Frequent
+    Order Flow '
+  environment: elo
+  exchange-rate: 1.5
+  num-rounds: 1
+  participation-fee: 4
+  session-auto-name: true
+  session-name: ELO_Session_1_rounds_3traders_240_sec_sv_on

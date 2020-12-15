@@ -57,7 +57,7 @@ def generateConfigs(period, seed):
     external_arrivals_file_name = external_arrivals_file_name_base + file_num + dt_string + '_' + conf['suffix'] + '.csv' 
     external_feed_file_name = external_feed_file_name_base + file_num + dt_string + '_' + conf['suffix'] +'.csv'
     trade_file_name = trade_file_name_base + file_num + dt_string + '_' + conf['suffix'] +'.csv'
-    investor_plot_name = investor_plot_name_base + file_num + dt_string + '_' + conf['suffix']
+    investor_plot_name = investor_plot_name_base + file_num
 
     #Create investors arrival file
     print('Generating investors arrival files ' + str(period + 1))

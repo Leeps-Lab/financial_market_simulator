@@ -89,7 +89,7 @@ def mainPlot(investor_arrivals_file_name, external_feed_file_name, investor_plot
             if order.buy_sell_indicator == 'B':
                 # calc best ask and check whether new order crosses
                 best_ask = min(asks, key=lambda order: order.price) if asks else None
-                if best_ask is not None and order.price > best_ask.price:
+                if best_ask is not None and order.price >= best_ask.price:
                     asks.remove(best_ask)
                     orderHistory.append({
                         'price': best_ask.price, 
@@ -108,7 +108,7 @@ def mainPlot(investor_arrivals_file_name, external_feed_file_name, investor_plot
             
             else:
                 best_bid = max(bids, key=lambda order: order.price) if bids else None
-                if best_bid is not None and order.price < best_bid.price:
+                if best_bid is not None and order.price <= best_bid.price:
                     bids.remove(best_bid)
                     orderHistory.append({
                         'price': best_bid.price, 
@@ -161,8 +161,9 @@ def mainPlot(investor_arrivals_file_name, external_feed_file_name, investor_plot
             for key, value in order.items():
                 graphDataAsk[key].append(value)
 
-    plt.hlines(y = graphDataBid['price'], xmin = graphDataBid['arrivalTime'], xmax = graphDataBid['exitTime'], label = 'Ask', color = 'red', linewidth = 1, alpha=0.6)
-    plt.hlines(y = graphDataAsk['price'], xmin = graphDataAsk['arrivalTime'], xmax = graphDataAsk['exitTime'], label = 'Bid', color = 'green', linewidth = 1, alpha=0.6)
+    plt.hlines(y = graphDataBid['price'], xmin = graphDataBid['arrivalTime'], xmax = graphDataBid['exitTime'], label = 'Bid', color = 'green', linewidth = 1, alpha=0.6)
+    plt.hlines(y = graphDataAsk['price'], xmin = graphDataAsk['arrivalTime'], xmax = graphDataAsk['exitTime'], label = 'Ask', color = 'red', linewidth = 1, alpha=0.6)
+    plt.scatter(x = graphDataAsk['exitTime'], y = graphDataAsk['price'], marker = 'x', s = 8, color = 'red', linewidth = 0.5)
     plt.xlabel('Arrival Times')
     plt.ylabel('Price')
     plt.title('Investor Plot')
