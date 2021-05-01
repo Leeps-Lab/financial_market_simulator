@@ -4,7 +4,7 @@ import os
 db_name = os.getenv('DBNAME', 'fimsim')
 host = os.getenv('DBHOST', 'localhost')
 db_user = os.getenv('DBUSER')
-db_password = os.getenv('DBPASSWORD')
+db_password = os.getenv('DBPASS')
 db_port = os.getenv('DBPORT', '5432')
 
 psql_db = PostgresqlDatabase(db_name, user=db_user, 

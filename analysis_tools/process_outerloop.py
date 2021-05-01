@@ -36,7 +36,7 @@ df['Session Code'] = df['Session Code'].map(lambda x: x[-2:])
 
 df_sorted = df.nlargest(30, 'Profit')
 # average all profits for each outer loop combo
-params = ['Format', 'Lambda J', 'Lambda I', 'Speed Cost', 'Time in Force', 'Inventory Multiplier']
+params = ['Format', 'Lambda J', 'Lambda I', 'Speed Cost']#, 'Time in Force', 'Inventory Multiplier']
 param_values = [list(df[e].unique()) for e in params]
 param_values = list(product(*param_values))
 

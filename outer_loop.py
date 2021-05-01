@@ -57,7 +57,7 @@ def get_current_strats(current_inv, current_ext, current_speed):
     sp = get_simulation_parameters()
     agents = sp['agent_state_configs'] # get current agent states
     agents = [(a[2], a[4], a[5]) for a in agents] # convert to tuples with speed, inv, ext
-    agents = set(agents) # turn into set
+    #agents = set(agents) # turn into set
     current_params = (current_speed, current_inv, current_ext)
     if current_params in agents: # this should always be true
         agents.remove(current_params)
@@ -103,17 +103,19 @@ def bigloop(sp, args=None):
     formats = ['CDA']
     lambdaj = [.5]#, 2]
     lambdai = [[0.1, 0.07]]#, [0.5, 0.25]]
-    speed = [500, 1000]#, 3000]
+    speed = [500]#, 1000]#, 3000]
     #time_in_force = [1]
     #inventory_multiplier = [3]
-    agent_state_configs = [[
+
+    #  arrival_time, agent_num, speed, a_x, a_y, a_z
+    agent_state_configs = [
         [0, 1, 0, 0, 0, 0],
         [0, 2, 0, 0, 0.25, 0.25],
         [0, 3, 0, 0, 0.25, 0.25],
         [0, 4, 0, 0, 0.25, 0.25],
-        [0, 5, 1, 0, 0.25, 0.75],
-        [0, 6, 1, 0, 0.25, 0.75],
-    ]]
+        [0, 5, 0, 0, 0.25, 0.75],
+        [0, 6, 0, 0, 0.25, 0.75],
+    ]
 
     paramslist = [formats, lambdaj, lambdai, speed] #time_in_force, inventory_multiplier]
     paramslens = [len(p) for p in paramslist]
