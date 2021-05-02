@@ -70,7 +70,7 @@ def build_df(code, params, imap, count):
             agent_df['Session Code'] = np.full(agent_df.shape[0], session)
             agent_df['Agent ID'] = np.full(agent_df.shape[0], c)
             agent_df['Tick'] = agent_df.index
-            df = pd.concat([df, agent_df], ignore_index=True)
+            df = pd.concat([df, agent_df], ignore_index=True, sort=True)
     df = df[cols]
     df.to_csv(f'app/data/{code}##_combined.csv')
     return df
