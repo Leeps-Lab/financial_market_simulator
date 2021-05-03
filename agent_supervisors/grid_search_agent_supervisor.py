@@ -19,10 +19,12 @@ class GridSearchAgentSupervisor(AgentSupervisor):
                     flatlist.append((y, z, speed))
         if self.elapsed_ticks < 0:
             return flatlist[0]
-        print("GET GRID PARAMS", len(flatlist))
+        #print("GET GRID PARAMS", len(flatlist))
         #print(flatlist)
-        print(self.elapsed_ticks)
-        return flatlist[self.elapsed_ticks]
+        #print(self.elapsed_ticks)
+
+        # Modulo to prevent index out of error 
+        return flatlist[self.elapsed_ticks % len(flatlist)]
 
     # entry point into the instance, called every tick
     def on_tick(self, is_dynamic):
