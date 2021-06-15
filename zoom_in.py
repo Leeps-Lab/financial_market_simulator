@@ -6,7 +6,12 @@ import settings
 
 def parse_csv(fname):
     df = pd.read_csv(fname)
+
+    # Ensure Profit columns are sorted numerically
+    df['Profit'] = pd.to_numeric(df.Profit)
     df = df[df['Profit'] == df['Profit'].max()]
+    
+    print(df['Inventory'].values[0], df['External'].values[0], df['Speed'].values[0], df['Profit'].values[0])
     if len(df) == 0:
         return 0, 0, 0
     inv = round(float(df['Inventory'].values[0]), 2)
@@ -33,16 +38,36 @@ def do_fine(inv, ext):
     }
     return retdict
 
+def update_agent_params(agents, start, speed, inv, ext):
+    for i in range(start, len(agents)):
+        agents[i][2] = speed
+        agents[i][4] = inv
+        agents[i][5] = ext
+    
+    return agents
+
 def do_others(inv, ext, speed):
     invlist = [0, 0.25, 0.5, 0.75, 1]
     extlist = [0, 0.25, 0.5, 0.75, 1]
-    retdict = {
-        'init_y': inv,
-        'init_z': ext,
-        'init_speed': speed,
-        'ys': invlist,
-        'zs': extlist,
-    }
+
+    sp = get_simulation_parameters()
+    agents = sp['agent_state_configs']
+
+    print('-------------------')
+    print("Update others", inv, ext, speed)
+    print('-------------------')
+    
+    # Update params for other agents besides 0
+    agents = update_agent_params(agents, 1, speed, inv, ext)
+
+    retdict = dict(agent_state_configs=agents, 
+        init_y= inv,
+        init_z= ext,
+        init_speed= speed,
+        ys= invlist,
+        zs= extlist,
+    )
+
     return retdict
 
 def do_final(inv, ext, speed):
@@ -50,17 +75,21 @@ def do_final(inv, ext, speed):
     invlist = [inv]
     extlist = [ext]
     speedlist = [speed]
-    num_repeats = 20
-    session_duration = int(sp['move_interval'] * (num_repeats) + 10)
+
+    sp = get_simulation_parameters()
+    agents = sp['agent_state_configs']
+
+    # Update params for all agents
+    agents = update_agent_params(agents, 0, speed, inv, ext)
+
     retdict = {
+        'agent_state_configs': agents,
         'init_y': inv,
         'init_z': ext,
         'init_speed': speed,
         'ys': invlist,
         'zs': extlist,
         'speeds': speedlist,
-        'num_repeats': num_repeats,
-        'session_duration': session_duration,
     }
     return retdict
 

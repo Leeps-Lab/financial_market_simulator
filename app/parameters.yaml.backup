@@ -32,8 +32,8 @@ k_signed_volume: 0.2
 lambdaI: [0.1, 0.07]
 lambdaJ: 0.5
 move_interval: 10
-num_moves: 49
-num_repeats: 2
+num_moves: 51
+num_repeats: 10
 peg_proportion: 0.5
 random_seed: false
 read_fundamental_values_from_array: false

@@ -19,7 +19,7 @@ class GridSearchAgentSupervisor(AgentSupervisor):
                     flatlist.append((y, z, speed))
         if self.elapsed_ticks < 0:
             return flatlist[0]
-        #print("GET GRID PARAMS", len(flatlist))
+        #print("GET GRID PARAMS", len(flatlist), self.elapsed_ticks)
         #print(flatlist)
         #print(self.elapsed_ticks)
 

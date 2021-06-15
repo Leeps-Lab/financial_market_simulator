@@ -98,14 +98,11 @@ def bigloop(sp, args=None):
         if args.code:
             datadir = join('app', 'data', '.storage', args.code, 'raw')
         
-    num_agents = 6
     processes = []
     formats = ['CDA']
-    lambdaj = [.5]#, 2]
+    lambdaj = [.5, 2]
     lambdai = [[0.1, 0.07]]#, [0.5, 0.25]]
     speed = [500]#, 1000]#, 3000]
-    #time_in_force = [1]
-    #inventory_multiplier = [3]
 
     #  arrival_time, agent_num, speed, a_x, a_y, a_z
     agent_state_configs = [
@@ -117,7 +114,7 @@ def bigloop(sp, args=None):
         [0, 6, 0, 0, 0.25, 0.75],
     ]
 
-    paramslist = [formats, lambdaj, lambdai, speed] #time_in_force, inventory_multiplier]
+    paramslist = [formats, lambdaj, lambdai, speed]
     paramslens = [len(p) for p in paramslist]
 
     params = {
@@ -125,8 +122,6 @@ def bigloop(sp, args=None):
         'Lambda J': lambdaj,
         'Lambda I': lambdai,
         'Speed Cost': speed,
-        #'Time in Force': time_in_force,
-        #'Inventory Multiplier': inventory_multiplier,
     }
     count = reduce(lambda x,y: x*y, paramslens)
     code = random_chars(6)
@@ -135,16 +130,18 @@ def bigloop(sp, args=None):
     dump_pickle(d)
 
     paramsproduct = product(*paramslist)
+    num = 0
     for index, (f, j, i, s) in enumerate(paramsproduct): 
-        
-        sn = str(index)
+        sn = str(num)
         if len(sn) == 1:
             sn = f'0{sn}'
         retdict = {'agent_state_configs': agent_state_configs}
+
         if args and args.code and args.zoom_method:
             fname = f'{args.code}{sn}_agent0.csv'
             fname = join(datadir, fname)
-            inv, ext, speed = zoom_in.parse_csv(fname)
+            inv, ext, speed = zoom_in.parse_csv(fname)                
+            
             if args.zoom_method == 'fine':
                 retdict = zoom_in.do_fine(inv, ext)
             elif args.zoom_method == 'update_others':
@@ -161,17 +158,41 @@ def bigloop(sp, args=None):
                 elif my_strat == 'market maker':
                     retdict = zoom_in.add_mm_and_update(current_strats, ext, speed)
                 print(retdict)
-                 
-        
+
+        print('-----------------------------------')
+        print(args.zoom_method)
+        print('-----------------------------------')
+
+        # Calculate the time a simulation is run
+        num_moves = sp['num_moves']
+        move_interval = sp['move_interval']
+
+        if args.zoom_method == 'final_update':
+            num_repeats = 1
+        else:
+            num_repeats = sp['num_repeats']
+
+        retdict['session_duration'] = int(num_moves * move_interval * num_repeats)
+            
         sp = update(sp,
             focal_market_format=f,
             lambdaJ=j,
             lambdaI=i,
             speed_unit_cost=s,
-            #time_in_force=t,
-            #a_y_multiplier=m,
             **retdict
         )
+
+        # If update others has been run previously, ensure that the init vals are correct
+        if sp['init_y'] != False and (args.zoom_method != 'update_others' and args.zoom_method != 'final_update'):
+            fname = f'{args.code}{sn}_agent1.csv'
+            fname = join(datadir, fname)
+            inv, ext, speed = zoom_in.parse_csv(fname)
+            sp['init_y'] = inv
+            sp['init_z'] = ext
+            sp['init_speed'] = speed
+
+        print(sp)
+
         write_sim_params(sp)
         print(f'Starting process {index}')
         session_code = f'{code}{sn}'
@@ -180,6 +201,7 @@ def bigloop(sp, args=None):
             sleep(sp['session_duration'] / 2 + 50)
         elif args and args.zoom_method == 'final_update':
             sleep(150)
+        num += 1
     return processes
 
 def smallloop(sp):

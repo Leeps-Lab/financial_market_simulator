@@ -43,7 +43,8 @@ def copy_params_to_logs(session_id: str):
 
 
 def get_interactive_agent_count(agent_events):
-    return max([int(row[1]) for row in agent_events])
+    return len(agent_events)
+    #return max([int(row[1]) for row in agent_events])
 
 
 def get_traders_initial_market_view():
