@@ -135,7 +135,8 @@ def bigloop(sp, args=None):
         sn = str(num)
         if len(sn) == 1:
             sn = f'0{sn}'
-        retdict = {'agent_state_configs': agent_state_configs}
+        
+        retdict = {}
 
         if args and args.code and args.zoom_method:
             fname = f'{args.code}{sn}_agent0.csv'
@@ -143,15 +144,15 @@ def bigloop(sp, args=None):
             inv, ext, speed = zoom_in.parse_csv(fname)                
             
             if args.zoom_method == 'fine':
-                retdict = zoom_in.do_fine(inv, ext)
+                retdict = zoom_in.do_fine(inv, ext, agent_state_configs)
             elif args.zoom_method == 'update_others':
-                retdict = zoom_in.do_others(inv, ext, speed)
+                retdict = zoom_in.do_others(inv, ext, speed, agent_state_configs)
             elif args.zoom_method == 'final_update':
-                retdict = zoom_in.do_final(inv, ext, speed)
+                retdict = zoom_in.do_final(inv, ext, speed, agent_state_configs)
             elif args.zoom_method == 'update_other_strats':
-                current_strats = get_current_strats(inv, ext, speed)
+                current_strats = get_current_strats(inv, ext, speed, agent_state_configs)
                 print(current_strats)
-                my_strat = determine_strat(ext, speed, current_strats)
+                my_strat = determine_strat(ext, speed, current_strats, agent_state_configs)
                 print(my_strat)
                 if my_strat == 'sniper':
                     retdict = zoom_in.add_sniper_and_update(current_strats, ext, speed)
@@ -166,11 +167,7 @@ def bigloop(sp, args=None):
         # Calculate the time a simulation is run
         num_moves = sp['num_moves']
         move_interval = sp['move_interval']
-
-        if args.zoom_method == 'final_update':
-            num_repeats = 1
-        else:
-            num_repeats = sp['num_repeats']
+        num_repeats = sp['num_repeats']
 
         retdict['session_duration'] = int(num_moves * move_interval * num_repeats)
             

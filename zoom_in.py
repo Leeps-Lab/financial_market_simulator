@@ -19,7 +19,7 @@ def parse_csv(fname):
     speed = round(float(df['Speed'].values[0]), 2)
     return inv, ext, speed
 
-def do_fine(inv, ext):
+def do_fine(inv, ext, agents):
     if inv == 0:
         invlist = [0.0, 0.06, 0.12, 0.18, 0.24]
     elif inv == 1:
@@ -32,7 +32,9 @@ def do_fine(inv, ext):
         extlist = [0.76, 0.82, 0.88, 0.94, 1.0]
     else:
         extlist = [ext - 0.24, ext - 0.12, ext, ext + 0.12, ext + 0.24]
+        
     retdict = {
+        'agent_state_configs': agents, 
         'ys': invlist,
         'zs': extlist,
     }
@@ -46,38 +48,28 @@ def update_agent_params(agents, start, speed, inv, ext):
     
     return agents
 
-def do_others(inv, ext, speed):
+def do_others(inv, ext, speed, agents):
     invlist = [0, 0.25, 0.5, 0.75, 1]
     extlist = [0, 0.25, 0.5, 0.75, 1]
 
-    sp = get_simulation_parameters()
-    agents = sp['agent_state_configs']
-
-    print('-------------------')
-    print("Update others", inv, ext, speed)
-    print('-------------------')
-    
     # Update params for other agents besides 0
     agents = update_agent_params(agents, 1, speed, inv, ext)
 
-    retdict = dict(agent_state_configs=agents, 
-        init_y= inv,
-        init_z= ext,
-        init_speed= speed,
-        ys= invlist,
-        zs= extlist,
-    )
+    retdict = {
+        'agent_state_configs': agents,
+        'init_y': inv,
+        'init_z': ext,
+        'init_speed': speed,
+        'ys': invlist,
+        'zs': extlist,
+    }
 
     return retdict
 
-def do_final(inv, ext, speed):
-    sp = get_simulation_parameters()
+def do_final(inv, ext, speed, agents):
     invlist = [inv]
     extlist = [ext]
     speedlist = [speed]
-
-    sp = get_simulation_parameters()
-    agents = sp['agent_state_configs']
 
     # Update params for all agents
     agents = update_agent_params(agents, 0, speed, inv, ext)

@@ -120,9 +120,6 @@ class AgentSupervisor():
                 'speed': self.sp['init_speed'] or self.sp['agent_state_configs'][self.config_num][2],
             }
         except:
-            print('---------------------------------------')
-            print("Ignore this warning")
-            print('---------------------------------------')
             self.curr_params = { # current parameters
                 'a_x': 0.0,
                 'a_y': self.sp['init_y'] or self.sp['agent_state_configs'][4],
