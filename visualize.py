@@ -48,7 +48,7 @@ def bar(a):
         widths.append(0)
     return xs, widths
 
-def scatter3d(a0, session_code, nums):
+def scatter3d(a0, session_code, nums, show):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     colors = [speed_color if s == 1 else TEXT for s in a0['Speed']]
@@ -72,7 +72,10 @@ def scatter3d(a0, session_code, nums):
 
     plt.title(f'{session_code} Agent {nums[0]} 3D Scatter Plot')
     
-    plt.show()
+    if show:
+        plt.show()
+    else:
+        plt.savefig(f'app/data/{session_code}_agent{nums[0]}_scatter3d.png', dpi=350)
 
 def heatmap(a0, session_code, nums, show):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
@@ -257,7 +260,7 @@ def main():
         if options.standard is True:
             plot(a0, a1, a2, code, nums, options.show)
         if options.scatter3d is True:
-            scatter3d(a0, code, nums)
+            scatter3d(a0, code, nums, options.show)
         if options.heatmap is True:
             heatmap(a0, code, nums, options.show)
 

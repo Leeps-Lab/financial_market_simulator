@@ -100,7 +100,7 @@ def bigloop(sp, args=None):
         
     processes = []
     formats = ['CDA']
-    lambdaj = [.5, 2]
+    lambdaj = [.5]#, 2]
     lambdai = [[0.1, 0.07]]#, [0.5, 0.25]]
     speed = [500]#, 1000]#, 3000]
 
@@ -144,7 +144,7 @@ def bigloop(sp, args=None):
             inv, ext, speed = zoom_in.parse_csv(fname)                
             
             if args.zoom_method == 'fine':
-                retdict = zoom_in.do_fine(inv, ext, agent_state_configs)
+                retdict = zoom_in.do_fine(inv, ext)
             elif args.zoom_method == 'update_others':
                 retdict = zoom_in.do_others(inv, ext, speed, agent_state_configs)
             elif args.zoom_method == 'final_update':
@@ -169,16 +169,11 @@ def bigloop(sp, args=None):
         move_interval = sp['move_interval']
         num_repeats = sp['num_repeats']
 
-        retdict['session_duration'] = int(num_moves * move_interval * num_repeats)
-            
-        sp = update(sp,
-            focal_market_format=f,
-            lambdaJ=j,
-            lambdaI=i,
-            speed_unit_cost=s,
-            **retdict
-        )
-
+        if args.zoom_method != 'final_update':
+            retdict['session_duration'] = int(num_moves * move_interval * num_repeats)
+        else:
+            retdict['session_duration'] = int(move_interval * num_repeats + 10)
+        '''
         # If update others has been run previously, ensure that the init vals are correct
         if sp['init_y'] != False and (args.zoom_method != 'update_others' and args.zoom_method != 'final_update'):
             fname = f'{args.code}{sn}_agent1.csv'
@@ -187,6 +182,16 @@ def bigloop(sp, args=None):
             sp['init_y'] = inv
             sp['init_z'] = ext
             sp['init_speed'] = speed
+        '''   
+        sp = update(sp,
+            focal_market_format=f,
+            lambdaJ=j,
+            lambdaI=i,
+            speed_unit_cost=s,
+            **retdict
+        )
+
+        
 
         print(sp)
 

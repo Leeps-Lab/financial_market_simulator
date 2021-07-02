@@ -9,6 +9,7 @@ mkdir app/data/.storage/$CODE/meta
 mkdir app/data/.storage/$CODE/raw
 mkdir app/data/.storage/$CODE/processed
 mv app/data/*outer_loop* app/data/${CODE}##_combined.csv app/data/.storage/${CODE}/processed
+mv app/data/*.png app/data/.storage/${CODE}/processed
 mv app/data/*param* app/data/*accessed* app/data/.storage/${CODE}/meta
 mv app/data/${CODE}* app/data/sim_meta.pickle app/data/.storage/${CODE}/raw
 

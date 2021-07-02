@@ -19,7 +19,7 @@ def parse_csv(fname):
     speed = round(float(df['Speed'].values[0]), 2)
     return inv, ext, speed
 
-def do_fine(inv, ext, agents):
+def do_fine(inv, ext):
     if inv == 0:
         invlist = [0.0, 0.06, 0.12, 0.18, 0.24]
     elif inv == 1:
@@ -34,7 +34,6 @@ def do_fine(inv, ext, agents):
         extlist = [ext - 0.24, ext - 0.12, ext, ext + 0.12, ext + 0.24]
         
     retdict = {
-        'agent_state_configs': agents, 
         'ys': invlist,
         'zs': extlist,
     }
