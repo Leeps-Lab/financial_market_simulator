@@ -97,7 +97,7 @@ def bigloop(sp, args=None):
     if args:
         if args.code:
             datadir = join('app', 'data', '.storage', args.code, 'raw')
-        
+   
     processes = []
     formats = ['CDA']
     lambdaj = [.5]#, 2]
@@ -233,7 +233,6 @@ def main():
     parser.add_argument('--zoom_method', action='store', type=str)
     parser.add_argument('--code', action='store', type=str)
     args = parser.parse_args()
-
     if args.method == 'big':
         processes = bigloop(sp, args=args)
     else:
