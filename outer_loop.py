@@ -161,7 +161,10 @@ def bigloop(sp, args=None):
                 print(retdict)
 
         print('-----------------------------------')
-        print(args.zoom_method)
+        if args.zoom_method is None:
+            print('Coarse')
+        else:
+            print(args.zoom_method)
         print('-----------------------------------')
 
         # Calculate the time a simulation is run
@@ -172,7 +175,9 @@ def bigloop(sp, args=None):
         if args.zoom_method != 'final_update':
             retdict['session_duration'] = int(num_moves * move_interval * num_repeats)
         else:
-            retdict['session_duration'] = int(move_interval * num_repeats + 10)
+            sp['num_repeats'] = 1
+            sp['num_moves'] = 25
+            retdict['session_duration'] = int(move_interval * 25 + 10)
         '''
         # If update others has been run previously, ensure that the init vals are correct
         if sp['init_y'] != False and (args.zoom_method != 'update_others' and args.zoom_method != 'final_update'):

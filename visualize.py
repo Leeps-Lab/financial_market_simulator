@@ -9,6 +9,7 @@ import configargparse
 from utility import get_simulation_parameters
 import settings
 from os import listdir
+from os.path import join
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.lines import Line2D
 import re
@@ -202,6 +203,46 @@ def plot(a0, a1, a2, session_code, nums, show):
         matplotlib.use('Agg')
         plt.savefig(f'app/data/{session_code}_agents{nums[0]}{nums[1]}{nums[2]}_standard.png', dpi=350)
 
+def histogram(session_code, show):
+    fig = plt.figure()
+
+    inpath = join('app', 'data')
+
+    # Read CSV
+    for fname in listdir(inpath):
+        if fname.endswith('##_combined.csv'):
+            fullpath = join(inpath, fname)
+            df = pd.read_csv(fullpath)
+            break
+    
+    agentProfits = {}
+
+    # Extract profits and group them by agent id
+    for i in range(len(df)):
+        id = 'Agent ' + str(df['Agent ID'][i])
+        profit = df['Profit'][i]
+
+        if id not in agentProfits:
+            agentProfits[id] = [profit]
+        else:
+            agentProfits[id].append(profit)
+
+    # Plot histogram for each agent's profit
+    for id in agentProfits:
+        plt.hist(agentProfits[id], alpha = 0.5, label = id)
+
+    plt.xlabel("Profit", color=gray_color)
+    plt.ylabel("Count", color=gray_color)
+    plt.title("Agent Histogram Profits", color=gray_color)
+    plt.legend(loc='upper right')
+
+    if show:
+        plt.show()
+    else:
+        matplotlib.use('Agg')
+        plt.savefig(f'app/data/{session_code}_histogram.png', dpi=350)
+
+
 def read_csvs(a0, a1, a2):
     a0 = pd.read_csv(a0)
     a1 = pd.read_csv(a1)
@@ -235,14 +276,21 @@ def parse_files(session_code, nums):
 def main():
     p = configargparse.getArgParser()
     p.add('session_code', nargs='+', help='8-digit alphanumeric')
+
     p.add('--scatter3d', action='store_true', 
     help='display (interactive mode) a 3d scatter plot for agent 0')
+
     p.add('--heatmap', action='store_true',
     help='create 2d heat maps for agent 0 for speed on/off')
+
     p.add('--standard', action='store_true',
     help='create standard line graph for profit and params')
+
     p.add('--a345', action='store_true',
     help='if there are 6 agents, visualize agents 3,4,5 rather than 0,1,2')
+
+    p.add('--histogram', action='store_true',
+    help='create histogram of all agent profits')
 
     # NOTE: this will only work if you remove the matplotlib.use('Agg') line and
     # use a default backend that supports the gui
@@ -257,12 +305,17 @@ def main():
             nums = (3, 4, 5)
         csvs = parse_files(code, nums)
         a0, a1, a2 = read_csvs(*csvs)
+
         if options.standard is True:
             plot(a0, a1, a2, code, nums, options.show)
         if options.scatter3d is True:
             scatter3d(a0, code, nums, options.show)
+
         if options.heatmap is True:
             heatmap(a0, code, nums, options.show)
+
+        if options.histogram is True:
+            histogram(code, options.show)
 
 if __name__ == '__main__':
     main()

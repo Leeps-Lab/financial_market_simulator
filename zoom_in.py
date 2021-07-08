@@ -66,8 +66,8 @@ def do_others(inv, ext, speed, agents):
     return retdict
 
 def do_final(inv, ext, speed, agents):
-    invlist = [inv]
-    extlist = [ext]
+    invlist = [inv] * 5
+    extlist = [ext] * 5
     speedlist = [speed]
 
     # Update params for all agents
