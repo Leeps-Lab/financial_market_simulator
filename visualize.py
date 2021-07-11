@@ -231,9 +231,9 @@ def histogram(session_code, show):
     for id in agentProfits:
         plt.hist(agentProfits[id], alpha = 0.5, label = id)
 
-    plt.xlabel("Profit", color=gray_color)
-    plt.ylabel("Count", color=gray_color)
-    plt.title("Agent Histogram Profits", color=gray_color)
+    plt.xlabel("Profit", color='white')
+    plt.ylabel("Count", color='white')
+    plt.title("Agent Histogram Profits", color='white')
     plt.legend(loc='upper right')
 
     if show:
